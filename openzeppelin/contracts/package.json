@@ -1,0 +1,63 @@
+{
+  "_from": "@openzeppelin/contracts",
+  "_id": "@openzeppelin/contracts@3.0.1",
+  "_inBundle": false,
+  "_integrity": "sha512-uSrD7hZ0ViuHGqHZbeHawZBi/uy7aBiNramXAt2dFFuSuoU4u9insS3V3zdVfOnYSPreUo636xSOuQIFN4//HA==",
+  "_location": "/@openzeppelin/contracts",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@openzeppelin/contracts",
+    "name": "@openzeppelin/contracts",
+    "escapedName": "@openzeppelin%2fcontracts",
+    "scope": "@openzeppelin",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-3.0.1.tgz",
+  "_shasum": "2f327f77d16b43f14674086b2b634bda38cb0838",
+  "_spec": "@openzeppelin/contracts",
+  "_where": "C:\\Eason\\HackMoney\\hackmoney-project",
+  "author": {
+    "name": "OpenZeppelin Community",
+    "email": "maintainers@openzeppelin.org"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/openzeppelin-contracts/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Secure Smart Contract library for Solidity",
+  "files": [
+    "**/*.sol",
+    "/build/contracts/*.json",
+    "!/mocks",
+    "!/examples"
+  ],
+  "homepage": "https://openzeppelin.com/contracts/",
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "smart",
+    "contracts",
+    "security",
+    "zeppelin"
+  ],
+  "license": "MIT",
+  "name": "@openzeppelin/contracts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenZeppelin/openzeppelin-contracts.git"
+  },
+  "scripts": {
+    "prepare": "bash ../scripts/prepare-contracts-package.sh",
+    "prepare-docs": "cd ..; npm run prepare-docs"
+  },
+  "version": "3.0.1"
+}
