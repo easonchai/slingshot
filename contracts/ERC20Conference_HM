@@ -1,0 +1,59 @@
+/**
+
+Outline code / suedo code:
+
+------------------------------------
+
+Event contracts created
+Status = event ended
+
+function start_event onlyEnded
+	require(now > start)
+	ended = false;
+	Current total reward = Next total reward
+	Next total reward = current total staked
+
+function mark_attended(_attendee)
+	require(staked_list[_attendee] == event_number);
+	attended_list[attendee] == true;
+	Total_attended++;
+
+function end_event onlyActive
+	ended = true;  
+	Staked list is refreshed to create fresh staked list with data zero'd.
+	reward_amount = current_total_reward / Total_attended
+	event_number++
+
+function claim_reward(_attendee) onlyEnded
+	require(attended_list[_attendee] == true);
+	send reward_amount to _attendee;
+	attended_list[_attendee] = false;
+
+function stake() onlyEnded
+	transfer deposit to contract;
+	staked_list[msg.sender] = event_number;
+
+function cancel_event() onlyAdmin onlyEnded
+	We now allow staked participants to claim the deposit amount back.
+	cancelled = true
+
+function refund(_staker) onlyEnded
+	require (canclled == true);
+	require staked_list[_staker] == event_number;
+	transfer deposit;
+
+
+-----------------------------------
+
+
+
+We would need a mapping of participants who attended.
+
+A different mapping of participants who have staked.
+
+Can reset staked list using a version number within a struct.
+
+For cancelling an event, admin uses cancel function 
+
+
+/*
