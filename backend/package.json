@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "scripts": {
     "build": "node ./util/build.js",
     "lint": "tslint --project \"tsconfig.json\"",
@@ -9,8 +9,6 @@
     "test": "nodemon --config nodemon.test.json"
   },
   "_moduleAliases": {
-    "@daos": "dist/daos",
-    "@entities": "dist/entities",
     "@shared": "dist/shared",
     "@server": "dist/Server"
   },

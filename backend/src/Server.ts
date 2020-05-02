@@ -15,7 +15,6 @@ import logger from '@shared/Logger';
 const app = express();
 
 
-
 /************************************************************************************
  *                              Set basic express settings
  ***********************************************************************************/
@@ -53,10 +52,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 const frontendDir = path.join(__dirname, '../dist/frontend');
 app.use(express.static(frontendDir));
-
-app.get('*', (req: Request, res: Response) => {
-    res.sendFile('index.html', {root: frontendDir});
-});
 
 
 // Export express instance

@@ -8,6 +8,9 @@
 ### Install dependencies:
 	npm install
 
+### Check for lint errors
+	npm run lint
+
 ### Build (+ transpile TS to JS):
 	npm run build
 
