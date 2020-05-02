@@ -51,13 +51,13 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
  *                              Serve front-end content
  ***********************************************************************************/
 
-const viewsDir = path.join(__dirname, 'views');
-app.set('views', viewsDir);
-const staticDir = path.join(__dirname, 'public');
-app.use(express.static(staticDir));
+const frontendDir = path.join(__dirname, '../dist/frontend');
+app.use(express.static(frontendDir));
+
 app.get('*', (req: Request, res: Response) => {
-    res.sendFile('index.html', {root: viewsDir});
+    res.sendFile('index.html', {root: frontendDir});
 });
+
 
 // Export express instance
 export default app;
