@@ -4,10 +4,10 @@ const childProcess = require('child_process');
 
 try {
     // Remove current build
-    fs.removeSync('./dist/');
+    fs.removeSync('./build/');
 
     // Copy pre-built optimized front-end files
-    fs.copySync('../frontend/build', './dist/frontend');
+    fs.copySync('../frontend/build', './build/frontend');
 
     // Transpile the typescript files
     childProcess.exec('tsc --build tsconfig.prod.json');

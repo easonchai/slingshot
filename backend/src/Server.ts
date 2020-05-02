@@ -50,7 +50,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
  *                              Serve front-end content
  ***********************************************************************************/
 
-const frontendDir = path.join(__dirname, '../dist/frontend');
+const frontendDir = path.join(__dirname, '../build/frontend');
 app.use(express.static(frontendDir));
 
 
