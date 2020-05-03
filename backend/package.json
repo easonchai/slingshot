@@ -22,6 +22,7 @@
     "http-status-codes": "^1.4.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
+    "tslib": "^1.11.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {
