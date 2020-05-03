@@ -21,12 +21,12 @@ contract Meeting is Ownable{
         uint32 rsvpDate;
         uint stakedAmount;
         address payable addr;
+        bool attended;
     }
 
     Participant[] public participants;
 
-    mapping (uint => bool) public attendanceMap; //Ben: could also use a list of addresses? List would allow us to loop over and automatically dispurse reward. For non-automatic, I would just add a bool to the Participant struct that is checked during withDrawal. 
-
+    mapping (address => Participant) addressToParticipant;
 
     /**
        @dev Constructor explanation
@@ -48,7 +48,7 @@ contract Meeting is Ownable{
     /**@dev Start of functions */
 
     function rsvp() external payable{
-        participants.push(Participant(uint32(now), msg.value, msg.sender));
+        participants.push(Participant(uint32(now), msg.value, msg.sender, false));
 
         /*Can store return value of the above function into `RegistrationId` which can be used to uniquely
         identify & distribute QR code (still figuring out if needed and how)*/
@@ -60,11 +60,11 @@ contract Meeting is Ownable{
             isCancelled = true;
         } else {
             //Participant cancel RSVP
-            for(uint i = 0; i<participants.length; i++){ //Ben: why not have two separate functions for owners and participants? Can avoid using loop here by using mapping (address => Participant) instead of Participant[]
-                //Do check here if the msg.sender is a participant
-                //Also check if rsvpDate + 1 days is after `now`
-            }
-            require(registered == 5, "random");
+            Participant memory participant = addressToParticipant[msg.sender];
+            //Check if RSVP'd within 24 hours
+
+            require((participant.rsvpDate + 1 days) > now, "Can't cancel past 24 hours of registering");
+            (msg.sender).transfer(participant.stakedAmount);
         }
     }
 
