@@ -25,7 +25,7 @@ contract Meeting is Ownable{
 
     Participant[] public participants;
 
-    mapping (uint => bool) public attendanceMap;
+    mapping (uint => bool) public attendanceMap; //Ben: could also use a list of addresses? List would allow us to loop over and automatically dispurse reward. For non-automatic, I would just add a bool to the Participant struct that is checked during withDrawal. 
 
 
     /**
@@ -60,7 +60,7 @@ contract Meeting is Ownable{
             isCancelled = true;
         } else {
             //Participant cancel RSVP
-            for(uint i = 0; i<participants.length; i++){
+            for(uint i = 0; i<participants.length; i++){ //Ben: why not have two separate functions for owners and participants? Can avoid using loop here by using mapping (address => Participant) instead of Participant[]
                 //Do check here if the msg.sender is a participant
                 //Also check if rsvpDate + 1 days is after `now`
             }
@@ -101,5 +101,14 @@ contract Meeting is Ownable{
     /**@dev Smart Contract's functions */
     function withdraw() external {
         //Either manually withdraw or automatic send back
+        //Ben: if contract holds both current stake and previous stake, need to make sure only previous stake amount is dispersed. Can do so by setting `previous_stake = address(this).balance` when contract is created.
     }
+
+    /**Ben: @dev Deploys next event contract.*/
+    function nextEvent(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external {
+        //Ben: Deploy next event contract
+        newEventContract.transfer(address(this).balance); //Ben: Send entire ether balance to new contract.
+    }
+
+
 }
