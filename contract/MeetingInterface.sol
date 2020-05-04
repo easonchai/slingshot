@@ -2,8 +2,8 @@ pragma solidity >= 0.5.0 < 0.7.0;
 
 interface MeetingInterface {
 	//Ownable
-	function renounceOwnership() public;
-	function transferOwnership(address newOwner) public;
+	function renounceOwnership() external;
+	function transferOwnership(address newOwner) external;
 
 	//Meeting
 	function rsvp() external payable;
