@@ -7,7 +7,7 @@ contract Meeting is Ownable{
 
     using SafeMath for uint;
 
-    uint public startDate;
+    uint public startDate; //Ben: Would time rather than date be better here?
     uint public endDate;
     uint public minStake; //should be entered in GWEI by frontend
     uint public registrationLimit;
@@ -26,7 +26,7 @@ contract Meeting is Ownable{
         bool attended;
     }
 
-    Participant[] public participants;
+    //Participant[] public participants; //Ben: Removed for now since seems like you don't need this if using addressToParticipant below.
 
     mapping (address => Participant) addressToParticipant;
 
@@ -56,7 +56,7 @@ contract Meeting is Ownable{
     constructor (
         uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit
     ) public {
-        startDate = _startDate;
+        startDate = _startDate; //Ben: Would time rather than date be better here?
         endDate = _endDate;
         minStake = _minStake;
         registrationLimit = _registrationLimit;
@@ -66,8 +66,10 @@ contract Meeting is Ownable{
     /**@dev Start of functions */
 
     function rsvp() external payable{
-        participants.push(Participant(uint32(now), msg.value, msg.sender, false));
-
+        require(msg.value >= minStake, 'Stake too low');
+        require(registered < registrationLimit, 'Limit reached');
+        addressToParticipant[msg.sender] = Participant(uint32(now), msg.value, msg.sender, false);
+        registered++
         /*Can store return value of the above function into `RegistrationId` which can be used to uniquely
         identify & distribute QR code (still figuring out if needed and how)*/
     }
@@ -79,26 +81,30 @@ contract Meeting is Ownable{
             payout = prevStake/registered;
         } else {
             //Participant cancel RSVP
-            Participant memory participant = addressToParticipant[msg.sender];
+            Participant memory participant = addressToParticipant[msg.sender]; 
 
             //Check if RSVP'd within 24 hours
-            require((participant.rsvpDate + 1 days) > now, "Can't cancel past 24 hours of registering");
+            require((participant.rsvpDate + 1 days) > now, "Can't cancel 24 hours after registering");
             (msg.sender).transfer(participant.stakedAmount);
         }
     }
 
     /**@dev Organizer's management functions */
-    function markAttendance() external onlyOwner {
+    function markAttendance(address _participant) external onlyOwner {
         //will pass in a list as parameter and use attendanceCount = list.length;
         require(isActive && isEnded, "Event did not take place");
+        addressToParticipant[_participant].attended = true;
+        attendanceCount++;
         
     } 
 
     function startEvent() external onlyOwner {
+        require(startDate < now && now < endDate); //Not sure we need but means organiser cannot start event at arbitrary times. 
         isActive = true;
     }
 
     function endEvent() external onlyOwner {
+        require(isActive == true);
         isEnded = true;
         payout = prevStake/attendanceCount;
         emit EndEvent(msg.sender, attendanceCount);
@@ -107,10 +113,15 @@ contract Meeting is Ownable{
     /**@dev Organizer's `edit event` functions */
     function setStartDate(uint dateTimestamp) external onlyOwner{
         //Check if new date is not within 24 hours of today or less
+        require(dateTimestamp > now + 24 hours, 'Within 24 hours of event');
+        startDate = dateTimestamp;
     }
 
     function setEndDate(uint dateTimestamp) external onlyOwner{
         //Check if new date is not within 24 hours of today or less && not before start date
+        require(dateTimestamp > now + 24 hours, 'Within 24 hours of event');
+        require(dateTimestamp > startDate, 'End must be after start')
+        endDate = dateTimestamp;
     }
 
     function setMinStake(uint stakeAmt) external onlyOwner{
@@ -119,7 +130,7 @@ contract Meeting is Ownable{
     }
 
     function setRegistrationLimit(uint max) external onlyOwner {
-        require(max > registrationLimit, "Cant set less than original");
+        require(max > registered, "Cant set less than original"); //Ben: no reason for admin to not be able to lower limit if less than registered I think.
         registrationLimit = max;
         emit EditMaxLimitEvent(max);
     }
