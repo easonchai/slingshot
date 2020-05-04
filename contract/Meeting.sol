@@ -2,6 +2,7 @@ pragma solidity >= 0.5.0 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
+import './DeployerInterface.sol';
 
 contract Meeting is Ownable{
 
@@ -18,6 +19,7 @@ contract Meeting is Ownable{
     bool public isCancelled;
     bool public isEnded;
     bool public isActive;
+    address parent_address; //For deployment of next event contract.
 
     struct Participant{
         uint32 rsvpDate;
@@ -29,6 +31,8 @@ contract Meeting is Ownable{
     //Participant[] public participants; //Ben: Removed for now since seems like you don't need this if using addressToParticipant below.
 
     mapping (address => Participant) addressToParticipant;
+
+    DeployerInterface public deployer;
 
     modifier canWithdraw() {
         require(isEnded || isCancelled, "Can't withdraw before event end");
@@ -54,13 +58,13 @@ contract Meeting is Ownable{
      */
 
     constructor (
-        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit
-    ) public {
+        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _parent_address) public {
         startDate = _startDate; //Ben: Would time rather than date be better here?
         endDate = _endDate;
         minStake = _minStake;
         registrationLimit = _registrationLimit;
         prevStake = address(this).balance;
+        parent_address = _parent_address; //For deployment of next event contract.
     }
 
     /**@dev Start of functions */
@@ -145,10 +149,13 @@ contract Meeting is Ownable{
         emit WithdrawEvent(msg.sender, payout);
     }
 
-    /**Ben: @dev Deploys next event contract.*/
+    /**@dev Deploys next event contract.*/
     function nextEvent(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external {
-        //Ben: Deploy next event contract
-        //newEventContract.transfer(address(this).balance); //Ben: Send entire ether balance to new contract.
+        deployer = DeployerInterface(parent_address); //Define deployer contract.
+
+        deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit); //Deploy next event contract
+        
+        deployer.transfer(address(this).balance); //Send entire ether balance to new contract.
     }
 
     //Temp function for testing
