@@ -1,4 +1,4 @@
-pragma solidity >= 0.5.0 < 0.7.0;
+pragma solidity >= 0.6.0 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
@@ -155,7 +155,7 @@ contract Meeting is Ownable{
     /**@dev Deploys next event contract.*/
     function nextEvent(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyOwner returns(uint) { //Or internal
         deployer = DeployerInterface(parentAddress); //Define deployer contract.
-        address targetAddress = deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit); //Deploy next event contract
+        address payable targetAddress = deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit); //Deploy next event contract
         deployer.transfer(targetAddress, address(this).balance); //Send entire ether balance to new contract.
     }
 
