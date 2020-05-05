@@ -7,5 +7,11 @@ An idea to incentivize event meetups using smart contracts that disburse stakes 
 ### Prepare static frontend files (for production)
 	npm --prefix=frontend install && npm --prefix=frontend run build
 
-### Build backend files that will serve API and static frontend files
-	npm --prefix=backend install && npm --prefix=backend run serve
+### Install backend dependencies
+	npm --prefix=backend install
+
+### Run using shared dev MongoDB (/backend/env/development.env)
+	npm --prefix=backend run serve-dev
+
+### Run using your own local MongoDB (/backend/env/local.env)
+	npm --prefix=backend run serve-local

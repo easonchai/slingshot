@@ -2,12 +2,14 @@
   "name": "backend",
   "version": "0.1.0",
   "scripts": {
-    "serve": "npm run build && npm run start:dev",
-    "build": "node ./util/build.js",
     "lint": "tslint --project \"tsconfig.json\"",
+    "test": "nodemon --config nodemon.test.json",
+    "build": "node ./util/build.js",
+    "serve-dev": "npm run build && npm run start:dev",
+    "serve-local": "npm run build && npm run start:local",
     "start": "node -r module-alias/register ./build",
-    "start:dev": "nodemon --config nodemon.json",
-    "test": "nodemon --config nodemon.test.json"
+    "start:dev": "nodemon --config nodemon.dev.json",
+    "start:local": "nodemon --config nodemon.local.json"
   },
   "_moduleAliases": {
     "@shared": "build/shared",
