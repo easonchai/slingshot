@@ -24,7 +24,10 @@ export class MongoDB {
   public connect(): Promise<mongoose.Connection> {
     return new Promise((resolve, reject) => {
       if (!this.useMongoDB) {
-        reject('MONGODB_ACTIVE=' + process.env.MONGODB_ACTIVE);
+        reject({
+          err: 'MONGODB_ACTIVE=' + process.env.MONGODB_ACTIVE,
+          useMongoDB: this.useMongoDB
+        });
       } else {
         const options = {
           useNewUrlParser: true,
@@ -34,7 +37,10 @@ export class MongoDB {
 
         mongoose.connect(this.connectionString, options, (error: MongoError) => {
           if (error) {
-            reject(error.message);
+            reject({
+              err: error.message,
+              useMongoDB: this.useMongoDB
+            });
           } else {
             logger.info('Successfully connected to MongoDB');
             resolve(mongoose.connection);
