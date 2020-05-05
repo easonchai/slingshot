@@ -1,13 +1,14 @@
-pragma solidity >= 0.5.0 < 0.7.0;
+pragma solidity >= 0.6.0 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
+import './DeployerInterface.sol';
 
 contract Meeting is Ownable{
 
     using SafeMath for uint;
 
-    uint public startDate;
+    uint public startDate; //Ben: Would time rather than date be better here?
     uint public endDate;
     uint public minStake; //should be entered in GWEI by frontend
     uint public registrationLimit;
@@ -18,6 +19,7 @@ contract Meeting is Ownable{
     bool public isCancelled;
     bool public isEnded;
     bool public isActive;
+    address parentAddress; //For deployment of next event contract.
 
     struct Participant{
         uint32 rsvpDate;
@@ -26,9 +28,9 @@ contract Meeting is Ownable{
         bool attended;
     }
 
-    Participant[] public participants;
-
     mapping (address => Participant) addressToParticipant;
+
+    DeployerInterface public deployer;
 
     modifier canWithdraw() {
         require(isEnded || isCancelled, "Can't withdraw before event end");
@@ -38,6 +40,7 @@ contract Meeting is Ownable{
     event WithdrawEvent(address addr, uint payout);
     event CancelEvent(address addr);
     event RSVPEvent(address addr, uint stake);
+    event StartEvent(address addr);
     event EndEvent(address addr, uint attendance);
     event SetStakeEvent(uint stake);
     event EditStartDateEvent(uint timeStamp);
@@ -54,20 +57,22 @@ contract Meeting is Ownable{
      */
 
     constructor (
-        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit
-    ) public {
-        startDate = _startDate;
+        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _parentAddress) public {
+        startDate = _startDate; //Ben: Would time rather than date be better here?
         endDate = _endDate;
         minStake = _minStake;
         registrationLimit = _registrationLimit;
         prevStake = address(this).balance;
+        parentAddress = _parentAddress; //For deployment of next event contract.
     }
 
     /**@dev Start of functions */
 
     function rsvp() external payable{
-        participants.push(Participant(uint32(now), msg.value, msg.sender, false));
-
+        require(msg.value >= minStake * 1 wei * 10**9, 'Stake too low');
+        require(registered < registrationLimit, 'Limit reached');
+        addressToParticipant[msg.sender] = Participant(uint32(now), msg.value, msg.sender, false);
+        registered++;
         /*Can store return value of the above function into `RegistrationId` which can be used to uniquely
         identify & distribute QR code (still figuring out if needed and how)*/
     }
@@ -82,23 +87,28 @@ contract Meeting is Ownable{
             Participant memory participant = addressToParticipant[msg.sender];
 
             //Check if RSVP'd within 24 hours
-            require((participant.rsvpDate + 1 days) > now, "Can't cancel past 24 hours of registering");
+            require((participant.rsvpDate + 1 days) > now, "Can't cancel 24 hours after registering");
             (msg.sender).transfer(participant.stakedAmount);
         }
     }
 
     /**@dev Organizer's management functions */
-    function markAttendance() external onlyOwner {
+    function markAttendance(address _participant) external onlyOwner {
         //will pass in a list as parameter and use attendanceCount = list.length;
         require(isActive && isEnded, "Event did not take place");
-        
-    } 
+        addressToParticipant[_participant].attended = true;
+        attendanceCount++;
+    }
 
     function startEvent() external onlyOwner {
+        require(startDate <= now && now < endDate, "Cant start out of scope");
+        //Not sure we need but means organiser cannot start event at arbitrary times.
         isActive = true;
+        emit StartEvent(msg.sender);
     }
 
     function endEvent() external onlyOwner {
+        require(isActive, "Event not started");
         isEnded = true;
         payout = prevStake/attendanceCount;
         emit EndEvent(msg.sender, attendanceCount);
@@ -107,10 +117,17 @@ contract Meeting is Ownable{
     /**@dev Organizer's `edit event` functions */
     function setStartDate(uint dateTimestamp) external onlyOwner{
         //Check if new date is not within 24 hours of today or less
+        require(dateTimestamp > now + 24 hours, 'Within 24 hours of event');
+        startDate = dateTimestamp;
+        emit EditStartDateEvent(dateTimestamp);
     }
 
     function setEndDate(uint dateTimestamp) external onlyOwner{
         //Check if new date is not within 24 hours of today or less && not before start date
+        require(dateTimestamp > now + 24 hours, 'Within 24 hours of event');
+        require(dateTimestamp > startDate, 'End must be after start');
+        endDate = dateTimestamp;
+        emit EditEndDateEvent(dateTimestamp);
     }
 
     function setMinStake(uint stakeAmt) external onlyOwner{
@@ -119,7 +136,8 @@ contract Meeting is Ownable{
     }
 
     function setRegistrationLimit(uint max) external onlyOwner {
-        require(max > registrationLimit, "Cant set less than original");
+        require(max >= registered, "Cant set less than registered");
+        //Ben: no reason for admin to not be able to lower limit if less than registered I think.
         registrationLimit = max;
         emit EditMaxLimitEvent(max);
     }
@@ -134,10 +152,11 @@ contract Meeting is Ownable{
         emit WithdrawEvent(msg.sender, payout);
     }
 
-    /**Ben: @dev Deploys next event contract.*/
-    function nextEvent(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external {
-        //Ben: Deploy next event contract
-        //newEventContract.transfer(address(this).balance); //Ben: Send entire ether balance to new contract.
+    /**@dev Deploys next event contract.*/
+    function nextEvent(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyOwner returns(uint) { //Or internal
+        deployer = DeployerInterface(parentAddress); //Define deployer contract.
+        address payable targetAddress = deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit); //Deploy next event contract
+        deployer.transfer(targetAddress, address(this).balance); //Send entire ether balance to new contract.
     }
 
     //Temp function for testing
