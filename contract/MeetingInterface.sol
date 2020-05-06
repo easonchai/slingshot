@@ -18,5 +18,6 @@ interface MeetingInterface {
 	function withdraw() external;
 	function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external;
 	function getBalance() external view returns (uint);
+	function setPrevStake(uint _prevStake) external;
 
 }

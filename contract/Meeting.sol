@@ -1,11 +1,11 @@
 pragma solidity >= 0.6.0 < 0.7.0;
 
-import "./openzeppelin/Ownable.sol";
-import "./openzeppelin/SafeMath.sol";
+import "./Ownable.sol";
+import "./SafeMath.sol";
 import './DeployerInterface.sol';
 import './MeetingInterface.sol';
 
-contract Meeting is Ownable, {
+contract Meeting is Ownable {
 
     using SafeMath for uint;
 
@@ -36,12 +36,11 @@ contract Meeting is Ownable, {
     address payable targetAddress;
     MeetingInterface public meeting;
 
-    event Rsvp(Participant participant);
     event EventCancelled();
     event GuyCancelled(address participant);
     event MarkAttendance(address _participant);
     event WithdrawEvent(address addr, uint payout);
-    event RSVPEvent(address addr, uint stake);
+    event RSVPEvent(address addr);
     event StartEvent(address addr);
     event EndEvent(address addr, uint attendance);
     event SetStakeEvent(uint stake);
@@ -66,7 +65,7 @@ contract Meeting is Ownable, {
      */
 
     constructor (
-        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _parentAddress, address prevMeeting) public {
+        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _parentAddress, address _prevMeeting) public {
         startDate = _startDate;
         endDate = _endDate;
         minStake = _minStake;
@@ -83,10 +82,10 @@ contract Meeting is Ownable, {
         require(msg.value.add(amnt) == minStake, 'Incorrect stake');
         require(registered < registrationLimit, 'Limit reached');
         addressToParticipant[msg.sender] = Participant(uint32(now), msg.value, false);
-        registered++
+        registered++;
         /*Can store return value of the above function into `RegistrationId` which can be used to uniquely
         identify & distribute QR code (still figuring out if needed and how)*/
-        emit Rsvp(addressToParticipant[msg.sender]);
+        emit RSVPEvent(msg.sender);
     }
 
     function getChange() external{
@@ -109,7 +108,7 @@ contract Meeting is Ownable, {
             require (participant.stakedAmount != 0, 'Already cancelled'); 
 
             //Check if RSVP'd within 24 hours
-            require(participant.rsvpDate.add(1 days) > now, "Can't cancel 24 hours after registering");
+            require(participant.rsvpDate + 1 days > now, "Can't cancel 24 hours after registering");
             msg.sender.transfer(participant.stakedAmount);
             addressToParticipant[msg.sender].stakedAmount = 0;
             registered--;
@@ -120,7 +119,7 @@ contract Meeting is Ownable, {
     /**@dev Organizer's management functions */
     function markAttendance(address _participant) external onlyOwner {
         //will pass in a list as parameter and use attendanceCount = list.length;
-        Participant participant = addressToParticipant[_participant]
+        Participant memory participant = addressToParticipant[_participant];
         require(participant.attended == false, 'already marked');
         require(isActive && !isEnded, "Event is not taking place");
         require(participant.stakedAmount >= minStake, 'Stake too low');
@@ -165,7 +164,6 @@ contract Meeting is Ownable, {
     }
 
     function setMinStake(uint stakeAmt) external onlyOwner notActive{
-        require 
         require(startDate > now.add(24 hours), 'Within 24 hours of event');
         if (minStake < stakeAmt){
             registered = 0; //All participants need to increase stake.
@@ -214,14 +212,12 @@ contract Meeting is Ownable, {
 
     function sendStake(uint _amnt) internal {
         targetAddress.transfer(_amnt); //Send current balance minus prevStake to new contract.
-        MeetingInterface public meeting;
         meeting = MeetingInterface(targetAddress);
         meeting.setPrevStake(_amnt);
     }
 
-    function destroy() onlyOwner public {
-        require(now > endDate.add(7 days), "Within cooldown period"); //Cooldown period.
-        selfdestruct(_owner);
+    function destroyAndSend(address payable _recipient) onlyOwner public {
+        selfdestruct(_recipient);
     }
 
     //Temp function for testing
