@@ -16,7 +16,7 @@ interface MeetingInterface {
 	function setMinStake(uint stakeAmt) external;
 	function setRegistrationLimit(uint max) external;
 	function withdraw() external;
-	function nextEvent(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external;
+	function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external;
 	function getBalance() external view returns (uint);
 
 }
