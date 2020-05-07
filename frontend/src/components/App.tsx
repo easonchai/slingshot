@@ -1,14 +1,21 @@
-import React, { Component } from 'react';
-import './App.css';
+import React from 'react';
+import { Home } from './../containers/Home';
+import { Event } from '../store/events/actions';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        Hello App
-      </div>
-    )
-  }
+interface IProps {
+  events: Array<Event>;
 }
 
-export default App;
+export class App extends React.Component<IProps> {
+  render() {
+    console.log("App's props", this.props);
+    
+    // TODO: Route logic
+
+    return (
+      <div>
+        <Home />
+      </div>
+    );
+  }
+}
