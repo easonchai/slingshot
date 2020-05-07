@@ -33,10 +33,10 @@ contract Meeting is Ownable {
     mapping (address => Participant) addressToParticipant;
 
     DeployerInterface public deployer;
-    address payable targetAddress;
     MeetingInterface public meeting;
 
     event EventCancelled();
+    event GetChange();
     event GuyCancelled(address participant);
     event MarkAttendance(address _participant);
     event WithdrawEvent(address addr, uint payout);
@@ -48,11 +48,22 @@ contract Meeting is Ownable {
     event EditEndDateEvent(uint timeStamp);
     event EditMaxLimitEvent(uint max);
     event Refund(address addr, uint refund);
-    event NextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit);
+    event NextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _nextMeeting);
     event SetPrevStake(uint prevStake);
+    event SendStake(uint _amnt);
 
     modifier notActive() {
-        require(!isActive, 'Event already started');
+        require(!isActive, 'Event started');
+        _;
+    }
+    
+    modifier notCancelled() {
+        require(!isCancelled, 'Event cancelled');
+        _;
+    }
+    
+    modifier duringEvent() {
+        require(isActive && !isEnded, "Event not happening");
         _;
     }
 
@@ -89,59 +100,58 @@ contract Meeting is Ownable {
     }
 
     function getChange() external{
-        msg.sender.transfer(addressToParticipant[msg.sender].stakedAmount.sub(minStake)); //Give change if user has overpaid. This can be done before or after the event.
+        uint amnt = addressToParticipant[msg.sender].stakedAmount;
+        require(amnt > 0);
+        msg.sender.transfer(amnt.sub(minStake)); //Give change if user has overpaid. This can be done before or after the event.
+    
+        emit GetChange();
     }
 
-    function cancel() external notActive {
-        require(!isCancelled, 'Event cancelled');
-        if(msg.sender == owner()){
-            //If it is the owner who calls this, it will cancel the event
-            isCancelled = true;
-            minStake = 0; //This allows refunds to be claimed through getChange()
-            if (targetAddress != address(0)){ //Send stake to new event if it has been created.
-                sendStake(address(this).balance.sub(prevStake));
-            }
-            emit EventCancelled();
-        } else {
-            //Participant cancel RSVP
-            Participant memory participant = addressToParticipant[msg.sender];
-            require (participant.stakedAmount != 0, 'Already cancelled'); 
-
-            //Check if RSVP'd within 24 hours
-            require(participant.rsvpDate + 1 days > now, "Can't cancel 24 hours after registering");
-            msg.sender.transfer(participant.stakedAmount);
-            addressToParticipant[msg.sender].stakedAmount = 0;
-            registered--;
-            emit GuyCancelled(msg.sender);
+    function eventCancel() external notActive onlyOwner notCancelled{
+        //If it is the owner who calls this, it will cancel the event
+        isCancelled = true;
+        minStake = 0; //This allows refunds to be claimed through getChange()
+        if (address(meeting) != address(0)){ //Send stake to new event if it has been created.
+            sendStake(address(this).balance.sub(prevStake));
         }
+        emit EventCancelled();
+    }
+    
+    function guyCancel() external notActive notCancelled {
+        //Participant cancel RSVP
+        Participant memory participant = addressToParticipant[msg.sender];
+        require (participant.stakedAmount != 0, 'Guy cancelled'); 
+
+        //Check if RSVP'd within 24 hours
+        require(participant.rsvpDate + 1 days > now, "1 day notice");
+        msg.sender.transfer(participant.stakedAmount);
+        addressToParticipant[msg.sender].stakedAmount = 0;
+        registered--;
+        emit GuyCancelled(msg.sender);
     }
 
     /**@dev Organizer's management functions */
-    function markAttendance(address _participant) external onlyOwner {
+    function markAttendance(address _participant) external onlyOwner duringEvent{
         //will pass in a list as parameter and use attendanceCount = list.length;
         Participant memory participant = addressToParticipant[_participant];
         require(participant.attended == false, 'already marked');
-        require(isActive && !isEnded, "Event is not taking place");
         require(participant.stakedAmount >= minStake, 'Stake too low');
         addressToParticipant[_participant].attended = true;
         attendanceCount++;
         emit MarkAttendance(_participant);
     }
 
-    function startEvent() external onlyOwner notActive{
-        require(!isCancelled, 'Event cancelled');
+    function startEvent() external onlyOwner notActive notCancelled{
         require(startDate < now && now < endDate, "Can't start out of scope");
         //Not sure we need but means organiser cannot start event at arbitrary times.
         isActive = true;
         emit StartEvent(msg.sender);
     }
 
-    function endEvent() external onlyOwner {
-        require(isActive, "Event not started");
+    function endEvent() external onlyOwner duringEvent{
         isEnded = true;
-        require(!isEnded, 'Already Ended'); //Maybe not needed, TBD
         payout = prevStake.div(attendanceCount);
-        if (targetAddress != address(0)){
+        if (address(meeting) != address(0)){
             sendStake(address(this).balance.sub(prevStake));
         } 
         emit EndEvent(msg.sender, attendanceCount);
@@ -183,37 +193,41 @@ contract Meeting is Ownable {
     function withdraw() external {
         //Either manually withdraw or automatic send back
         require(addressToParticipant[msg.sender].attended, "Did not attend");
+        require(payout != 0, 'no payout');
         msg.sender.transfer(payout);
         addressToParticipant[msg.sender].attended = false;
         emit WithdrawEvent(msg.sender, payout);
     }
 
     /**@dev Deploys next event contract.*/
-    function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyOwner returns(uint) { //Or internal
+    function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyOwner returns(address) { //Or internal
         //Cooldown period not necessary since we want owner to, at any time, be able to create chains of events.
-        require(targetAddress == address(0), 'Only be called once');
+        require(address(meeting) == address(0), 'Only be called once');
         deployer = DeployerInterface(parentAddress); //Define deployer contract.
-        targetAddress = deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit); //Deploy next event contract
+        meeting = MeetingInterface(deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit)); //Deploy next event contract
         if (isEnded){
             sendStake(address(this).balance.sub(prevStake));
         }
         if (isCancelled){
             sendStake(prevStake);
         }
-        emit NextMeeting (_startDate, _endDate, _minStake, _registrationLimit);
+        emit NextMeeting (_startDate, _endDate, _minStake, _registrationLimit, address(meeting));
+        return address(meeting);
     }
 
     //@dev This function is called by the previous contract to set the stake amount.
-    function setPrevStake(uint _prevStake) external {
+    function setPrevStake(uint _prevStake) external payable {
         require(msg.sender == prevMeeting, 'Sender != prevMeeting');
         prevStake = _prevStake;
         emit SetPrevStake(prevStake);
     }
 
     function sendStake(uint _amnt) internal {
-        targetAddress.transfer(_amnt); //Send current balance minus prevStake to new contract.
-        meeting = MeetingInterface(targetAddress);
-        meeting.setPrevStake(_amnt);
+        if (_amnt != 0){ //Send current balance minus prevStake to new contract.
+            meeting.setPrevStake.value(_amnt)(_amnt);
+        }
+        
+        emit SendStake(_amnt);
     }
 
     function destroyAndSend(address payable _recipient) onlyOwner public {
