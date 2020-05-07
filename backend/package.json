@@ -2,26 +2,31 @@
   "name": "backend",
   "version": "0.1.0",
   "scripts": {
-    "serve": "npm run build && npm run start:dev",
-    "build": "node ./util/build.js",
     "lint": "tslint --project \"tsconfig.json\"",
+    "test": "nodemon --config nodemon.test.json",
+    "build": "node ./util/build.js",
+    "serve-dev": "npm run build && npm run start:dev",
+    "serve-local": "npm run build && npm run start:local",
     "start": "node -r module-alias/register ./build",
-    "start:dev": "nodemon --config nodemon.json",
-    "test": "nodemon --config nodemon.test.json"
+    "start:dev": "nodemon --config nodemon.dev.json",
+    "start:local": "nodemon --config nodemon.local.json"
   },
   "_moduleAliases": {
     "@shared": "build/shared",
     "@server": "build/Server"
   },
   "dependencies": {
+    "@types/mongoose": "^5.7.15",
     "command-line-args": "^5.1.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
+    "dotenv-expand": "^5.1.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "helmet": "^3.22.0",
     "http-status-codes": "^1.4.0",
     "module-alias": "^2.2.2",
+    "mongoose": "^5.9.12",
     "morgan": "^1.10.0",
     "tslib": "^1.11.1",
     "winston": "^3.2.1"
