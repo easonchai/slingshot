@@ -224,7 +224,7 @@ contract Meeting is Ownable {
 
     function sendStake(uint _amnt) internal {
         if (_amnt != 0){ //Send current balance minus prevStake to new contract.
-            meeting.setPrevStake.value(_amnt)(_amnt);
+            meeting.setPrevStake{value:_amnt}(_amnt);
         }
         
         emit SendStake(_amnt);

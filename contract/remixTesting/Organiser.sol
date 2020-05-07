@@ -33,7 +33,7 @@ contract Organiser{
     
     function meetingRun(Meeting _meeting) public{ //startDate must be now
         participant = new Participant(_meeting, startDate, endDate, minStake, registrationLimit);
-        participant.RSVP.value(50)();
+        participant.RSVP{value:50}();
         _meeting.startEvent();
         _meeting.markAttendance(address(participant));
         //meeting.nextMeeting(startDate, endDate, minStake, registrationLimit);
@@ -124,7 +124,7 @@ contract Participant{
     receive() external payable {}
         
     function RSVP() public payable{
-        meeting.rsvp.value(minStake)();
+        meeting.rsvp{value:minStake}();
     }
     
     function withdraw() public{
