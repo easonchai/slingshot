@@ -9,8 +9,6 @@ interface IProps {
 export class App extends React.Component<IProps> {
   render() {
     console.log("App's props", this.props);
-    
-    // TODO: Route logic
 
     return (
       <div>

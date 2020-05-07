@@ -13,7 +13,7 @@ const mapStateToProps = (state: IAppState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<IAction>) => {
   return { 
-    dispatchAddEvent: () => dispatch(SetEvent({ name: "Test event", isEnded: false, address: "0x0000" }))
+    dispatchAddEvent: (eventName: string) => dispatch(SetEvent({ name: eventName, isEnded: false, address: "0x0000" }))
   };
 };
 
