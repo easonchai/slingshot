@@ -14,7 +14,7 @@ contract Meeting is Ownable {
     uint public minStake; //should be entered in GWEI by frontend
     uint public registrationLimit;
     uint public registered;
-    uint public prevStake; 
+    uint public prevStake;
     uint public payout;
     uint public attendanceCount;
     bool public isCancelled;

@@ -13,10 +13,4 @@ contract Deployer{
 		emit NewMeetingEvent(msg.sender, address(meeting));
 		return address(meeting);
 	}
-
-	/**
-	function transfer(address payable targetAddr, uint transferAmt) external {
-		targetAddr.transfer(transferAmt);
-	} //Ben: I think we no longer need this? (see Meeting.nextEvent())
-	*/
 }
