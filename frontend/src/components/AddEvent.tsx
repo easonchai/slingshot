@@ -1,7 +1,9 @@
 import React from 'react';
+import { History } from 'history';
 import { Event } from '../store/events/actions';
 
 interface IProps {
+  history: History,
   events: Array<Event>;
   dispatchAddEvent(name: string): void;
 }
@@ -13,6 +15,8 @@ export class AddEvent extends React.Component<IProps> {
     this.props.dispatchAddEvent(
       event.target.eventName.value
     );
+
+    this.props.history.push('/');
   }
 
   render() {
