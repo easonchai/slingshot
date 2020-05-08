@@ -23,12 +23,13 @@ export class EventList extends React.Component<IProps> {
 
           {
             !isEnded &&
-              <Grid item>
-                <Link to='/events/create'>
+              <Grid item xs={6}>
+                <Link style={{ textDecoration: 'none' }} to='/events/create'>
                   <Card raised={true} className="event-preview">
                     <CardContent>
                       <CardActions>
                         <AddCircleIcon fontSize="large" color="primary" />
+                        Add your event here
                       </CardActions>
                     </CardContent>
                   </Card>
@@ -47,7 +48,7 @@ export class EventList extends React.Component<IProps> {
               (
                 events.map((event) => {
                   return (
-                    <Grid key={event.name} item>
+                    <Grid key={event.name} item xs={6}>
                       <EventPreview key={event.name} event={event} />
                     </Grid>
                   );
