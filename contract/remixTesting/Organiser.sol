@@ -70,7 +70,7 @@ contract Organiser{
     }
     
     function cancelledEventRun2() public {
-        meeting1.eventCancel();
+        meeting2.eventCancel();
         participant.getChange();
     }
     
