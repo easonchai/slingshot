@@ -7,6 +7,7 @@
     "@material-ui/core": "^4.9.13",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/pickers": "^3.2.10",
+    "ethers": "^5.0.0-beta.185",
     "history": "^4.10.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
