@@ -11,6 +11,12 @@ const makeAction = <T extends AppActions, P>(type: T) => (payload: P) => {
 
 export interface Event {
   name: string;
+  stake: number;
+  maxParticipants: number;
+  startDate: any;
+  startTime: any;
+  location: string;
+  description: string;
   isEnded: boolean;
   address: string;
 }

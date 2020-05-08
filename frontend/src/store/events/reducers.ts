@@ -3,19 +3,15 @@ import { IAction, Event } from './actions';
 
 const passiveEvents = [
   {
-    name:"ended #1",
+    name:"Event Title #1",
+    stake: 0.05,
+    maxParticipants: 10,
+    startDate: null,
+    startTime: null,
+    location: "Online",
+    description: "This event will be used for ...",
     isEnded:true,
-    address:"0x0000000",
-  },
-  {
-    name:"ended #2",
-    isEnded:true,
-    address:"0x0000001",
-  },
-  {
-    name:"active #1",
-    isEnded:false,
-    address:"0x0000001",
+    address:"0x0...0",
   }
 ];
 

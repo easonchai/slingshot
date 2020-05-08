@@ -8,15 +8,20 @@ export interface IProps {
 
 export class EventPreview extends React.Component<IProps> {
   render() {
-    console.log("Event Preview's props", this.props);
+    const title = this.props.event.name + ' ( ' + this.props.event.stake + ' ETH )';
 
     return (
       <Card raised={true} className="event-preview">
         <CardHeader
-          title={this.props.event.name}
+          title={title}
         />
         <CardContent>
-          { this.props.event.address }
+          <p>
+            Max participants: { this.props.event.maxParticipants }
+          </p>
+          <p>
+            { this.props.event.description }
+          </p>
         </CardContent>
       </Card>
     );

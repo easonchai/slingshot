@@ -4,7 +4,6 @@ import { EventPreview } from './../containers/EventPreview';
 import { Event } from '../store/events/actions';
 import { Grid } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-
 import { Card, CardContent, CardActions } from '@material-ui/core';
 
 interface IProps {
@@ -18,7 +17,7 @@ export class EventList extends React.Component<IProps> {
 
     return (
       <Grid item xs={12}>
-        <h1>{ isEnded ? 'Ended' : 'Active' } Events.</h1>
+        <h1>{ isEnded ? 'Finished' : 'Active' } Events</h1>
 
         <Grid container alignItems="center" justify="center" spacing={6}>
 
@@ -41,7 +40,7 @@ export class EventList extends React.Component<IProps> {
             events.length === 0 ?
               (
                 <Grid container alignItems="center" justify="center" item xs={12}>
-                  <div>There are currently no events matching this criteria.</div>
+                  <div>There are currently no { isEnded ? 'Finished' : 'Active' } events.</div>
                 </Grid>
               )
               :
