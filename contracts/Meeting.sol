@@ -1,7 +1,7 @@
-pragma solidity >= 0.6.0 < 0.7.0;
+pragma solidity >= 0.5.12 < 0.7.0;
 
-import "./Ownable.sol";
-import "./SafeMath.sol";
+import "./openzeppelin/Ownable.sol";
+import "./openzeppelin/SafeMath.sol";
 import './DeployerInterface.sol';
 import './MeetingInterface.sol';
 
@@ -224,7 +224,7 @@ contract Meeting is Ownable {
 
     function sendStake(uint _amnt) internal {
         if (_amnt != 0){ //Send current balance minus prevStake to new contract.
-            meeting.setPrevStake{value:_amnt}(_amnt);
+            meeting.setPrevStake(_amnt);
         }
         
         emit SendStake(_amnt);
