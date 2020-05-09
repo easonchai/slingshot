@@ -8,6 +8,7 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
+import { ethers } from 'ethers';
 
 interface IProps {
   history: History,
@@ -41,7 +42,47 @@ export class AddEvent extends React.Component<IProps> {
       address: "0x0...0"
     });
 
-    this.props.history.push('/');
+    // The even was just saved locally, lets try to deploy a meeting next on testnet.
+    this.testEthersJS();
+
+    // TODO: uncomment once ethers.js is fixed
+    //this.props.history.push('/');
+  }
+
+  testEthersJS = () => {
+    let ethereum = (window as any).ethereum;
+    let web3 = (window as any).Web3;
+
+    if (typeof ethereum !== 'undefined') {
+      ethereum.enable()
+        .then((accounts: any) => {
+          console.log(window);
+          console.log("accounts ", accounts)
+
+          //const provider = new ethers.providers.Web3Provider(web3.currentProvider, "ropsten");
+          //const signer = provider.getSigner();
+          
+          const defaultProvider = ethers.getDefaultProvider('ropsten');
+          defaultProvider.getBalance("0xafa676bf71a9464ab6fa1edb1f154a289a2737bd")
+            .then((balance: any) => console.log(ethers.utils.formatEther(balance)))
+            .catch((err: any) => console.log(err));
+
+          // Partial Deployer Contract interface
+          let abi = [
+              "function deploy(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address)"
+          ];
+          //const contractAddress = "0x8dF42792C58e7F966cDE976a780B376129632468";
+          //const contract = new ethers.Contract(contractAddress, abi, signer);
+
+          //const tx = contract.deploy(0, 1, 1, 1);  
+          // tx is prepared, but still needs to be sent to testnet
+          // [should we utilise this?: sendAsync ( method , params , callback )]
+
+        })
+        .catch((error: any) => {
+          console.log("error @ outer level: ", error)
+        })
+    }
   }
 
   handleDateChange = (d: any) => {
@@ -65,7 +106,7 @@ export class AddEvent extends React.Component<IProps> {
           <form onSubmit={this.handleSubmit} className='add-event-form'>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <TextField required id="eventName" label="Event Name" />
+                <TextField required={false} id="eventName" label="Event Name" />
               </Grid>
 
               <Grid item xs={12}>
@@ -80,7 +121,7 @@ export class AddEvent extends React.Component<IProps> {
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Grid item xs={12}>
                   <KeyboardDatePicker
-                    required={true}
+                    required={false}
                     margin="normal"
                     id="startDate"
                     label="Start Date"
@@ -91,7 +132,7 @@ export class AddEvent extends React.Component<IProps> {
                 </Grid>
                 <Grid item xs={12}>
                   <KeyboardTimePicker
-                    required={true}
+                    required={false}
                     margin="normal"
                     id="startTime"
                     label="Start Time"
@@ -103,7 +144,7 @@ export class AddEvent extends React.Component<IProps> {
               </Grid>
 
               <Grid item xs={12}>
-                <TextField required id="location" label="Location" />
+                <TextField required={false} id="location" label="Location" />
               </Grid>
 
               <Grid item xs={12}>
