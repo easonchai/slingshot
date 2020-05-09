@@ -120,3 +120,5 @@ dist
 
 #buidler config
 buidler.config.js
+artifacts/
+cache/
