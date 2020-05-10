@@ -4,7 +4,7 @@ import { Event } from '../store/events/actions';
 import { Button, Container, Grid, TextField } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
-import { ethers } from 'ethers';
+import EtherService from '../services/EtherService';
 
 interface IProps {
 	history: History;
@@ -14,14 +14,28 @@ interface IProps {
 
 export class AddEvent extends React.Component<IProps> {
 	state: any;
+  etherService: EtherService;
 
 	constructor(props: any) {
 		super(props);
+
 		this.state = {
 			date: null,
 			time: null
 		};
+
+    this.etherService = new EtherService();
 	}
+
+  componentDidMount() {
+    this.etherService.requestConnection()
+      .then((account: string) => {
+        console.log('Selected account: ', account);  // TODO: save account into redux store
+      })
+      .catch((error: string) => {
+        console.log('Error: ', error);
+      });
+  }
 
 	handleSubmit = (event: any) => {
 		event.preventDefault();
@@ -35,52 +49,19 @@ export class AddEvent extends React.Component<IProps> {
 			location: event.target.location.value,
 			description: event.target.description.value,
 			isEnded: false,
-			address: '0x0...0'
+			address: '0x0...0'  // TODO: retrieve account from redux store
 		});
 
 		// The even was just saved locally, lets try to deploy a meeting next on testnet.
-		this.testEthersJS();
-
-		// TODO: uncomment once ethers.js is fixed
-		//this.props.history.push('/');
-	};
-
-	testEthersJS = () => {
-		let ethereum = (window as any).ethereum;
-		let web3 = (window as any).Web3;
-
-		if (typeof ethereum !== 'undefined') {
-			ethereum
-				.enable()
-				.then((accounts: any) => {
-					console.log(window);
-					console.log('accounts ', accounts);
-
-					const provider = new ethers.providers.Web3Provider(ethereum, 'ropsten');
-					const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
-
-					// Partial Deployer Contract interface
-					let abi = [
-						'event NewMeetingEvent(address ownerAddr, address contractAddr)',
-						'function deploy(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address)'
-					];
-					const contractAddress = '0x8dF42792C58e7F966cDE976a780B376129632468';
-					const contract = new ethers.Contract(contractAddress, abi, signer);
-
-					const tx = contract.deploy(0, 1, 1, 1);
-					contract
-						.on("NewMeetingEvent", (ownerAddr, contractAddr, event) => {
-
-							console.log("Owner addr: " + ownerAddr);
-							console.log("Contract addr: " + contractAddr);
-							console.log(event.blockNumber);
-						}).on("error", console.error);
-
-				})
-				.catch((error: any) => {
-					console.log('error @ outer level: ', error);
-				});
-		}
+    
+		this.etherService.deployFirstMeeting()
+      .then((res: any) => {
+        console.log("res ", res);
+        this.props.history.push('/');
+      })
+      .catch((err: any) => {
+        console.log("err ", err);
+      });
 	};
 
 	handleDateChange = (d: any) => {
