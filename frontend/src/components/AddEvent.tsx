@@ -59,48 +59,23 @@ export class AddEvent extends React.Component<IProps> {
 					const provider = new ethers.providers.Web3Provider(ethereum, 'ropsten');
 					const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
 
-					console.log('Provider: ' + web3.currentProvider);
-					console.log(signer);
-
-					// console.log(signer);
-					provider
-						.getBalance(accounts[0])
-						.then((balance: any) => console.log(ethers.utils.formatEther(balance)))
-						.catch((err: any) => console.log(err));
-
-					// let tx = {
-					// 	// Required unless deploying a contract (in which case omit)
-					// 	to: '0x8dF42792C58e7F966cDE976a780B376129632468', // the target address or ENS name
-
-					// 	// These are optional/meaningless for call and estimateGas
-					// 	nonce: 3, // the transaction nonce
-					// 	gasLimit: 200000, // the maximum gas this transaction may spend
-					// 	gasPrice: 10, // the price (in wei) per unit of gas
-
-					// 	// These are always optional (but for call, data is usually specified)
-					// 	data: '0x', // extra data for the transaction, or input for call
-					// 	value: 100, // the amount (in wei) this transaction is sending
-					// 	chainId: 3 // the network ID; usually added by a signer
-					// };
-
-					// const defaultProvider = ethers.getDefaultProvider('ropsten');
-					// defaultProvider.getBalance("0xafa676bf71a9464ab6fa1edb1f154a289a2737bd")
-					//   .then((balance: any) => console.log(ethers.utils.formatEther(balance)))
-					//   .catch((err: any) => console.log(err));
-
 					// Partial Deployer Contract interface
 					let abi = [
+						'event NewMeetingEvent(address ownerAddr, address contractAddr)',
 						'function deploy(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address)'
 					];
 					const contractAddress = '0x8dF42792C58e7F966cDE976a780B376129632468';
 					const contract = new ethers.Contract(contractAddress, abi, signer);
 
 					const tx = contract.deploy(0, 1, 1, 1);
+					contract
+						.on("NewMeetingEvent", (ownerAddr, contractAddr, event) => {
 
-					let txn = signer.sendTransaction(tx);
-					let signature = signer.signMessage('Hello world');
-					// tx is prepared, but still needs to be sent to testnet
-					// [should we utilise this?: sendAsync ( method , params , callback )]
+							console.log("Owner addr: " + ownerAddr);
+							console.log("Contract addr: " + contractAddr);
+							console.log(event.blockNumber);
+						}).on("error", console.error);
+
 				})
 				.catch((error: any) => {
 					console.log('error @ outer level: ', error);
