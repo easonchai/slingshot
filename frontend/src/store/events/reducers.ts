@@ -11,7 +11,8 @@ const passiveEvents = [
     location: "Online",
     description: "This event will be used for ...",
     isEnded:true,
-    address:"0x0...0",
+    ownerAddress:"0x0...0",
+    contractAddress:"0x0...0",
   }
 ];
 

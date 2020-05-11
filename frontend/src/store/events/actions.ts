@@ -18,7 +18,8 @@ export interface Event {
   location: string;
   description: string;
   isEnded: boolean;
-  address: string;
+  ownerAddress: string;
+  contractAddress: string;
 }
 
 export const SetEvent= makeAction<AppActions.SET_EVENT, Event>(AppActions.SET_EVENT);

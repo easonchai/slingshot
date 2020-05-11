@@ -28,14 +28,36 @@ export class AddEvent extends React.Component<IProps> {
 	}
 
   componentDidMount() {
-    this.etherService.requestConnection()
+	this.etherService.requestConnection()
       .then((account: string) => {
-        console.log('Selected account: ', account);  // TODO: save account into redux store
-      })
+        console.log('Selected account:', account);  // TODO: save account into redux store
+      }, (reason: string) => {
+	    console.log('Rejection:', reason);
+	  })
       .catch((error: string) => {
-        console.log('Error: ', error);
+        console.log('Error:', error);
       });
   }
+
+  	callbackRSVP = (event: any) => {
+		console.log("RSVPEvent: ", event);
+	}
+
+  	callbackDeployedMeeting = (event: any) => {
+		console.log("NewMeetingEvent: ", event);
+
+		const meetingAddress: string = event.args.contractAddr;
+		this.etherService
+			.rsvp(meetingAddress, this.callbackRSVP)
+			.then((res: any) => {
+				console.log("success rsvp ", res);
+			}, (reason: any) => {
+				console.log("reason rsvp ", reason);
+			})
+			.catch((err: any) => {
+				console.log("error rsvp ", err);
+			});
+	}
 
 	handleSubmit = (event: any) => {
 		event.preventDefault();
@@ -49,19 +71,28 @@ export class AddEvent extends React.Component<IProps> {
 			location: event.target.location.value,
 			description: event.target.description.value,
 			isEnded: false,
-			address: '0x0...0'  // TODO: retrieve account from redux store
+			ownerAddress: '0x0...0',  // TODO: retrieve account from redux store
+			contractAddress: '0x0...0',  // TODO: retrieve address
 		});
 
-		// The even was just saved locally, lets try to deploy a meeting next on testnet.
-    
-		this.etherService.deployFirstMeeting()
-      .then((res: any) => {
-        console.log("res ", res);
-        this.props.history.push('/');
-      })
-      .catch((err: any) => {
-        console.log("err ", err);
-      });
+		// The event was just saved locally, lets try to deploy a meeting next on testnet.
+		
+		this.etherService.deployFirstMeeting(
+				0,
+				1,
+				1,
+				1,
+				this.callbackDeployedMeeting
+			)
+			.then((res: any) => {
+				console.log("success deploy ", res);
+				this.props.history.push('/');
+			}, (reason: any) => {
+				console.log("reason deploy ", reason);
+			})
+			.catch((err: any) => {
+				console.log("error deploy ", err);
+			});
 	};
 
 	handleDateChange = (d: any) => {
