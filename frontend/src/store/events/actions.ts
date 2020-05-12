@@ -1,38 +1,39 @@
 import { AppActions } from '../constants';
-
-// Higher-order function to srongly type check return types.
-// Source: https://www.youtube.com/watch?v=3d9XqFmCmQw
-const makeAction = <T extends AppActions, P>(type: T) => (payload: P) => {
-  return {
-    type,
-    payload
-  };
-};
+import { makeAction } from '../types';
 
 export interface Event {
+  // BACKEND
+  txHash: string;
+  meetingAddress: string;
   name: string;
-  stake: number;
-  maxParticipants: number;
-  startDate: any;
-  startTime: any;
   location: string;
   description: string;
+
+  // SOLIDITY
+  startDateTime: number;
+  endDateTime: number;
+  stake: number;
+  maxParticipants: number;
+  registered: number;
+  prevStake: number;
+  payout: number;
+  attendanceCount: number;
+  isCancelled: boolean;
+  isStarted: boolean;
   isEnded: boolean;
-  ownerAddress: string;
-  contractAddress: string;
+  deployerContractAddress: string;
+  organizerAddress: string;
 }
 
-export const SetEvent= makeAction<AppActions.SET_EVENT, Event>(AppActions.SET_EVENT);
-
-const actions = {
-  SetEvent
+export interface GroupHashAndAddress {
+  txHash: string;
+  meetingAddress: string;
 }
 
-// Generic interfaces that will help us with strong type checks during compilation.
-// Source: https://www.youtube.com/watch?v=3d9XqFmCmQw
-interface IStringMap<T> {
-  [key: string]: T
-} 
-type IAnyFunction = (...args: any[]) => any;
-type IActionUnion<A extends IStringMap<IAnyFunction>> = ReturnType<A[keyof A]>;
-export type IAction = IActionUnion<typeof actions>;
+export const CreateFirstMeeting = makeAction<AppActions, Event>(AppActions.CREATE_FIRST_MEETING);
+export const UpdateMeetingContractAddress = makeAction<AppActions, GroupHashAndAddress>(AppActions.UPDATE_MEETING_CONTRACT_ADDRESS);
+
+export const actions = {
+  CreateFirstMeeting,
+  UpdateMeetingContractAddress
+};

@@ -1,23 +1,9 @@
 import { AppActions } from '../constants';
-import { IAction, Event } from './actions';
-
-const passiveEvents = [
-  {
-    name:"Event Title #1",
-    stake: 0.05,
-    maxParticipants: 10,
-    startDate: null,
-    startTime: null,
-    location: "Online",
-    description: "This event will be used for ...",
-    isEnded:true,
-    ownerAddress:"0x0...0",
-    contractAddress:"0x0...0",
-  }
-];
+import { Event } from './actions';
+import { IAction } from '../types';
 
 const initState: IState = {
-  events: [...passiveEvents]
+  events: []
 };
 
 export interface IState {
@@ -26,13 +12,28 @@ export interface IState {
 
 export const reducer = (state: IState = initState, action: IAction): IState => {
   switch (action.type) {
-    case AppActions.SET_EVENT:
+    case AppActions.CREATE_FIRST_MEETING:
       return Object.assign({}, state, {
           events: [
             ...state.events,
             action.payload
           ]
         });
+
+    case AppActions.UPDATE_MEETING_CONTRACT_ADDRESS:
+      const updatedEvents = state.events.map((event: Event) => {
+        if (event.txHash === action.payload.txHash) {
+          // Update contract meeting address
+          return {
+            ...event,
+            meetingAddress: action.payload.meetingAddress
+          }
+        } else {
+          return event;
+        }
+      });
+      return { events: updatedEvents };
+
     default:
       return state;
   }

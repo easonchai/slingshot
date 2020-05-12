@@ -90,7 +90,7 @@ export default class EtherService {
 
                 // Send TX
                 contract
-                    .deploy(startDate, endDate, minStake, registrationLimit)
+                    .deploy(startDate, endDate, ethers.utils.parseEther(String(minStake)), registrationLimit)
                     .then(
                       (success: any) => resolve(success),
                       (reason: any) => reject(reason)

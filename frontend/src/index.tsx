@@ -14,7 +14,14 @@ ReactDOM.render(
     <BrowserRouter>
       <Switch>
         <Route path='/events/create' component={AddEvent} />
-        <Route path='/events/:name' component={ViewEvent} />
+        <Route
+          path='/events/hash/:hash'
+          render={ (props) => <ViewEvent {...props} isContractAddress={ false } /> }
+        />
+        <Route
+          path='/events/contract/:address'
+          render={ (props) => <ViewEvent {...props} isContractAddress={ true } /> }
+        />
         <Route path='/' component={App} />
       </Switch>
     </BrowserRouter>

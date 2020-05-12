@@ -10,7 +10,13 @@ export interface IProps {
 export class EventPreview extends React.Component<IProps> {
   render() {
     const title = this.props.event.name + ' ( ' + this.props.event.stake + ' ETH )';
-    const url = '/events/' + this.props.event.name;
+    
+    let url = '/events/';
+    if (this.props.event.meetingAddress) {
+      url += 'contract/' + this.props.event.meetingAddress;
+    } else {
+      url += 'hash/' + this.props.event.txHash;
+    }
 
     return (
       <Link style={{ textDecoration: 'none' }} to={url}>
