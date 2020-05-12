@@ -1,4 +1,4 @@
-pragma solidity >= 0.6.0 < 0.7.0;
+pragma solidity >= 0.6.2 < 0.7.0;
 
 import './Deployer.sol';
 //import './Participant.sol';
@@ -70,7 +70,7 @@ contract Organiser{
     }
     
     function cancelledEventRun2() public {
-        meeting1.eventCancel();
+        meeting2.eventCancel();
         participant.getChange();
     }
     
