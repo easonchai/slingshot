@@ -5,6 +5,8 @@ import { Provider } from '@ethersproject/providers';
 // TODO: handle network change
 // TODO: check that the retrieved provider / signer is valid
 // TOOD: window.ethereum.enable() will be deprecated by MetaMask => find a fallback solution
+let overrides = {value: 1};
+
 export default class EtherService {
   network: string;
   ethereum: any;
@@ -38,7 +40,7 @@ export default class EtherService {
     
     this.meetingABI = [
       'event RSVPEvent(address addr)',
-      'function rsvp() external'
+      'function rsvp() external payable'
       // ...
     ];
   }
@@ -121,7 +123,7 @@ export default class EtherService {
 
             // Send TX
             contract
-                .rsvp()
+                .rsvp(overrides)
                 .then(
                     (success: any) => resolve(success),
                     (reason: any) => reject(reason)
