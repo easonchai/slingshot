@@ -112,8 +112,11 @@ dist
 .vscode-test
 
 # yarn v2
-
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
 .pnp.*
+
+# Reactide
+reactide.config.js
+reactide.js
