@@ -5,7 +5,6 @@ import { IAppState } from '../store/index';
 
 const mapStateToProps = (state: IAppState) => {
   return {
-    events: state.app.events
   };
 };
 

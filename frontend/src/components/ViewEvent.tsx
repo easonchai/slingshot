@@ -10,6 +10,7 @@ export interface IProps {
 
 export class ViewEvent extends React.Component<IProps> {
   render() {
+    console.log(this.props.event);
     return (
       <div>
         <Link to='/'>
@@ -36,11 +37,11 @@ export class ViewEvent extends React.Component<IProps> {
                     </Grid>
 
                     <Grid item xs={ 12 }>
-                      <TextField disabled id="startTime" label="Start time" defaultValue={ new Date(this.props.event.startDateTime) } />
+                      <TextField disabled id="startTime" label="Start time" defaultValue={ new Date(this.props.event.startDateTime * 1000) } />
                     </Grid>
 
                     <Grid item xs={ 12 }>
-                      <TextField disabled id="endTime" label="End time" defaultValue={ new Date(this.props.event.endDateTime) } />
+                      <TextField disabled id="endTime" label="End time" defaultValue={ new Date(this.props.event.endDateTime * 1000) } />
                     </Grid>
 
                     <Grid item xs={ 12 }>
@@ -49,6 +50,14 @@ export class ViewEvent extends React.Component<IProps> {
 
                     <Grid item xs={ 12 }>
                       <TextField disabled id="description" label="Description" defaultValue={ this.props.event.description } />
+                    </Grid>
+
+                    <Grid item xs={ 12 }>
+                      <TextField disabled id="organizer" label="Organizer" defaultValue={ this.props.event.organizerAddress } />
+                    </Grid>
+
+                    <Grid item xs={ 12 }>
+                      <TextField disabled id="deployerContractAddress" label="Deployer Contract Address" defaultValue={ this.props.event.deployerContractAddress } />
                     </Grid>
 
                     <Grid item xs={ 12 }>

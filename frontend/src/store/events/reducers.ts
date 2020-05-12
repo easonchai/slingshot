@@ -1,6 +1,5 @@
 import { AppActions } from '../constants';
-import { Event } from './actions';
-import { IAction } from '../types';
+import { IAction, Event } from './actions';
 
 const initState: IState = {
   events: []

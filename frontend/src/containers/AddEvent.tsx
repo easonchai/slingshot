@@ -2,20 +2,21 @@ import { AddEvent as Component } from '../components/AddEvent';
 import { Dispatch } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { actions, Event, GroupHashAndAddress } from '../store/events/actions';
-import { IAction  } from '../store/types';
+import { IAction as IActionEvent, actions as eventsActions, Event, GroupHashAndAddress } from '../store/events/actions';
+import { IAction as IActionUser, actions as usersActions, User } from '../store/users/actions';
 import { IAppState } from '../store/index';
 
 const mapStateToProps = (state: IAppState) => {
   return {
-    events: state.app.events
+    user: state.userReducer.user
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<IAction>) => {
+const mapDispatchToProps = (dispatch: Dispatch<IActionEvent | IActionUser>) => {
   return {
-    dispatchCreateFirstMeeting: (payload: Event) => dispatch(actions.CreateFirstMeeting(payload)),
-    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress) => dispatch(actions.UpdateMeetingContractAddress(payload)),
+    dispatchCreateFirstMeeting: (payload: Event) => dispatch(eventsActions.CreateFirstMeeting(payload)),
+    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress) => dispatch(eventsActions.UpdateMeetingContractAddress(payload)),
+    dispatchUpdateUserEthereumAddress: (payload: User) => dispatch(usersActions.UpdateUserEthereumAddress(payload)),
   };
 };
 

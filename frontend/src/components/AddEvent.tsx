@@ -1,6 +1,7 @@
 import React from 'react';
 import { History } from 'history';
 import { Event, GroupHashAndAddress } from '../store/events/actions';
+import { User } from '../store/users/actions';
 import { Button, Container, Grid, TextField } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
@@ -8,9 +9,10 @@ import EtherService from '../services/EtherService';
 
 interface IProps {
 	history: History;
-	events: Array<Event>;
+	user: User;
 	dispatchCreateFirstMeeting(payload: Event): void;
 	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress): void;
+	dispatchUpdateUserEthereumAddress(payload: User): void;
 }
 
 interface IState {
@@ -23,6 +25,7 @@ interface IState {
 }
 
 export class AddEvent extends React.Component<IProps, IState> {
+	stakeInputProps: any;
 	etherService: EtherService;
 
 	constructor(props: any) {
@@ -37,24 +40,27 @@ export class AddEvent extends React.Component<IProps, IState> {
 			}
 		};
 
+		this.stakeInputProps = {
+			min: 0,
+			step: 0.01,
+		};
+
 		this.etherService = new EtherService();
 	}
 
   componentDidMount() {
 	this.etherService.requestConnection()
       .then((account: string) => {
-        console.log('Selected account:', account);  // TODO: save account into redux store
+		this.props.dispatchUpdateUserEthereumAddress({ ethereumAddress: account });
       }, (reason: string) => {
-	    console.log('Rejection:', reason);
+		console.log('Rejection:', reason);
+		// TODO notify user
 	  })
       .catch((error: string) => {
-        console.log('Error:', error);
+		console.log('Error:', error);
+		// TODO notify user
       });
   }
-
-  	callbackRSVP = (event: any) => {
-		console.log("RSVPEvent: ", event);
-	}
 
   	callbackDeployedMeeting = (event: any) => {
 		console.log("NewMeetingEvent: ", event);
@@ -65,19 +71,6 @@ export class AddEvent extends React.Component<IProps, IState> {
 		};
 
 		this.props.dispatchUpdateMeetingContractAddress(payload);
-
-		/*
-		this.etherService
-			.rsvp(meetingAddress, this.callbackRSVP)
-			.then((res: any) => {
-				console.log("success rsvp ", res);
-			}, (reason: any) => {
-				console.log("reason rsvp ", reason);
-			})
-			.catch((err: any) => {
-				console.log("error rsvp ", err);
-			});
-		*/
 	}
 
 	handleSubmit = (event: any) => {
@@ -114,8 +107,8 @@ export class AddEvent extends React.Component<IProps, IState> {
 					description: event.target.description.value,
 					startDateTime: startDateTime,
 					endDateTime: endDateTime,
-					stake: event.target.stake.value,
-					maxParticipants: event.target.maxParticipants.value,
+					stake: parseFloat(event.target.stake.value),
+					maxParticipants: parseInt(event.target.maxParticipants.value),
 					registered: 0,
 					prevStake: 0,
 					payout: 0,
@@ -123,16 +116,18 @@ export class AddEvent extends React.Component<IProps, IState> {
 					isCancelled: false,
 					isStarted: false,
 					isEnded: false,
-					deployerContractAddress: '0x0...0',  // TODO
-					organizerAddress: '0x0...0',  // TODO
+					deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+					organizerAddress: this.props.user.ethereumAddress
 				});
 
 				this.props.history.push('/');
 			}, (reason: any) => {
 				console.log("reason deploy ", reason);
+				// TODO notify user
 			})
 			.catch((err: any) => {
 				console.log("error deploy ", err);
+				// TODO notify user
 			});
 	};
 
@@ -150,6 +145,7 @@ export class AddEvent extends React.Component<IProps, IState> {
 								<TextField
 									required={ true }
 									type="number"
+									inputProps={ this.stakeInputProps }
 									id="stake"
 									label="Stake Amount (ETH)"
 									defaultValue={ 0.01 }

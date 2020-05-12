@@ -1,5 +1,5 @@
 import { AppActions } from '../constants';
-import { makeAction } from '../types';
+import { IActionUnion, makeAction } from '../types';
 
 export interface Event {
   // BACKEND
@@ -37,3 +37,5 @@ export const actions = {
   CreateFirstMeeting,
   UpdateMeetingContractAddress
 };
+
+export type IAction = IActionUnion<typeof actions>;

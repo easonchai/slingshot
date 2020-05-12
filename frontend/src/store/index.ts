@@ -1,8 +1,10 @@
 import { createStore, combineReducers } from 'redux';
 import { reducer as eventsReducer } from './events/reducers'
+import { reducer as userReducer } from './users/reducers'
 
 const rootReducer = combineReducers({
-  app: eventsReducer
+  eventsReducer,
+  userReducer
 });
 
 export type IAppState = ReturnType<typeof rootReducer>;
