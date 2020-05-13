@@ -4,25 +4,25 @@ import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './containers/App';
-import { AddEvent } from './containers/AddEvent';
-import { ViewEvent } from './containers/ViewEvent';
+import { MeetingAdd } from './containers/meetings/MeetingAdd';
+import { MeetingView } from './containers/meetings/MeetingView';
 import { store } from './store/index';
 import './index.css';
 
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={ store }>
     <BrowserRouter>
       <Switch>
-        <Route path='/events/create' component={AddEvent} />
+        <Route path='/meetings/create' component={ MeetingAdd } />
         <Route
-          path='/events/hash/:hash'
-          render={ (props) => <ViewEvent {...props} isContractAddress={ false } /> }
+          path='/meetings/hash/:hash'
+          render={ (props) => <MeetingView { ...props } isContractAddress={ false } /> }
         />
         <Route
-          path='/events/contract/:address'
-          render={ (props) => <ViewEvent {...props} isContractAddress={ true } /> }
+          path='/meetings/contract/:address'
+          render={ (props) => <MeetingView { ...props } isContractAddress={ true } /> }
         />
-        <Route path='/' component={App} />
+        <Route path='/' component={ App } />
       </Switch>
     </BrowserRouter>
   </Provider>,

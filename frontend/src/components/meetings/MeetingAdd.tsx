@@ -1,16 +1,16 @@
 import React from 'react';
 import { History } from 'history';
-import { Event, GroupHashAndAddress } from '../store/events/actions';
-import { User } from '../store/users/actions';
+import { Meeting, GroupHashAndAddress } from '../../store/meetings/types';
+import { User } from '../../store/users/actions';
+import EtherService from '../../services/EtherService';
 import { Button, Container, Grid, TextField } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
-import EtherService from '../services/EtherService';
 
 interface IProps {
 	history: History;
 	user: User;
-	dispatchCreateFirstMeeting(payload: Event): void;
+	dispatchCreateFirstMeeting(payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
 }
@@ -24,7 +24,7 @@ interface IState {
 	}
 }
 
-export class AddEvent extends React.Component<IProps, IState> {
+export class MeetingAdd extends React.Component<IProps, IState> {
 	stakeInputProps: any;
 	etherService: EtherService;
 
@@ -41,8 +41,8 @@ export class AddEvent extends React.Component<IProps, IState> {
 		};
 
 		this.stakeInputProps = {
-			min: 0,
-			step: 0.01,
+			min: 0.001,
+			step: 0.001,
 		};
 
 		this.etherService = new EtherService();
@@ -51,7 +51,8 @@ export class AddEvent extends React.Component<IProps, IState> {
   componentDidMount() {
 	this.etherService.requestConnection()
       .then((account: string) => {
-		this.props.dispatchUpdateUserEthereumAddress({ ethereumAddress: account });
+		const payload = { ethereumAddress: account };
+		this.props.dispatchUpdateUserEthereumAddress(payload);
       }, (reason: string) => {
 		console.log('Rejection:', reason);
 		// TODO notify user
@@ -62,12 +63,12 @@ export class AddEvent extends React.Component<IProps, IState> {
       });
   }
 
-  	callbackDeployedMeeting = (event: any) => {
-		console.log("NewMeetingEvent: ", event);
+  	callbackDeployedMeeting = (meeting: any) => {
+		console.log("NewMeetingEvent: ", meeting);
 
 		const payload: GroupHashAndAddress = {
-			txHash: event.transactionHash,
-			meetingAddress: event.args.contractAddr
+			txHash: meeting.transactionHash,
+			meetingAddress: meeting.args.contractAddr
 		};
 
 		this.props.dispatchUpdateMeetingContractAddress(payload);
@@ -102,7 +103,7 @@ export class AddEvent extends React.Component<IProps, IState> {
 				this.props.dispatchCreateFirstMeeting({
 					txHash: res.hash,
 					meetingAddress: '',
-					name: event.target.eventName.value,
+					name: event.target.meetingName.value,
 					location: event.target.location.value,
 					description: event.target.description.value,
 					startDateTime: startDateTime,
@@ -135,10 +136,10 @@ export class AddEvent extends React.Component<IProps, IState> {
 		return (
 			<Container maxWidth={ false }>
 				<Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={ 2 }>
-					<form onSubmit={ this.handleSubmit } className="add-event-form">
+					<form onSubmit={ this.handleSubmit } className="add-meeting-form">
 						<Grid container spacing={ 2 }>
 							<Grid item xs={ 12 }>
-								<TextField id="eventName" label="Event Name" />
+								<TextField id="meetingName" label="Meeting Name" />
 							</Grid>
 
 							<Grid item xs={ 12 }>
@@ -220,7 +221,7 @@ export class AddEvent extends React.Component<IProps, IState> {
 
 							<Grid item xs={ 12 }>
 								<Button type="submit" variant="outlined" color="primary">
-									Create new Event
+									Create new Meeting
 								</Button>
 							</Grid>
 						</Grid>
