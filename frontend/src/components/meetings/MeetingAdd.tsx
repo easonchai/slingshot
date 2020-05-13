@@ -1,21 +1,25 @@
 import React from 'react';
 import { History } from 'history';
-import { Meeting, GroupHashAndAddress } from '../../store/meetings/types';
+import { Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
-import { Button, Container, Grid, TextField } from '@material-ui/core';
+import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 
 interface IProps {
 	history: History;
 	user: User;
+	newMeeting: Meeting;
 	dispatchCreateFirstMeeting(payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
 }
 
 interface IState {
+	/**
+	 * Local `form` state is simply used to keep track of necessary <form> element changes.
+	 */
 	form: {
 		startDate: any,
 		startTime: any,
@@ -31,6 +35,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	constructor(props: any) {
 		super(props);
 
+		/**
+		 * Pre-fill starting date to current time +24 hours.
+		 * Pre-fill ending date to current time +25 hours (1 hour meeting).
+		 */
 		this.state = {
 			form: {
 				startDate: new Date(new Date().getTime() + (24 * 60 * 60 * 1000)),
@@ -40,6 +48,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			}
 		};
 
+		/**
+		 * HTML5 input element attributes for type=number used to decorate stake amount field.
+		 */
 		this.stakeInputProps = {
 			min: 0.001,
 			step: 0.001,
@@ -76,6 +87,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	}
 
 	handleSubmit = (event: any) => {
+		/**
+		 * TODO: verify that the user is still connected to MetaMask.
+		 * Preferably listen to events (network change, account change, logout).
+		 */
+
 		event.preventDefault();
 		event.persist();
 		
@@ -218,13 +234,15 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 							</Grid>
 
 							<Grid item xs={ 12 }>
-								<TextField id="description" label="Description" />
+								<TextareaAutosize id="description" aria-label="Description" rowsMin={10} placeholder="Description" />
 							</Grid>
 
 							<Grid item xs={ 12 }>
-								<Button type="submit" variant="outlined" color="primary">
-									Create new Meeting
-								</Button>
+								<Tooltip title={ this.props.user.ethereumAddress === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
+									<Button disabled={ this.props.user.ethereumAddress === '' } type="submit" variant="outlined" color="primary">
+										CREATE MEETING
+									</Button>
+								</Tooltip>
 							</Grid>
 						</Grid>
 					</form>

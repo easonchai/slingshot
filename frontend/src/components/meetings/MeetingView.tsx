@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/types';
+import { Meeting } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
@@ -23,10 +23,16 @@ export class MeetingView extends React.Component<IProps> {
 		this.etherService = new EtherService();
   }
   
-  componentDidMount() {
-    // TODO: check whether we can synchronize router path to correct redux store state instead of loading all meetings here
+  componentWillMount() {
+    /**
+     * TODO: In order for people to share direct links to meeting details page,
+     * we need to synchronize router path to correct redux store,
+     * or at least lazy load requested meeting instead of all the meetings.
+     */
     this.props.dispatchGetAllMeetings();
-    
+  }
+
+  componentDidMount() {
     // TODO: refactor
     this.etherService
       .requestConnection()

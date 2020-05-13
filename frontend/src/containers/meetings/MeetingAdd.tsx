@@ -1,39 +1,36 @@
 import axios, { AxiosResponse } from 'axios';
 import { Dispatch } from 'react';
-import { compose } from 'redux';
+import { compose, Action } from 'redux';
 import { connect } from 'react-redux';
-import { IAction as IActionMeeting, actions as meetingActions } from '../../store/meetings/new/actions';
-import { Meeting, GroupHashAndAddress } from '../../store/meetings/types';
-import { IAction as IActionUser, actions as userActions, User } from '../../store/users/actions';
+import { actions as meetingActions, Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
+import { actions as userActions, User } from '../../store/users/actions';
 import { IAppState } from '../../store/index';
 import { MeetingAdd as Component } from '../../components/meetings/MeetingAdd';
 
 const mapStateToProps = (state: IAppState) => {
   return {
-    user: state.userReducer.user
+    user: state.userReducer.user,
+    newMeeting: state.meetingsReducer.newMeeting
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<IActionMeeting | IActionUser>) => {
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
     dispatchCreateFirstMeeting: (payload: Meeting) => {
-        console.log(payload);
         axios
           .post('/api/meeting/create', payload)
-          .then((res: AxiosResponse<any>) => {
-              dispatch(meetingActions.CreateFirstMeeting(payload));
-          })
+          .then(res => dispatch(meetingActions.CreateFirstMeeting(payload)));
     },
 
     dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress) => {
         axios
-        .put('/api/meeting/update', payload)
-        .then((res: AxiosResponse<any>) => {
-            dispatch(meetingActions.UpdateMeetingContractAddress(payload))
-        })
+          .put('/api/meeting/update', payload)
+          .then(res => dispatch(meetingActions.UpdateMeetingContractAddress(payload)));
     },
 
-    dispatchUpdateUserEthereumAddress: (payload: User) => dispatch(userActions.UpdateUserEthereumAddress(payload)),
+    dispatchUpdateUserEthereumAddress: (payload: User) => {
+        dispatch(userActions.UpdateUserEthereumAddress(payload));
+    }
   };
 };
 

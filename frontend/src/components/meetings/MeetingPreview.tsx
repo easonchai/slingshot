@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/types';
+import { Meeting } from '../../store/meetings/actions';
 import { Card, CardContent, CardHeader } from '@material-ui/core';
 
 export interface IProps {
@@ -21,9 +21,7 @@ export class MeetingPreview extends React.Component<IProps> {
     return (
       <Link style={ { textDecoration: 'none' } } to={ url }>
         <Card raised={ true } className="meeting-preview">
-          <CardHeader
-            title={ title }
-          />
+          <CardHeader title={ title } />
           <CardContent>
             <p>
               Max participants: { this.props.meeting.maxParticipants }

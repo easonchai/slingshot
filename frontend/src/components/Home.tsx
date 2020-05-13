@@ -7,7 +7,7 @@ interface IProps {
 }
 
 export class Home extends React.Component<IProps> {
-  componentDidMount() {
+  componentWillMount() {
     this.props.dispatchGetAllMeetings();
   }
 

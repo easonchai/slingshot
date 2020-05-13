@@ -1,5 +1,6 @@
-import { AppActions } from '../constants';
-import { IAction, User } from './actions';
+import { Action } from 'redux';
+import { isType } from 'typescript-fsa';
+import { actions, User } from './actions';
 
 const initState: IState = {
   user: {
@@ -11,17 +12,15 @@ export interface IState {
   user: User;
 }
 
-export const reducer = (state: IState = initState, action: IAction): IState => {
-  switch (action.type) {
-    case AppActions.UPDATE_USER_ETHEREUM_ADDRESS:
-      const updatedUser = {
+export const reducer = (state: IState = initState, action: Action): IState => {
+  if (isType(action, actions.UpdateUserEthereumAddress)) {
+    return {
+      user: {
         ...state.user,
         ethereumAddress: action.payload.ethereumAddress
-      };
-
-      return { user: updatedUser };
-
-    default:
-      return state;
+      }
+    };
   }
+
+  return state;
 }

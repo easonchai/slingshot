@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Grid } from '@material-ui/core';
-import { Meeting } from '../../store/meetings/types';
+import { Meeting } from '../../store/meetings/actions';
 
 interface IProps {
     meeting: Meeting

@@ -6,7 +6,7 @@ import { MeetingList as Component } from '../../components/meetings/MeetingList'
 const mapStateToProps = (state: IAppState, props: { isEnded: boolean }) => {
   return {
       meetings: 
-          state.allMeetingsReducer.meetings.filter((meeting) => {
+          state.meetingsReducer.meetings.filter((meeting) => {
             return meeting.isEnded === props.isEnded;
           })
   };

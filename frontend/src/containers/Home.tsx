@@ -1,26 +1,23 @@
 import axios, { AxiosResponse } from 'axios';
 import { Dispatch } from 'react';
-import { compose } from 'redux';
+import { Action, compose } from 'redux';
 import { connect } from 'react-redux';
 import { IAppState } from '../store/index';
 import { Home as Component } from '../components/Home';
-import { IAction as IActionMeeting, actions as meetingActions } from '../store/meetings/all/actions';
-import { Meeting } from '../store/meetings/types';
+import { actions as meetingActions, Meeting } from '../store/meetings/actions';
 
 const mapStateToProps = (state: IAppState) => {
   return {
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<IActionMeeting>) => {
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
     dispatchGetAllMeetings: () => {
         axios
           .get('/api/meeting/all')
-          .then((res: AxiosResponse<any>) => {
-              const meetings = res.data as Array<Meeting>;
-              dispatch(meetingActions.ReadAllMeetings(meetings));
-          })
+          .then(res => res.data as Array<Meeting>)
+          .then(meetings => dispatch(meetingActions.ReadAllMeetings(meetings)))
     }
   };
 };

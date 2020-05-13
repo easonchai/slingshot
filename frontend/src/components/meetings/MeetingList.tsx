@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/types';
+import { Meeting } from '../../store/meetings/actions';
 import { MeetingPreview } from '../../containers/meetings/MeetingPreview';
 import { Grid } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -25,7 +25,7 @@ export class MeetingList extends React.Component<IProps> {
             !isEnded &&
               <Grid item xs={ 6 }>
                 <Link style={ { textDecoration: 'none' } } to='/meetings/create'>
-                  <Card raised={ true } className="meeting-preview">
+                  <Card raised={ true } className="meeting-create">
                     <CardContent>
                       <CardActions>
                         <AddCircleIcon fontSize="large" color="primary" />

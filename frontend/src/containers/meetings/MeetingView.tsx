@@ -1,18 +1,17 @@
 import axios, { AxiosResponse } from 'axios';
 import { Dispatch } from 'react';
-import { compose } from 'redux';
+import { Action, compose } from 'redux';
 import { connect } from 'react-redux';
 import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
-import { IAction as IActionMeeting, actions as meetingActions } from '../../store/meetings/all/actions';
-import { Meeting } from '../../store/meetings/types';
-import { User } from '../../store/users/actions';
+import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
+import { actions as userActions, User } from '../../store/users/actions';
 
 const mapStateToProps = (state: IAppState, props: any) => {
   return {
       user: state.userReducer.user,
       meeting:
-          state.allMeetingsReducer.meetings.find(
+          state.meetingsReducer.meetings.find(
               (meeting) =>
                   props.isContractAddress
                   ? meeting.meetingAddress === props.match.params.address
@@ -21,15 +20,25 @@ const mapStateToProps = (state: IAppState, props: any) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<IActionMeeting>) => {
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
+    /**
+     * TODO: refactor duplicate function.
+     * See containers/Home.tsx
+     */
     dispatchGetAllMeetings: () => {
         axios
           .get('/api/meeting/all')
-          .then((res: AxiosResponse<any>) => {
-              const meetings = res.data as Array<Meeting>;
-              dispatch(meetingActions.ReadAllMeetings(meetings));
-          })
+          .then(res => res.data as Array<Meeting>)
+          .then(meetings => dispatch(meetingActions.ReadAllMeetings(meetings)));
+    },
+
+    /**
+     * TODO: refactor duplicate function.
+     * See containers/MeetingAdd.tsx
+     */
+    dispatchUpdateUserEthereumAddress: (payload: User) => {
+      dispatch(userActions.UpdateUserEthereumAddress(payload));
     },
     
     dispatchUpdateRSVP: (meetingAddress: string, user: User) => {
