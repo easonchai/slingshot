@@ -1,3 +1,5 @@
+import { User } from '../users/actions';
+
 export interface Meeting {
     // BACKEND
     txHash: string;
@@ -5,7 +7,8 @@ export interface Meeting {
     name: string;
     location: string;
     description: string;
-  
+    users: Array<User>;
+
     // SOLIDITY
     startDateTime: number;
     endDateTime: number;

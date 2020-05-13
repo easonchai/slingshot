@@ -17,6 +17,7 @@ const mapStateToProps = (state: IAppState) => {
 const mapDispatchToProps = (dispatch: Dispatch<IActionMeeting | IActionUser>) => {
   return {
     dispatchCreateFirstMeeting: (payload: Meeting) => {
+        console.log(payload);
         axios
           .post('/api/meeting/create', payload)
           .then((res: AxiosResponse<any>) => {

@@ -5,8 +5,6 @@ import { Provider } from '@ethersproject/providers';
 // TODO: handle network change
 // TODO: check that the retrieved provider / signer is valid
 // TOOD: window.ethereum.enable() will be deprecated by MetaMask => find a fallback solution
-let overrides = {value: 1};
-
 export default class EtherService {
   network: string;
   ethereum: any;
@@ -55,11 +53,14 @@ export default class EtherService {
       'event NextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _nextMeeting)',
       'event SetPrevStake(uint prevStake)',
       'event SendStake(uint _amnt)',
+      'function getChange() external',
+      'function eventCancel() external notActive onlyOwner notCancelled',
+      'function guyCancel() external notActive notCancelled',
       'function rsvp() external payable',
       'function cancel() external',
       'function markAttendance(address _participant) external',
       'function startEvent() external',
-      'function endEvent() external',
+      'function endEvent() external onlyOwner duringEvent',
       'function setStartDate(uint dateTimestamp) external',
       'function setEndDate(uint dateTimestamp) external',
       'function setMinStake(uint stakeAmt) external',
@@ -137,6 +138,7 @@ export default class EtherService {
 
   public async rsvp(
     meetingAddress: string,
+    stakeAmount: number,
     eventCallback: (event: any) => void
     ): Promise<string>
     {
@@ -150,7 +152,7 @@ export default class EtherService {
 
             // Send TX
             contract
-                .rsvp(overrides)
+                .rsvp({ value: ethers.utils.parseEther(String(stakeAmount))})
                 .then(
                     (success: any) => resolve(success),
                     (reason: any) => reject(reason)
@@ -339,7 +341,7 @@ export default class EtherService {
 
             // Send TX
             contract
-                .nextMeeting(_startDate, _endDate, _minStake, _registrationLimit)
+                .nextMeeting(_startDate, _endDate, ethers.utils.parseEther(String(_minStake)), _registrationLimit)
                 .then(
                     (success: any) => resolve(success),
                     (reason: any) => reject(reason)

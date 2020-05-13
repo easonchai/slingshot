@@ -7,7 +7,7 @@ export const UpdateMeetingContractAddress = makeAction<AppActions, GroupHashAndA
 
 export const actions = {
   CreateFirstMeeting,
-  UpdateMeetingContractAddress
+  UpdateMeetingContractAddress,
 };
 
 export type IAction = IActionUnion<typeof actions>;

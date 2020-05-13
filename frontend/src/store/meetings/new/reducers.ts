@@ -14,6 +14,7 @@ const initState: IState = {
       name: '',
       location: '',
       description: '',
+      users: [],
       startDateTime: 0,
       endDateTime: 0,
       stake: 0.0,

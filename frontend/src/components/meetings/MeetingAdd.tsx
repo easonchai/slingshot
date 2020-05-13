@@ -64,6 +64,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
   }
 
   	callbackDeployedMeeting = (meeting: any) => {
+		// TODO: handle case when the user quite the browser or even refreshed the page, before the meetingAddress could be updated
 		console.log("NewMeetingEvent: ", meeting);
 
 		const payload: GroupHashAndAddress = {
@@ -106,6 +107,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					name: event.target.meetingName.value,
 					location: event.target.location.value,
 					description: event.target.description.value,
+					users: [],
 					startDateTime: startDateTime,
 					endDateTime: endDateTime,
 					stake: parseFloat(event.target.stake.value),
