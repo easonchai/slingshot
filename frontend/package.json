@@ -64,6 +64,8 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/react-router-redux": "^5.0.18",
     "@types/redux": "^3.6.0",
-    "typesafe-actions": "^5.1.0"
+    "redux-devtools-extension": "^2.13.8",
+    "typesafe-actions": "^5.1.0",
+    "typescript-fsa": "^3.0.0"
   }
 }
