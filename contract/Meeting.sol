@@ -1,4 +1,4 @@
-pragma solidity >= 0.6.0 < 0.7.0;
+pragma solidity >= 0.6.2 < 0.7.0;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
@@ -112,7 +112,7 @@ contract Meeting is Ownable {
         isCancelled = true;
         minStake = 0; //This allows refunds to be claimed through getChange()
         if (address(meeting) != address(0)){ //Send stake to new event if it has been created.
-            sendStake(address(this).balance.sub(prevStake));
+            sendStake(prevStake);
         }
         emit EventCancelled();
     }
@@ -145,7 +145,7 @@ contract Meeting is Ownable {
         require(startDate < now && now < endDate, "Can't start out of scope");
         //Not sure we need but means organiser cannot start event at arbitrary times.
         isActive = true;
-        emit StartEvent(msg.sender);
+        emit StartEvent(msg.sender); //Maybe not necessary to msg.sender
     }
 
     function endEvent() external onlyOwner duringEvent{
@@ -154,7 +154,7 @@ contract Meeting is Ownable {
         if (address(meeting) != address(0)){
             sendStake(address(this).balance.sub(prevStake));
         } 
-        emit EndEvent(msg.sender, attendanceCount);
+        emit EndEvent(msg.sender, attendanceCount); //Maybe not necessary to msg.sender
     }
 
     /**@dev Organizer's `edit event` functions */
