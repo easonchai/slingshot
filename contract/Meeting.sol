@@ -88,7 +88,8 @@ contract Meeting is Ownable {
     /**@dev Start of functions */
 
     function rsvp() external payable{
-        uint amnt = addressToParticipant[msg.sender].stakedAmount; 
+        uint amnt = addressToParticipant[msg.sender].stakedAmount;
+        require(!isEnded, 'Event finished');
         require(amnt < minStake, 'Already registered');
         require(msg.value.add(amnt) == minStake, 'Incorrect stake');
         require(registered < registrationLimit, 'Limit reached');
@@ -107,7 +108,7 @@ contract Meeting is Ownable {
         emit GetChange();
     }
 
-    function eventCancel() external notActive onlyOwner notCancelled{
+    function eventCancel() public notActive onlyOwner notCancelled{
         //If it is the owner who calls this, it will cancel the event
         isCancelled = true;
         minStake = 0; //This allows refunds to be claimed through getChange()
@@ -149,12 +150,17 @@ contract Meeting is Ownable {
     }
 
     function endEvent() external onlyOwner duringEvent{
-        isEnded = true;
-        payout = prevStake.div(attendanceCount);
-        if (address(meeting) != address(0)){
-            sendStake(address(this).balance.sub(prevStake));
-        } 
-        emit EndEvent(msg.sender, attendanceCount); //Maybe not necessary to msg.sender
+        if (attendanceCount == 0){
+            isActive = false;
+            eventCancel();
+        }else{
+            isEnded = true;
+            payout = prevStake.div(attendanceCount);
+            if (address(meeting) != address(0)){
+                sendStake(address(this).balance.sub(prevStake));
+            } 
+            emit EndEvent(msg.sender, attendanceCount); //Maybe not necessary to msg.sender
+        }
     }
 
     /**@dev Organizer's `edit event` functions */
