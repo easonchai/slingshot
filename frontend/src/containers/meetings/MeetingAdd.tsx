@@ -23,7 +23,15 @@ const mapDispatchToProps = (dispatch: Dispatch<IActionMeeting | IActionUser>) =>
               dispatch(meetingActions.CreateFirstMeeting(payload));
           })
     },
-    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress) => dispatch(meetingActions.UpdateMeetingContractAddress(payload)),
+
+    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress) => {
+        axios
+        .put('/api/meeting/update', payload)
+        .then((res: AxiosResponse<any>) => {
+            dispatch(meetingActions.UpdateMeetingContractAddress(payload))
+        })
+    },
+
     dispatchUpdateUserEthereumAddress: (payload: User) => dispatch(userActions.UpdateUserEthereumAddress(payload)),
   };
 };

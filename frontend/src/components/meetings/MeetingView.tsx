@@ -6,9 +6,15 @@ import { Button, Container, Grid, TextField } from '@material-ui/core';
 
 export interface IProps {
   meeting: Meeting | undefined;
+  dispatchGetAllMeetings(): void;
 }
 
 export class MeetingView extends React.Component<IProps> {
+  componentDidMount() {
+    // TODO: check whether we can synchronize router path to correct redux store state instead of loading all meetings here
+    this.props.dispatchGetAllMeetings();
+  }
+
   render() {
     return (
       <div>
@@ -18,6 +24,7 @@ export class MeetingView extends React.Component<IProps> {
 
         { 
           typeof this.props.meeting === 'undefined'
+            // TODO: replace by a Loading animation in case no meetings have been loaded yet
             ? ('Something went wrong retrieving the correct Meeting. Please try again.')
             : (
               <Container maxWidth={ false }>
@@ -53,6 +60,10 @@ export class MeetingView extends React.Component<IProps> {
 
                     <Grid item xs={ 12 }>
                       <TextField disabled id="organizer" label="Organizer" defaultValue={ this.props.meeting.organizerAddress } />
+                    </Grid>
+
+                    <Grid item xs={ 12 }>
+                      <TextField disabled id="meetingAddress" label="Meeting Contract Address" defaultValue={ this.props.meeting.meetingAddress } />
                     </Grid>
 
                     <Grid item xs={ 12 }>

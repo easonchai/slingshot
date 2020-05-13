@@ -24,8 +24,22 @@ router.post('/create', async (req: Request, res: Response, next: NextFunction) =
         .create(req.body)
         .then(document => {
             res
-                .status(OK)
+                .status(CREATED)
                 .json(document);
+        })
+        .catch(err => next(err));
+});
+
+router.put('/update', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Meeting
+        .updateOne(
+            { txHash: req.body['txHash'] },
+            { meetingAddress: req.body['meetingAddress'] }
+        )
+        .then(document => {
+            res
+                .status(OK)
+                .json(req.body)
         })
         .catch(err => next(err));
 });
