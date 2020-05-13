@@ -1,5 +1,4 @@
 import React from 'react';
-import { History } from 'history';
 import { Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
@@ -8,7 +7,6 @@ import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 
 interface IProps {
-	history: History;
 	user: User;
 	newMeeting: Meeting;
 	dispatchCreateFirstMeeting(payload: Meeting): void;
@@ -87,11 +85,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	}
 
 	handleSubmit = (event: any) => {
-		/**
-		 * TODO: verify that the user is still connected to MetaMask.
-		 * Preferably listen to events (network change, account change, logout).
-		 */
-
 		event.preventDefault();
 		event.persist();
 		
@@ -107,6 +100,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		const endMinute = this.state.form.endTime.getMinutes();
 		const endDateTime = (new Date(endDate)).getTime() / 1000 + (endHour * 60 + endMinute) * 60;
 
+		/**
+		 * TODO: verify that the user is still connected to MetaMask.
+		 * Preferably listen to events (network change, account change, logout).
+		 */
 		this.etherService.deployFirstMeeting(
 				startDateTime,
 				endDateTime,
@@ -138,8 +135,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
 					organizerAddress: this.props.user.ethereumAddress
 				});
-
-				this.props.history.push('/');
 			}, (reason: any) => {
 				console.log("reason deploy ", reason);
 				// TODO notify user
@@ -234,7 +229,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 							</Grid>
 
 							<Grid item xs={ 12 }>
-								<TextareaAutosize id="description" aria-label="Description" rowsMin={10} placeholder="Description" />
+								<TextareaAutosize id="description" aria-label="Description" rowsMin={ 10 } placeholder="Description" />
 							</Grid>
 
 							<Grid item xs={ 12 }>

@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { Dispatch } from 'react';
 import { Action, compose } from 'redux';
 import { connect } from 'react-redux';

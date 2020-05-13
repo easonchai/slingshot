@@ -1,11 +1,12 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
 import { actions, Meeting } from './actions';
+import { actions as userActions } from '../users/actions';
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
   newMeeting: Meeting;
-}
+}    
 
 const initState: IState = {
   meetings: [],
@@ -68,6 +69,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
         meetingAddress: action.payload.meetingAddress
       }
     };
+  }
+
+  if (isType(action, userActions.UpdateUserEthereumAddress)) {
+    return {
+      ...state,
+      newMeeting: {
+        ...state.newMeeting,
+        organizerAddress: action.payload.ethereumAddress
+      }
+    }
   }
 
   return state;
