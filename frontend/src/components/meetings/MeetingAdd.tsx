@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { History } from 'history';
 import { Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
@@ -7,8 +9,9 @@ import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 
 interface IProps {
+	history: History;
 	user: User;
-	newMeeting: Meeting;
+	//cachedMeeting: Meeting;
 	dispatchCreateFirstMeeting(payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
@@ -17,6 +20,7 @@ interface IProps {
 interface IState {
 	/**
 	 * Local `form` state is simply used to keep track of necessary <form> element changes.
+	 * TODO: transition to central cachedMeeting state.
 	 */
 	form: {
 		startDate: any,
@@ -135,6 +139,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
 					organizerAddress: this.props.user.ethereumAddress
 				});
+
+				this.props.history.push('/meetings/hash/' + res.hash);
 			}, (reason: any) => {
 				console.log("reason deploy ", reason);
 				// TODO notify user
@@ -233,10 +239,17 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 							</Grid>
 
 							<Grid item xs={ 12 }>
-								<Tooltip title={ this.props.user.ethereumAddress === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
-									<Button disabled={ this.props.user.ethereumAddress === '' } type="submit" variant="outlined" color="primary">
-										CREATE MEETING
+								<Link style={ { textDecoration: 'none' } } to={ '/' }>
+									<Button variant="outlined" color="primary">
+										CANCEL
 									</Button>
+								</Link>
+								<Tooltip title={ this.props.user.ethereumAddress === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
+									<span>
+										<Button disabled={ this.props.user.ethereumAddress === '' } type="submit" variant="outlined" color="primary">
+											CREATE MEETING
+										</Button>
+									</span>
 								</Tooltip>
 							</Grid>
 						</Grid>

@@ -1,7 +1,12 @@
 import mongoose from 'mongoose';
 
-export const Meeting = mongoose.model(
-    "Meeting",
+const UserSchema =
+    new mongoose.Schema({
+        ethereumAddress: String,
+        meetings: [ String ]
+    });
+
+const MeetingSchema =
     new mongoose.Schema({
         txHash: String,
         meetingAddress: String,
@@ -21,10 +26,14 @@ export const Meeting = mongoose.model(
         isEnded: Boolean,
         deployerContractAddress: String,
         organizerAddress: String,
-        users: [
-            {
-                type: String,
-            }
-        ]
+        users: [ String ]
+    });
+
+export const Item = mongoose.model(
+    "Item",
+    new mongoose.Schema({
+        type: String,
+        user: UserSchema,
+        meeting: MeetingSchema
     })
 );

@@ -2,16 +2,21 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Meeting } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
+import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
-import { Button, Container, Grid, TextField } from '@material-ui/core';
+import { Button, Container, Grid } from '@material-ui/core';
 
 export interface IProps {
+  txHash: String;
+  contractAddress: String;
   user: User;
-  meeting: Meeting | undefined;
-  dispatchGetAllMeetings(): void;
-  dispatchUpdateRSVP(meetingAddress: string, user: User): Array<User>;
+  cachedMeeting: Meeting;
+  loading: Loading;
+  dispatchGetCachedMeetingByTx(txHash: String): void;
+  dispatchGetCachedMeetingByContractAddress(txHash: String): void;
+  dispatchUpdateRSVP(meetingAddress: String, user: User): Array<User>;
 }
 
 export class MeetingView extends React.Component<IProps> {
@@ -24,12 +29,11 @@ export class MeetingView extends React.Component<IProps> {
   }
   
   componentWillMount() {
-    /**
-     * TODO: In order for people to share direct links to meeting details page,
-     * we need to synchronize router path to correct redux store,
-     * or at least lazy load requested meeting instead of all the meetings.
-     */
-    this.props.dispatchGetAllMeetings();
+    if (this.props.contractAddress) {
+      this.props.dispatchGetCachedMeetingByContractAddress(this.props.contractAddress);
+    } else if (this.props.txHash) {
+      this.props.dispatchGetCachedMeetingByTx(this.props.txHash);
+    }
   }
 
   componentDidMount() {
@@ -53,44 +57,37 @@ export class MeetingView extends React.Component<IProps> {
   }
   
   handleRSVP = (event: any) => {
-    console.log(event);
-
-    if (this.props.meeting) {
-      this.etherService.rsvp(
-        this.props.meeting.meetingAddress,
-        this.props.meeting.stake,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success rsvp ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-
-        if (this.props.meeting) {
-          //this.props.meeting.users = this.props.dispatchUpdateRSVP(this.props.meeting.meetingAddress, this.props.user);
-        } else {
-          // TODO: fix undefined type
-        }
-			}, (reason: any) => {
-				console.log("reason rsvp ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error rsvp ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: RSVP button disabled
-    }
+    /**
+     * TODO: validate that the meeting contract address is available.
+     * Otherwise retrieve it from the known txHash (and persist in DB).
+     */
+    this.etherService.rsvp(
+      this.props.cachedMeeting.meetingAddress,
+      this.props.cachedMeeting.stake,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success rsvp ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+      this.props.dispatchUpdateRSVP(this.props.cachedMeeting.meetingAddress, this.props.user);
+    }, (reason: any) => {
+      console.log("reason rsvp ", reason);
+      // TODO notify user
+    })
+    .catch((err: any) => {
+      console.log("error rsvp ", err);
+      // TODO notify user
+    });
   }
 
   handleGetChange = (event: any) => {
     console.log(event);
 
-    if (this.props.meeting) {
+    if (this.props.cachedMeeting) {
       // TODO: get user address
       
       this.etherService.getChange(
-        this.props.meeting.meetingAddress,
+        this.props.cachedMeeting.meetingAddress,
         this.callbackFn
       )
       .then((res: any) => {
@@ -112,11 +109,11 @@ export class MeetingView extends React.Component<IProps> {
   handleCancelEvent = (event: any) => {
     console.log(event);
 
-    if (this.props.meeting) {
+    if (this.props.cachedMeeting) {
       // TODO: get user address
       
       this.etherService.eventCancel(
-        this.props.meeting.meetingAddress,
+        this.props.cachedMeeting.meetingAddress,
         this.callbackFn
       )
       .then((res: any) => {
@@ -136,39 +133,31 @@ export class MeetingView extends React.Component<IProps> {
   }
 
   handleCancelRSVP = (event: any) => {
-    console.log(event);
-
-    if (this.props.meeting) {
-      // TODO: get user address
-      
-      this.etherService.guyCancel(
-        this.props.meeting.meetingAddress,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success cancel rsvp ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-				console.log("reason cancel rsvp ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error cancel rsvp ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.guyCancel(
+      this.props.cachedMeeting.meetingAddress,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success cancel rsvp ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      console.log("reason cancel rsvp ", reason);
+      // TODO notify user
+    })
+    .catch((err: any) => {
+      console.log("error cancel rsvp ", err);
+      // TODO notify user
+    });
   }
 
   handleStart = (event: any) => {
     console.log(event);
 
-    if (this.props.meeting) {
+    if (this.props.cachedMeeting) {
       // TODO: get user address
       
       this.etherService.startEvent(
-        this.props.meeting.meetingAddress,
+        this.props.cachedMeeting.meetingAddress,
         this.callbackFn
       )
       .then((res: any) => {
@@ -190,11 +179,11 @@ export class MeetingView extends React.Component<IProps> {
   handleEnd = (event: any) => {
     console.log(event);
 
-    if (this.props.meeting) {
+    if (this.props.cachedMeeting) {
       // TODO: get user address
       
       this.etherService.endEvent(
-        this.props.meeting.meetingAddress,
+        this.props.cachedMeeting.meetingAddress,
         this.callbackFn
       )
       .then((res: any) => {
@@ -216,11 +205,11 @@ export class MeetingView extends React.Component<IProps> {
   handleWithdraw = (event: any) => {
     console.log(event);
 
-    if (this.props.meeting) {
+    if (this.props.cachedMeeting) {
       // TODO: get user address
       
       this.etherService.withdraw(
-        this.props.meeting.meetingAddress,
+        this.props.cachedMeeting.meetingAddress,
         this.callbackFn
       )
       .then((res: any) => {
@@ -242,15 +231,15 @@ export class MeetingView extends React.Component<IProps> {
   handleNextMeeting = (event: any) => {
     console.log(event);
 
-    if (this.props.meeting) {
+    if (this.props.cachedMeeting) {
       // TODO: get user address
       
       this.etherService.nextMeeting(
-        this.props.meeting.meetingAddress,
-        this.props.meeting.startDateTime,
-        this.props.meeting.endDateTime,
-        this.props.meeting.stake,
-        this.props.meeting.maxParticipants,
+        this.props.cachedMeeting.meetingAddress,
+        this.props.cachedMeeting.startDateTime,
+        this.props.cachedMeeting.endDateTime,
+        this.props.cachedMeeting.stake,
+        this.props.cachedMeeting.maxParticipants,
         this.callbackFn
       )
       .then((res: any) => {
@@ -270,96 +259,81 @@ export class MeetingView extends React.Component<IProps> {
   }
 
   render() {
+    console.log("rend",this.props.cachedMeeting)
     return (
       <div>
-        <Link to='/'>
-          <HomeIcon fontSize="large" color="primary" />
-        </Link>
+          {
+            this.props.loading.cachedMeetingLoaded
+              ? (
+                // TODO: replace by reusable loading component
+                <div>Loading</div>
+              )
+              : (
+                <div>
+                  <div>Name: { this.props.cachedMeeting.name }</div><br />
+                  <div>Stake: {this.props.cachedMeeting.stake}</div><br />
+                  <div>Max participants: {this.props.cachedMeeting.maxParticipants}</div><br />
+                  <div>Start time: { new Date(this.props.cachedMeeting.startDateTime * 1000).toUTCString() }</div><br />
+                  <div>End time: { new Date(this.props.cachedMeeting.endDateTime * 1000).toUTCString() }</div><br />
+                  <div>Location: { this.props.cachedMeeting.location }</div><br />
+                  <div>Description: { this.props.cachedMeeting.description }</div><br />
+                  <div>Organizer address: { this.props.cachedMeeting.organizerAddress }</div><br />
+                  <div>Meeting contract: { this.props.cachedMeeting.meetingAddress }</div><br />
+                  <div>Deployer contract: { this.props.cachedMeeting.deployerContractAddress }</div><br />
+                
 
-        { 
-          typeof this.props.meeting === 'undefined'
-            // TODO: replace by a Loading animation in case no meetings have been loaded yet
-            ? ('Something went wrong retrieving the correct Meeting. Please try again.')
-            : (
-              <Container maxWidth={ false }>
-                <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={ 2 }>
-                  <Grid container spacing={ 2 }>
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="meetingName" label={ this.props.meeting.name } />
+
+                  <Container maxWidth={ false }>
+                    <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={ 2 }>
+                      <Grid container spacing={ 2 }>
+                        {
+                          // TODO: organize buttons per role (organizer / participant) and per state (active / finished meeting).
+                        }
+
+                        <Grid item xs={ 12 }>
+                          <Link to='/'>
+                            <Button>
+                              <HomeIcon fontSize="large" color="primary" />
+                            </Button>
+                          </Link>
+                          <Button disabled={ false } onClick={ this.handleRSVP } variant="outlined" color="primary">
+                            RSVP
+                          </Button>
+                          <Button disabled={ false } onClick={ this.handleCancelRSVP } variant="outlined" color="primary">
+                            CANCEL RSVP
+                          </Button>
+                          <Button disabled={ false } onClick={ this.handleGetChange } variant="outlined" color="primary">
+                            GET CHANGE
+                          </Button>
+                          <Button disabled={ false } onClick={ this.handleWithdraw } variant="outlined" color="primary">
+                            WITHDRAW PAYOUT
+                          </Button>
+                        </Grid>
+
+
+                              <Grid item xs={ 12 }>
+                                <Button disabled={ false } onClick={ this.handleCancelEvent } variant="outlined" color="primary">
+                                  CANCEL EVENT
+                                </Button>
+                                <Button disabled={ false } onClick={ this.handleStart } variant="outlined" color="primary">
+                                  START EVENT
+                                </Button>
+                                <Button disabled={ false } onClick={ this.handleEnd } variant="outlined" color="primary">
+                                  END EVENT
+                                </Button>
+                                <Button disabled={ false } onClick={ this.handleNextMeeting } variant="outlined" color="primary">
+                                  NEXT MEETING
+                                </Button>
+                              </Grid>
+
+                      </Grid>
                     </Grid>
 
-                    <Grid item xs={ 12 }>
-                      <TextField disabled type="number" id="stakeAmount" label="Stake Amount (ETH)" defaultValue={ this.props.meeting.stake } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled type="number" id="maxParticipants" label="Max participants" defaultValue={ this.props.meeting.maxParticipants } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="startTime" label="Start time" defaultValue={ new Date(this.props.meeting.startDateTime * 1000) } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="endTime" label="End time" defaultValue={ new Date(this.props.meeting.endDateTime * 1000) } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="location" label="Location" defaultValue={ this.props.meeting.location } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="description" label="Description" defaultValue={ this.props.meeting.description } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="organizer" label="Organizer" defaultValue={ this.props.meeting.organizerAddress } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="meetingAddress" label="Meeting Contract Address" defaultValue={ this.props.meeting.meetingAddress } />
-                    </Grid>
-
-                    <Grid item xs={ 12 }>
-                      <TextField disabled id="deployerContractAddress" label="Deployer Contract Address" defaultValue={ this.props.meeting.deployerContractAddress } />
-                    </Grid>
-
-                    {
-                      // TODO: disable buttons when needed
-                    }
-                    <Grid item xs={ 12 }>
-                      <Button disabled={ false } onClick={ this.handleRSVP } variant="outlined" color="primary">
-                        RSVP
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleGetChange } variant="outlined" color="primary">
-                        GET CHANGE
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleCancelEvent } variant="outlined" color="primary">
-                        CANCEL EVENT
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleCancelRSVP } variant="outlined" color="primary">
-                        CANCEL RSVP
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleStart } variant="outlined" color="primary">
-                        START
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleEnd } variant="outlined" color="primary">
-                        END
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleWithdraw } variant="outlined" color="primary">
-                        WITHDRAW
-                      </Button>
-                      <Button disabled={ false } onClick={ this.handleNextMeeting } variant="outlined" color="primary">
-                        NEXT MEETING
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                <UsersList meeting={ this.props.meeting } />
-              </Container>
-            )
-        }
+                    <UsersList />
+                  </Container>
+                </div>
+              )
+            }
       </div>
     );
   }

@@ -5,12 +5,12 @@ import { actions as userActions } from '../users/actions';
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
-  newMeeting: Meeting;
+  cachedMeeting: Meeting;
 }    
 
 const initState: IState = {
   meetings: [],
-  newMeeting: {
+  cachedMeeting: {
     txHash: '',
     meetingAddress: '',
     name: '',
@@ -38,7 +38,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     return {
       ...state,
       meetings: [action.payload, ...state.meetings],
-      newMeeting: action.payload
+      cachedMeeting: action.payload
     };
   }
 
@@ -46,6 +46,13 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     return {
       ...state,
       meetings: action.payload
+    };
+  }
+
+  if (isType(action, actions.ReadCachedMeeting)) {
+    return {
+      ...state,
+      cachedMeeting: action.payload
     };
   }
 
@@ -64,9 +71,23 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     return {
       ...state,
       meetings: updatedMeetings,
-      newMeeting: {
-        ...state.newMeeting,
+      cachedMeeting: {
+        ...state.cachedMeeting,
         meetingAddress: action.payload.meetingAddress
+      }
+    };
+  }
+  
+  if(isType(action, actions.UpdateMeetingRSVPList)) {
+    // TODO: update the entry in overall meetings array too.
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        users: [
+          ...state.cachedMeeting.users,
+          action.payload
+        ]
       }
     };
   }
@@ -74,8 +95,8 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   if (isType(action, userActions.UpdateUserEthereumAddress)) {
     return {
       ...state,
-      newMeeting: {
-        ...state.newMeeting,
+      cachedMeeting: {
+        ...state.cachedMeeting,
         organizerAddress: action.payload.ethereumAddress
       }
     }

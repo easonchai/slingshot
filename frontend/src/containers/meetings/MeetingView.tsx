@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { Dispatch } from 'react';
 import { Action, compose } from 'redux';
 import { connect } from 'react-redux';
@@ -6,31 +6,43 @@ import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
 import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
 import { actions as userActions, User } from '../../store/users/actions';
+import { actions as loadingActions } from '../../store/loading/actions';
 
 const mapStateToProps = (state: IAppState, props: any) => {
+  console.log(props);
   return {
+      txHash: props.match.params.hash,
+      contractAddress: props.match.params.address,
       user: state.userReducer.user,
-      meeting:
-          state.meetingsReducer.meetings.find(
-              (meeting) =>
-                  props.isContractAddress
-                  ? meeting.meetingAddress === props.match.params.address
-                  : meeting.txHash === props.match.params.hash
-          )
+      cachedMeeting: state.meetingsReducer.cachedMeeting,
+      loading: state.loadingReducer.loading,
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
-    /**
-     * TODO: refactor duplicate function.
-     * See containers/Home.tsx
-     */
-    dispatchGetAllMeetings: () => {
-        axios
-          .get('/api/meeting/all')
-          .then(res => res.data as Array<Meeting>)
-          .then(meetings => dispatch(meetingActions.ReadAllMeetings(meetings)));
+    dispatchGetCachedMeetingByTx: (txHash: string) => {
+      dispatch(loadingActions.UpdateCachedMeetingLoading(true));
+
+      axios
+        .get('/api/meeting/tx/' + txHash)
+        .then(res => res.data as Meeting)
+        .then(meeting => {
+          dispatch(meetingActions.ReadCachedMeeting(meeting));
+          dispatch(loadingActions.UpdateCachedMeetingLoading(false));
+        });
+    },
+
+    dispatchGetCachedMeetingByContractAddress: (address: string) => {
+      dispatch(loadingActions.UpdateCachedMeetingLoading(true));
+
+      axios
+        .get('/api/meeting/contract/' + address)
+        .then(res => res.data as Meeting)
+        .then(meeting => {
+          dispatch(meetingActions.ReadCachedMeeting(meeting));
+          dispatch(loadingActions.UpdateCachedMeetingLoading(false));
+        });
     },
 
     /**
@@ -42,21 +54,19 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
     },
     
     dispatchUpdateRSVP: (meetingAddress: string, user: User) => {
+      dispatch(loadingActions.UpdateCachedMeetingLoading(true));
+
       const payload = {
         meetingAddress: meetingAddress,
-        user: user
+        userAddress: user.ethereumAddress
       };
       
       axios
         .put('/api/meeting/rsvp', payload)
-        .then((res: AxiosResponse<any>) => {
-            const rsvpList = res.data as Array<User>;
-            console.log(rsvpList);
-            return rsvpList;
-            
-            //this.state.meeting.users = rsvpList;
-            //dispatch(rsvpActions.UpdateRSVP(rsvpList));
-        })
+        .then(res => {
+          dispatch(meetingActions.UpdateMeetingRSVPList(user.ethereumAddress));
+          dispatch(loadingActions.UpdateCachedMeetingLoading(false));
+        });
     }
   };
 };

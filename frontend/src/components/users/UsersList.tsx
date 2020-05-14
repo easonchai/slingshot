@@ -3,7 +3,7 @@ import { Button, Grid } from '@material-ui/core';
 import { Meeting } from '../../store/meetings/actions';
 
 interface IProps {
-    meeting: Meeting
+    cachedMeeting: Meeting
 }
 
 export class UsersList extends React.Component<IProps> {
@@ -16,11 +16,11 @@ export class UsersList extends React.Component<IProps> {
                 </Grid>
 
                 {
-                    this.props.meeting.users
-                        .map((meeting) => {
+                    this.props.cachedMeeting.users
+                        .map((ethereumAddress) => {
                             return (
-                                <Grid item key={ meeting.ethereumAddress } xs={ 12 }>
-                                    { meeting.ethereumAddress }
+                                <Grid item key={ ethereumAddress } xs={ 12 }>
+                                    { ethereumAddress }
                                     <Button disabled={ false } type="submit" variant="outlined" color="primary">
                                         MARK ATTENDANCE
                                     </Button>

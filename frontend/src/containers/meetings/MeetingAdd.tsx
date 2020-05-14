@@ -10,7 +10,7 @@ import { MeetingAdd as Component } from '../../components/meetings/MeetingAdd';
 const mapStateToProps = (state: IAppState) => {
   return {
     user: state.userReducer.user,
-    newMeeting: state.meetingsReducer.newMeeting
+    //cachedMeeting: state.meetingsReducer.cachedMeeting
   };
 };
 

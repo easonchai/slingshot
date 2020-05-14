@@ -6,8 +6,7 @@ export const User = mongoose.model(
         ethereumAddress: String,
         meetings: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Meeting"
+                type: String
             }
         ]
     })

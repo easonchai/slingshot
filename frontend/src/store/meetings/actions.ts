@@ -9,7 +9,8 @@ export interface Meeting {
     name: string;
     location: string;
     description: string;
-    users: Array<User>;
+    
+    users: Array<string>;
 
     // SOLIDITY
     startDateTime: number;
@@ -36,10 +37,14 @@ const actionCreator = actionCreatorFactory();
 
 export const CreateFirstMeeting = actionCreator<Meeting>(AppActions.CREATE_FIRST_MEETING);
 export const ReadAllMeetings = actionCreator<Array<Meeting>>(AppActions.READ_ALL_MEETINGS);
+export const ReadCachedMeeting = actionCreator<Meeting>(AppActions.READ_CACHED_MEETING);
 export const UpdateMeetingContractAddress = actionCreator<GroupHashAndAddress>(AppActions.UPDATE_MEETING_CONTRACT_ADDRESS);
+export const UpdateMeetingRSVPList = actionCreator<string>(AppActions.UPDATE_MEETING_RSVP_LIST);
 
 export const actions = {
   CreateFirstMeeting,
   ReadAllMeetings,
+  ReadCachedMeeting,
   UpdateMeetingContractAddress,
+  UpdateMeetingRSVPList,
 };
