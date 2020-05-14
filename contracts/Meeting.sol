@@ -1,7 +1,7 @@
 pragma solidity >= 0.6.2 < 0.7.0;
 
-import "./Ownable.sol";
-import "./SafeMath.sol";
+import "./openzeppelin/Ownable.sol";
+import "./openzeppelin/SafeMath.sol";
 import './DeployerInterface.sol';
 import './MeetingInterface.sol';
 
@@ -14,7 +14,7 @@ contract Meeting is Ownable {
     uint public minStake; //should be entered in GWEI by frontend
     uint public registrationLimit;
     uint public registered;
-    uint public prevStake; 
+    uint public prevStake;
     uint public payout;
     uint public attendanceCount;
     bool public isCancelled;
@@ -230,7 +230,7 @@ contract Meeting is Ownable {
 
     function sendStake(uint _amnt) internal {
         if (_amnt != 0){ //Send current balance minus prevStake to new contract.
-            meeting.setPrevStake{value:_amnt}(_amnt);
+            meeting.setPrevStake(_amnt);
         }
         
         emit SendStake(_amnt);

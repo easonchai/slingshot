@@ -123,3 +123,5 @@ reactide.js
 
 #buidler config
 buidler.config.js
+artifacts/
+cache/
