@@ -1,16 +1,21 @@
 import React from 'react';
-import { EventList } from './../containers/EventList';
+import { MeetingList } from '../containers/meetings/MeetingList';
 import Grid from '@material-ui/core/Grid';
 
 interface IProps {
+  dispatchGetAllMeetings(): void;
 }
 
 export class Home extends React.Component<IProps> {
+  componentWillMount() {
+    this.props.dispatchGetAllMeetings();
+  }
+
   render() {
     return (
-      <Grid container className="events-list" spacing={4}>
-        <EventList isEnded={false} />
-        <EventList isEnded={true} />
+      <Grid container className="meetings-list" spacing={ 4 }>
+        <MeetingList isEnded={ false } />
+        <MeetingList isEnded={ true } />
       </Grid>
     );
   }

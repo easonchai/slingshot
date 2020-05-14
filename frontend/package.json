@@ -7,6 +7,8 @@
     "@material-ui/core": "^4.9.13",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/pickers": "^3.2.10",
+    "axios": "^0.19.2",
+    "ethers": "^5.0.0-beta.185",
     "history": "^4.10.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -19,6 +21,7 @@
     "redux-thunk": "^2.3.0",
     "typescript": "^3.7.5"
   },
+  "proxy": "http://localhost:3030",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -61,6 +64,8 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/react-router-redux": "^5.0.18",
     "@types/redux": "^3.6.0",
-    "typesafe-actions": "^5.1.0"
+    "redux-devtools-extension": "^2.13.8",
+    "typesafe-actions": "^5.1.0",
+    "typescript-fsa": "^3.0.0"
   }
 }

@@ -120,3 +120,6 @@ dist
 # Reactide
 reactide.config.js
 reactide.js
+
+#buidler config
+buidler.config.js

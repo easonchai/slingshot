@@ -7,7 +7,9 @@ interface MeetingInterface {
 
 	//Meeting
 	function rsvp() external payable;
-	function cancel() external;
+	function getChange() external;
+	function eventCancel() external;
+	function guyCancel() external;
 	function markAttendance(address _participant) external;
 	function startEvent() external;
 	function endEvent() external;
@@ -17,6 +19,8 @@ interface MeetingInterface {
 	function setRegistrationLimit(uint max) external;
 	function withdraw() external;
 	function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address);
+	function setPrevStake(uint _prevStake) external payable;
+	function destroyAndSend(address payable _recipient) external;
 	function getBalance() external view returns (uint);
-    function setPrevStake(uint _prevStake) external payable;
 }
+
