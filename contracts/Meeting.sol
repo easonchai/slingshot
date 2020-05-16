@@ -1,4 +1,4 @@
-pragma solidity >= 0.5.12 < 0.7.0;
+pragma solidity >= 0.6.2 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
