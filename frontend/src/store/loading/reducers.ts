@@ -6,7 +6,8 @@ const initState: IState = {
   loading: {
     cachedMeeting: false,
     meetingDeployment: false,
-    rsvpConfirmation: false
+    rsvpConfirmation: false,
+    rsvpCancellationConfirmation: false,
   }
 };
 
@@ -41,6 +42,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       loading: {
         ...state.loading,
         rsvpConfirmation: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateRsvpCancellationConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        rsvpCancellationConfirmation: action.payload
       }
     };
   }

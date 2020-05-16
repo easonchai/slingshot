@@ -19,6 +19,15 @@ export class UsersList extends React.Component<IProps> {
                 </Grid>
 
                 {
+                    // Simulate awaiting confirmation of RSVP cancellation (gray out + spinner)
+                    this.props.loading.rsvpCancellationConfirmation &&
+                            <Grid item key={ this.props.userWallet } xs={ 12 }>
+                                { this.props.userWallet }
+                                <CircularProgress />
+                            </Grid>
+                }
+
+                {
                     this.props.cachedMeeting.rsvp
                         .map((participantWallet) => {
                             return (
@@ -26,17 +35,18 @@ export class UsersList extends React.Component<IProps> {
                                     { participantWallet }
 
                                     {
-                                        participantWallet === this.props.userWallet && this.props.loading.rsvpConfirmation &&
-                                            <CircularProgress />
+                                        this.props.loading.rsvpConfirmation &&
+                                            participantWallet === this.props.userWallet &&
+                                                <CircularProgress />
                                     }
 
                                     {
                                         this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                                        <Button disabled={ false } type="submit" variant="outlined" color="primary">
-                                            MARK ATTENDANCE
-                                        </Button>
+                                            <Button disabled={ false } type="submit" variant="outlined" color="primary">
+                                                MARK ATTENDANCE
+                                            </Button>
                                     }
-                                </Grid>
+                                </Grid> 
                             );
                         })
                 }

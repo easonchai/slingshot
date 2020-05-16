@@ -97,7 +97,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   
   if(isType(action, actions.UpdateRSVPList)) {
     // TODO: update the entry in overall meetings array too.
-    // TODO: verify whether we need to update spread the data field
+    // TODO: verify whether we need to update the nested data field
     return {
       ...state,
       cachedMeeting: {
@@ -106,6 +106,18 @@ export const reducer = (state: IState = initState, action: Action): IState => {
           ...state.cachedMeeting.rsvp,
           action.payload.userAddress
         ]
+      }
+    };
+  }
+
+  if(isType(action, actions.UpdateRSVPListCancellation)) {
+    // TODO: update the entry in overall meetings array too.
+    // TODO: verify whether we need to update the nested data field
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        rsvp: state.cachedMeeting.rsvp.filter((address) => address !== action.payload.userAddress)
       }
     };
   }

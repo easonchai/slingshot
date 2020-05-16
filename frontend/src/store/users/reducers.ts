@@ -42,5 +42,17 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if(isType(action, meetingActions.UpdateRSVPListCancellation)) {
+    // TODO: update the entry in overall meetings array too.
+    // TODO: verify whether we need to update the nested data field
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: state.user.rsvp.filter((address) => address !== action.payload.meetingAddress)
+      }
+    };
+  }
+
   return state;
 }

@@ -13,9 +13,14 @@ export interface IProps {
   user: User;
   cachedMeeting: Meeting;
   loading: Loading;
+  
   dispatchGetCachedMeetingById(id: String): void;
-  dispatchUpdateRSVP(meetingAddress: String, user: User): Array<User>;
+
+  dispatchUpdateRSVP(meetingAddress: String, userAddress: String): Array<User>;
+  dispatchUpdateRsvpCancellation(meetingAddress: String, userAddress: String): void;
+
   dispatchUpdateRsvpConfirmationLoading(status: Boolean): void;
+  dispatchUpdateRsvpCancellationConfirmationLoading(status: Boolean): void;
 }
 
 export class MeetingView extends React.Component<IProps> {
@@ -24,7 +29,12 @@ export class MeetingView extends React.Component<IProps> {
   constructor(props: any) {
     super(props);
 
-		this.etherService = new EtherService();
+    this.etherService = new EtherService();
+   /**
+     * TODO: Before every meaningful interaction with etherService,
+     * validate that the meeting contract address is available.
+     * Otherwise retrieve it from the known txHash (and persist in DB).
+     */
   }
   
   componentWillMount() {
@@ -52,21 +62,13 @@ export class MeetingView extends React.Component<IProps> {
   }
   
   handleRSVP = (event: any) => {
-    /**
-     * TODO: validate that the meeting contract address is available.
-     * Otherwise retrieve it from the known txHash (and persist in DB).
-     */
     this.etherService.rsvp(
       this.props.cachedMeeting._id,
       this.props.cachedMeeting.data.stake,
-      (result: any) => {
-        console.log("rsvp confirmed ", result);
-        this.props.dispatchUpdateRsvpConfirmationLoading(false);
-      }
+      confirmation => this.props.dispatchUpdateRsvpConfirmationLoading(false)
     )
     .then((res: any) => {
-      console.log("success rsvp ", res);
-      this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user);
+      this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
     }, (reason: any) => {
       console.log("reason rsvp ", reason);
       // TODO notify user
@@ -132,11 +134,10 @@ export class MeetingView extends React.Component<IProps> {
   handleCancelRSVP = (event: any) => {
     this.etherService.guyCancel(
       this.props.cachedMeeting._id,
-      this.callbackFn
+      confirmation => this.props.dispatchUpdateRsvpCancellationConfirmationLoading(false)
     )
     .then((res: any) => {
-      console.log("success cancel rsvp ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
+      this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
     }, (reason: any) => {
       console.log("reason cancel rsvp ", reason);
       // TODO notify user

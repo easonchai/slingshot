@@ -88,7 +88,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 
   	callbackDeployedMeeting = (meeting: any) => {
 		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
-		console.log("NewMeetingEvent: ", meeting);
 
 		const payload: GroupHashAndAddress = {
 			txHash: meeting.transactionHash,
@@ -126,8 +125,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				this.callbackDeployedMeeting
 			)
 			.then((res: any) => {
-				console.log("success deploy ", res);
-
 				this.props.dispatchCreateFirstMeeting({
 					_id: res.hash,
 					type: ModelType.PENDING,

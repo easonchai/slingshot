@@ -39,16 +39,16 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       dispatch(userActions.UpdateUserEthereumAddress(payload));
     },
     
-    dispatchUpdateRSVP: (meetingAddress: string, user: User) => {
+    dispatchUpdateRSVP: (meetingAddress: string, userAddress: string) => {
       dispatch(loadingActions.UpdateRsvpConfirmationLoading(true));
 
       const payload = {
         meetingAddress: meetingAddress,
-        userAddress: user._id
+        userAddress: userAddress
       };
       
       axios
-        .put('/api/meeting/rsvp', payload)
+        .put('/api/meeting/rsvp/add', payload)
         .then(res => {
           dispatch(meetingActions.UpdateRSVPList(payload));
         });
@@ -56,7 +56,27 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
 
     dispatchUpdateRsvpConfirmationLoading: (status: boolean) => {
       dispatch(loadingActions.UpdateRsvpConfirmationLoading(status));
+    },
+
+    dispatchUpdateRsvpCancellation: (meetingAddress: string, userAddress: string) => {
+      dispatch(loadingActions.UpdateRsvpCancellationConfirmationLoading(true));
+
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: userAddress
+      };
+
+      axios
+      .put('/api/meeting/rsvp/cancel', payload)
+      .then(res => {
+        dispatch(meetingActions.UpdateRSVPListCancellation(payload));
+      });
+    },
+
+    dispatchUpdateRsvpCancellationConfirmationLoading: (status: boolean) => {
+      dispatch(loadingActions.UpdateRsvpCancellationConfirmationLoading(status));
     }
+    
   };
 };
 

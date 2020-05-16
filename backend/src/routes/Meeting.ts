@@ -114,14 +114,14 @@ router.put('/update', async (req: Request, res: Response, next: NextFunction) =>
 });
 
 /**
- * Update RSVP list both for the given meeting and user.
+ * Update RSVP lists by adding new entry cross-mutually over two documents.
  * 
  * @params  meetingAddress  The _id to look for.
- * @params  userAddress     The user's address to insert.
+ * @params  userAddress     The user's address to look for.
  * 
  * @returns Meeting
  */
-router.put('/rsvp', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/rsvp/add', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
@@ -133,6 +133,38 @@ router.put('/rsvp', async (req: Request, res: Response, next: NextFunction) => {
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
                     { $push: { 'rsvp': req.body['meetingAddress'] } },
+                    { safe: true, upsert: true }
+                )
+                .then(user => {
+                    res
+                        .status(OK)
+                        .json(meeting);
+                })
+                .catch(err => next(err));
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Update RSVP lists by removing existing entry cross-mutually over two documents.
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * @params  userAddress     The user's address to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/rsvp/cancel', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            { $pull: { 'rsvp': req.body['userAddress'] } },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            Models.Item
+                .updateOne(
+                    { _id: req.body['userAddress'], type: ModelType.USER },
+                    { $pull: { 'rsvp': req.body['meetingAddress'] } },
                     { safe: true, upsert: true }
                 )
                 .then(user => {
