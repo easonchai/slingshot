@@ -36,11 +36,11 @@ const initState: IState = {
       isEnded: false,
       deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',
       organizerAddress: '',
+
+      parent: '',  // prev meeting
+      child: '',  // next meeting
     },
-  
-    parent: '',  // prev meeting
-    child: '',  // next meeting
-  
+
     // list of user wallets (ethereum address) linked to this meeting per status
     cancel: [],
     rsvp: [],

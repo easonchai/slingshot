@@ -5,7 +5,9 @@ import { UsersList as Component } from '../../components/users/UsersList';
 
 const mapStateToProps = (state: IAppState) => {
   return {
-    cachedMeeting: state.meetingsReducer.cachedMeeting
+    cachedMeeting: state.meetingsReducer.cachedMeeting,
+    userWallet: state.userReducer.user._id,
+    loading: state.loadingReducer.loading,
   };
 };
 

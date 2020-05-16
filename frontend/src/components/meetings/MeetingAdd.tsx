@@ -13,7 +13,7 @@ interface IProps {
 	user: User;
 	//cachedMeeting: Meeting;
 	dispatchCreateFirstMeeting(payload: Meeting): void;
-	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress): void;
+	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress, history: History): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
 }
 
@@ -40,6 +40,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		/**
 		 * Pre-fill starting date to current time +24 hours.
 		 * Pre-fill ending date to current time +25 hours (1 hour meeting).
+		 * TODO: round up to next hour
 		 */
 		this.state = {
 			form: {
@@ -64,6 +65,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
   componentDidMount() {
 	this.etherService.requestConnection()
       .then((account: string) => {
+	    // TODO: keep the whole object consistent (i.e. reload the arrays of meetings for the new wallet addres.)
 		const user = {
 			_id: account,
 			type: ModelType.USER,
@@ -72,6 +74,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			attend: [],
 			withdraw: []
 		};
+
 		this.props.dispatchUpdateUserEthereumAddress(user);
       }, (reason: string) => {
 		console.log('Rejection:', reason);
@@ -84,7 +87,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
   }
 
   	callbackDeployedMeeting = (meeting: any) => {
-		// TODO: handle case when the user quite the browser or even refreshed the page, before the meetingAddress could be updated
+		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
 		console.log("NewMeetingEvent: ", meeting);
 
 		const payload: GroupHashAndAddress = {
@@ -92,7 +95,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			meetingAddress: meeting.args.contractAddr
 		};
 
-		this.props.dispatchUpdateMeetingContractAddress(payload);
+		this.props.dispatchUpdateMeetingContractAddress(payload, this.props.history);
 	}
 
 	handleSubmit = (event: any) => {
@@ -143,9 +146,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					  isEnded: false,
 					  deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
 					  organizerAddress: this.props.user._id,
+					  parent: '',
+					  child: '',
 					},
-					parent: '',
-					child: '',
 					cancel: [],
 					rsvp: [],
 					attend: [],
@@ -256,7 +259,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										CANCEL
 									</Button>
 								</Link>
-								<Tooltip title={ this.props.user._id === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
+								<Tooltip title={ this.props.user._id === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.' }>
 									<span>
 										<Button disabled={ this.props.user._id === '' } type="submit" variant="outlined" color="primary">
 											CREATE MEETING

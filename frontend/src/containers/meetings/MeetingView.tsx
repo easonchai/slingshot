@@ -40,7 +40,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
     },
     
     dispatchUpdateRSVP: (meetingAddress: string, user: User) => {
-      dispatch(loadingActions.UpdateCachedMeetingLoading(true));
+      dispatch(loadingActions.UpdateRsvpConfirmationLoading(true));
 
       const payload = {
         meetingAddress: meetingAddress,
@@ -51,8 +51,11 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         .put('/api/meeting/rsvp', payload)
         .then(res => {
           dispatch(meetingActions.UpdateRSVPList(payload));
-          dispatch(loadingActions.UpdateCachedMeetingLoading(false));
         });
+    },
+
+    dispatchUpdateRsvpConfirmationLoading: (status: boolean) => {
+      dispatch(loadingActions.UpdateRsvpConfirmationLoading(status));
     }
   };
 };

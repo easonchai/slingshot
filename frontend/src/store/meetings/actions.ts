@@ -34,10 +34,10 @@ export interface Meeting {
     isEnded: boolean;
     deployerContractAddress: string;
     organizerAddress: string;
-  },
 
-  parent: string,  // prev meeting
-  child: string,  // next meeting
+    parent: string,  // prev meeting
+    child: string,  // next meeting
+  },
 
   // list of user wallets (ethereum address) linked to this meeting per status
   cancel: ReadonlyArray<string>,

@@ -14,10 +14,11 @@ interface IProps {
 export class MeetingList extends React.Component<IProps> {
   render() {
     const { meetings, isEnded } = this.props;
+    const status: string = isEnded ? 'Finished' : 'Active';
 
     return (
       <Grid item xs={ 12 }>
-        <h1>{ isEnded ? 'Finished' : 'Active' } Meetings</h1>
+        <h1>{ status } Meetings</h1>
 
         <Grid container alignItems="center" justify="center" spacing={ 6 }>
 
@@ -41,7 +42,7 @@ export class MeetingList extends React.Component<IProps> {
             meetings.length === 0 ?
               (
                 <Grid container alignItems="center" justify="center" item xs={ 12 }>
-                  <div>There are currently no { isEnded ? 'Finished' : 'Active' } meetings.</div>
+                  <div>There are currently no { status } meetings.</div>
                 </Grid>
               )
               :

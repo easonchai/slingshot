@@ -6,7 +6,7 @@ import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
-import { Button, Container, Grid } from '@material-ui/core';
+import { Button, CircularProgress, Container, Grid } from '@material-ui/core';
 
 export interface IProps {
   id: String;
@@ -15,6 +15,7 @@ export interface IProps {
   loading: Loading;
   dispatchGetCachedMeetingById(id: String): void;
   dispatchUpdateRSVP(meetingAddress: String, user: User): Array<User>;
+  dispatchUpdateRsvpConfirmationLoading(status: Boolean): void;
 }
 
 export class MeetingView extends React.Component<IProps> {
@@ -58,11 +59,13 @@ export class MeetingView extends React.Component<IProps> {
     this.etherService.rsvp(
       this.props.cachedMeeting._id,
       this.props.cachedMeeting.data.stake,
-      this.callbackFn
+      (result: any) => {
+        console.log("rsvp confirmed ", result);
+        this.props.dispatchUpdateRsvpConfirmationLoading(false);
+      }
     )
     .then((res: any) => {
       console.log("success rsvp ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
       this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user);
     }, (reason: any) => {
       console.log("reason rsvp ", reason);
@@ -253,30 +256,39 @@ export class MeetingView extends React.Component<IProps> {
   }
 
   render() {
-    console.log("rend",this.props.cachedMeeting)
+    const { cachedMeeting } = this.props;
+
     return (
       <div>
           {
-            this.props.loading.cachedMeetingLoaded
+            this.props.loading.cachedMeeting && cachedMeeting
               ? (
-                // TODO: replace by reusable loading component
-                <div>Loading</div>
+                <CircularProgress />
               )
               : (
                 <div>
-                  <div>Name: { this.props.cachedMeeting.data.name }</div><br />
-                  <div>Stake: {this.props.cachedMeeting.data.stake}</div><br />
-                  <div>Max participants: {this.props.cachedMeeting.data.maxParticipants}</div><br />
-                  <div>Start time: { new Date(this.props.cachedMeeting.data.startDateTime * 1000).toUTCString() }</div><br />
-                  <div>End time: { new Date(this.props.cachedMeeting.data.endDateTime * 1000).toUTCString() }</div><br />
-                  <div>Location: { this.props.cachedMeeting.data.location }</div><br />
-                  <div>Description: { this.props.cachedMeeting.data.description }</div><br />
-                  <div>Organizer address: { this.props.cachedMeeting.data.organizerAddress }</div><br />
-                  <div>Meeting contract: { this.props.cachedMeeting._id }</div><br />
-                  <div>Deployer contract: { this.props.cachedMeeting.data.deployerContractAddress }</div><br />
+                  <div>Name: { cachedMeeting.data.name }</div>
+                  <div>Stake: { cachedMeeting.data.stake }</div>
+                  <div>Max participants: { cachedMeeting.data.maxParticipants }</div>
+                  <div>Start time: { new Date(cachedMeeting.data.startDateTime * 1000).toUTCString() }</div>
+                  <div>End time: { new Date(cachedMeeting.data.endDateTime * 1000).toUTCString() }</div>
+                  <div>Location: { cachedMeeting.data.location }</div>
+                  <div>Description: { cachedMeeting.data.description }</div>
+                  <div>Organizer address: { cachedMeeting.data.organizerAddress }</div>
+                  
+                  {
+                      this.props.loading.meetingDeployment
+                      ? (
+                        <div>Meeting tx: { cachedMeeting._id } <CircularProgress /></div>
+                      )
+                      : (
+                        // display contract address
+                        <div>Meeting contract: { cachedMeeting._id }</div>
+                      )
+                  }
+
+                  <div>Deployer contract: { cachedMeeting.data.deployerContractAddress }</div>
                 
-
-
                   <Container maxWidth={ false }>
                     <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={ 2 }>
                       <Grid container spacing={ 2 }>
@@ -305,20 +317,20 @@ export class MeetingView extends React.Component<IProps> {
                         </Grid>
 
 
-                              <Grid item xs={ 12 }>
-                                <Button disabled={ false } onClick={ this.handleCancelEvent } variant="outlined" color="primary">
-                                  CANCEL EVENT
-                                </Button>
-                                <Button disabled={ false } onClick={ this.handleStart } variant="outlined" color="primary">
-                                  START EVENT
-                                </Button>
-                                <Button disabled={ false } onClick={ this.handleEnd } variant="outlined" color="primary">
-                                  END EVENT
-                                </Button>
-                                <Button disabled={ false } onClick={ this.handleNextMeeting } variant="outlined" color="primary">
-                                  NEXT MEETING
-                                </Button>
-                              </Grid>
+                        <Grid item xs={ 12 }>
+                          <Button disabled={ false } onClick={ this.handleCancelEvent } variant="outlined" color="primary">
+                            CANCEL EVENT
+                          </Button>
+                          <Button disabled={ false } onClick={ this.handleStart } variant="outlined" color="primary">
+                            START EVENT
+                          </Button>
+                          <Button disabled={ false } onClick={ this.handleEnd } variant="outlined" color="primary">
+                            END EVENT
+                          </Button>
+                          <Button disabled={ false } onClick={ this.handleNextMeeting } variant="outlined" color="primary">
+                            NEXT MEETING
+                          </Button>
+                        </Grid>
 
                       </Grid>
                     </Grid>

@@ -13,9 +13,6 @@ export interface User {
   type: string,
   //data: {};
 
-  //parent: string,  // referree
-  //child: string,  // referrals
-
   // list of meeting wallets (smart contract address) linked to this user profile per status
   cancel: ReadonlyArray<string>,
   rsvp: ReadonlyArray<string>,

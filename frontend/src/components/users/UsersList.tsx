@@ -1,9 +1,12 @@
 import React from 'react';
-import { Button, Grid } from '@material-ui/core';
+import { Button, CircularProgress, Grid } from '@material-ui/core';
 import { Meeting } from '../../store/meetings/actions';
+import { Loading } from '../../store/loading/actions';
 
 interface IProps {
-    cachedMeeting: Meeting
+    cachedMeeting: Meeting,
+    userWallet: string,
+    loading: Loading
 }
 
 export class UsersList extends React.Component<IProps> {
@@ -17,13 +20,22 @@ export class UsersList extends React.Component<IProps> {
 
                 {
                     this.props.cachedMeeting.rsvp
-                        .map((ethereumAddress) => {
+                        .map((participantWallet) => {
                             return (
-                                <Grid item key={ ethereumAddress } xs={ 12 }>
-                                    { ethereumAddress }
-                                    <Button disabled={ false } type="submit" variant="outlined" color="primary">
-                                        MARK ATTENDANCE
-                                    </Button>
+                                <Grid item key={ participantWallet } xs={ 12 }>
+                                    { participantWallet }
+
+                                    {
+                                        participantWallet === this.props.userWallet && this.props.loading.rsvpConfirmation &&
+                                            <CircularProgress />
+                                    }
+
+                                    {
+                                        this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
+                                        <Button disabled={ false } type="submit" variant="outlined" color="primary">
+                                            MARK ATTENDANCE
+                                        </Button>
+                                    }
                                 </Grid>
                             );
                         })

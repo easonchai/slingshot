@@ -2,7 +2,9 @@ import axios from 'axios';
 import { Dispatch } from 'react';
 import { compose, Action } from 'redux';
 import { connect } from 'react-redux';
+import { History } from 'history';
 import { actions as meetingActions, Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
+import { actions as loadingActions } from '../../store/loading/actions';
 import { actions as userActions, User } from '../../store/users/actions';
 import { IAppState } from '../../store/index';
 import { MeetingAdd as Component } from '../../components/meetings/MeetingAdd';
@@ -17,15 +19,24 @@ const mapStateToProps = (state: IAppState) => {
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
     dispatchCreateFirstMeeting: (payload: Meeting) => {
+        dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
+
         axios
           .post('/api/meeting/create', payload)
-          .then(res => dispatch(meetingActions.CreateFirstMeeting(payload)));
+          .then(res => {
+            dispatch(meetingActions.CreateFirstMeeting(payload));
+          });
     },
 
-    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress) => {
+    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress, history: History) => {
         axios
           .put('/api/meeting/update', payload)
-          .then(res => dispatch(meetingActions.UpdateMeetingContractAddress(payload)));
+          .then(res => {
+            dispatch(meetingActions.UpdateMeetingContractAddress(payload));
+            dispatch(loadingActions.UpdateMeetingDeploymentLoading(false));
+
+            history.push('/meeting/' + payload.meetingAddress);
+          });
     },
 
     dispatchUpdateUserEthereumAddress: (payload: User) => {
