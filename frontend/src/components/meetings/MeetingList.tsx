@@ -24,7 +24,7 @@ export class MeetingList extends React.Component<IProps> {
           {
             !isEnded &&
               <Grid item xs={ 6 }>
-                <Link style={ { textDecoration: 'none' } } to='/meetings/create'>
+                <Link style={ { textDecoration: 'none' } } to='/meeting/create'>
                   <Card raised={ true } className="meeting-create">
                     <CardContent>
                       <CardActions>
@@ -48,8 +48,8 @@ export class MeetingList extends React.Component<IProps> {
               (
                 meetings.map((meeting) => {
                   return (
-                    <Grid key={ meeting.txHash } item xs={ 6 }>
-                      <MeetingPreview key={ meeting.txHash } meeting={ meeting } />
+                    <Grid key={ meeting._id } item xs={ 6 }>
+                      <MeetingPreview key={ meeting._id } meeting={ meeting } />
                     </Grid>
                   );
                 })

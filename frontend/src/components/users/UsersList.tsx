@@ -16,7 +16,7 @@ export class UsersList extends React.Component<IProps> {
                 </Grid>
 
                 {
-                    this.props.cachedMeeting.users
+                    this.props.cachedMeeting.rsvp
                         .map((ethereumAddress) => {
                             return (
                                 <Grid item key={ ethereumAddress } xs={ 12 }>

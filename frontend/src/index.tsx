@@ -13,14 +13,10 @@ ReactDOM.render(
   <Provider store={ store }>
     <BrowserRouter>
       <Switch>
-        <Route path='/meetings/create' component={ MeetingAdd } />
+        <Route path='/meeting/create' component={ MeetingAdd } />
         <Route
-          path='/meetings/hash/:hash'
+          path='/meeting/:id'
           render={ (props) => <MeetingView { ...props } isContractAddress={ false } /> }
-        />
-        <Route
-          path='/meetings/contract/:address'
-          render={ (props) => <MeetingView { ...props } isContractAddress={ true } /> }
         />
         <Route path='/' component={ App } />
       </Switch>

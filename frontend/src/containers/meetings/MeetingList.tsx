@@ -7,7 +7,7 @@ const mapStateToProps = (state: IAppState, props: { isEnded: boolean }) => {
   return {
       meetings: 
           state.meetingsReducer.meetings.filter((meeting) => {
-            return meeting.isEnded === props.isEnded;
+            return meeting.data.isEnded === props.isEnded;
           })
   };
 };

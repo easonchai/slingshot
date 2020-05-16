@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, Meeting } from './actions';
+import { actions, Meeting, ModelType } from './actions';
 import { actions as userActions } from '../users/actions';
 
 export interface IState {
@@ -11,25 +11,41 @@ export interface IState {
 const initState: IState = {
   meetings: [],
   cachedMeeting: {
-    txHash: '',
-    meetingAddress: '',
-    name: '',
-    location: '',
-    description: '',
-    users: [],
-    startDateTime: 0,
-    endDateTime: 0,
-    stake: 0.0,
-    maxParticipants: 0,
-    registered: 0,
-    prevStake: 0,
-    payout: 0,
-    attendanceCount: 0,
-    isCancelled: false,
-    isStarted: false,
-    isEnded: false,
-    deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',
-    organizerAddress: ''
+    _id: '',
+    type: ModelType.PENDING,
+    
+    data: {
+      // BACKEND
+      //txHash: string;  // only used as primary key for pending TX's
+      //meetingAddress: string;  // id is replaced by contract address as primary key once TX is mined
+      name: '',
+      location: '',
+      description: '',
+  
+      // SOLIDITY
+      startDateTime: 0,
+      endDateTime: 0,
+      stake: 0.0,
+      maxParticipants: 0,
+      //registered: number,  // redundant -> rsvp.length + attend.length + withdraw.length
+      prevStake: 0,
+      payout: 0,
+      //attendanceCount: number,  // redundant -> attend.length + withdraw.length
+      isCancelled: false,
+      isStarted: false,
+      isEnded: false,
+      deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',
+      organizerAddress: '',
+    },
+  
+    parent: '',  // prev meeting
+    child: '',  // next meeting
+  
+    // list of user wallets (ethereum address) linked to this meeting per status
+    cancel: [],
+    rsvp: [],
+    attend: [],
+    withdraw: []
   }
 };
 
@@ -57,11 +73,12 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   }
 
   if (isType(action, actions.UpdateMeetingContractAddress)) {
+    // TODO: verify whether we need to update spread the data field
     const updatedMeetings = state.meetings.map((meeting) => {
-      if (meeting.txHash === action.payload.txHash) {
+      if (meeting._id === action.payload.txHash) {
         return {
           ...meeting,
-          meetingAddress: action.payload.meetingAddress
+          _id: action.payload.meetingAddress
         };
       }
 
@@ -73,20 +90,21 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        meetingAddress: action.payload.meetingAddress
+        _id: action.payload.meetingAddress
       }
     };
   }
   
-  if(isType(action, actions.UpdateMeetingRSVPList)) {
+  if(isType(action, actions.UpdateRSVPList)) {
     // TODO: update the entry in overall meetings array too.
+    // TODO: verify whether we need to update spread the data field
     return {
       ...state,
       cachedMeeting: {
         ...state.cachedMeeting,
-        users: [
-          ...state.cachedMeeting.users,
-          action.payload
+        rsvp: [
+          ...state.cachedMeeting.rsvp,
+          action.payload.userAddress
         ]
       }
     };
@@ -97,7 +115,10 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       cachedMeeting: {
         ...state.cachedMeeting,
-        organizerAddress: action.payload.ethereumAddress
+        data: {
+          ...state.cachedMeeting.data,
+          organizerAddress: action.payload._id
+        }
       }
     }
   }

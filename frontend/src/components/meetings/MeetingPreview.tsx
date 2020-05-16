@@ -9,14 +9,8 @@ export interface IProps {
 
 export class MeetingPreview extends React.Component<IProps> {
   render() {
-    const title = this.props.meeting.name + ' ( ' + this.props.meeting.stake + ' ETH )';
-    
-    let url = '/meetings/';
-    if (this.props.meeting.meetingAddress) {
-      url += 'contract/' + this.props.meeting.meetingAddress;
-    } else {
-      url += 'hash/' + this.props.meeting.txHash;
-    }
+    const url = '/meeting/' + this.props.meeting._id;
+    const title = this.props.meeting.data.name + ' ( ' + this.props.meeting.data.stake + ' ETH )';
 
     return (
       <Link style={ { textDecoration: 'none' } } to={ url }>
@@ -24,10 +18,10 @@ export class MeetingPreview extends React.Component<IProps> {
           <CardHeader title={ title } />
           <CardContent>
             <p>
-              Max participants: { this.props.meeting.maxParticipants }
+              Max participants: { this.props.meeting.data.maxParticipants }
             </p>
             <p>
-              { this.props.meeting.description }
+              { this.props.meeting.data.description }
             </p>
           </CardContent>
         </Card>

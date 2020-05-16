@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
-import { Models } from '../models'
+import { Models } from '../models';
+import { ModelType } from '../models/Item';
 
 const router = Router();
 
@@ -9,8 +10,8 @@ const router = Router();
  ******************************************************************************/
 
 router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
-    Models.User
-        .find()
+    Models.Item
+        .find({ type: ModelType.USER })
         .then(document => {
             res
                 .status(OK)
@@ -20,7 +21,7 @@ router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 router.post('/create', async (req: Request, res: Response, next: NextFunction) => {
-    Models.User
+    Models.Item
         .create(req.body)
         .then(document => {
             res

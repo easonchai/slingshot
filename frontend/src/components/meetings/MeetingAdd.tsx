@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
-import { Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
+import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
 import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip } from '@material-ui/core';
@@ -64,8 +64,15 @@ export class MeetingAdd extends React.Component<IProps, IState> {
   componentDidMount() {
 	this.etherService.requestConnection()
       .then((account: string) => {
-		const payload = { ethereumAddress: account };
-		this.props.dispatchUpdateUserEthereumAddress(payload);
+		const user = {
+			_id: account,
+			type: ModelType.USER,
+			cancel: [],
+			rsvp: [],
+			attend: [],
+			withdraw: []
+		};
+		this.props.dispatchUpdateUserEthereumAddress(user);
       }, (reason: string) => {
 		console.log('Rejection:', reason);
 		// TODO notify user
@@ -119,28 +126,33 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				console.log("success deploy ", res);
 
 				this.props.dispatchCreateFirstMeeting({
-					txHash: res.hash,
-					meetingAddress: '',
-					name: event.target.meetingName.value,
-					location: event.target.location.value,
-					description: event.target.description.value,
-					users: [],
-					startDateTime: startDateTime,
-					endDateTime: endDateTime,
-					stake: parseFloat(event.target.stake.value),
-					maxParticipants: parseInt(event.target.maxParticipants.value),
-					registered: 0,
-					prevStake: 0,
-					payout: 0,
-					attendanceCount: 0,
-					isCancelled: false,
-					isStarted: false,
-					isEnded: false,
-					deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
-					organizerAddress: this.props.user.ethereumAddress
+					_id: res.hash,
+					type: ModelType.PENDING,
+					data: {
+					  name: event.target.meetingName.value,
+					  location: event.target.location.value,
+					  description: event.target.description.value,
+					  startDateTime: startDateTime,
+					  endDateTime: endDateTime,
+					  stake: parseFloat(event.target.stake.value),
+					  maxParticipants: parseInt(event.target.maxParticipants.value),
+					  prevStake: 0,
+					  payout: 0,
+					  isCancelled: false,
+					  isStarted: false,
+					  isEnded: false,
+					  deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+					  organizerAddress: this.props.user._id,
+					},
+					parent: '',
+					child: '',
+					cancel: [],
+					rsvp: [],
+					attend: [],
+					withdraw: []
 				});
 
-				this.props.history.push('/meetings/hash/' + res.hash);
+				this.props.history.push('/meeting/' + res.hash);
 			}, (reason: any) => {
 				console.log("reason deploy ", reason);
 				// TODO notify user
@@ -244,9 +256,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										CANCEL
 									</Button>
 								</Link>
-								<Tooltip title={ this.props.user.ethereumAddress === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
+								<Tooltip title={ this.props.user._id === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
 									<span>
-										<Button disabled={ this.props.user.ethereumAddress === '' } type="submit" variant="outlined" color="primary">
+										<Button disabled={ this.props.user._id === '' } type="submit" variant="outlined" color="primary">
 											CREATE MEETING
 										</Button>
 									</span>

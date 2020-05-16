@@ -9,13 +9,11 @@ import HomeIcon from '@material-ui/icons/Home';
 import { Button, Container, Grid } from '@material-ui/core';
 
 export interface IProps {
-  txHash: String;
-  contractAddress: String;
+  id: String;
   user: User;
   cachedMeeting: Meeting;
   loading: Loading;
-  dispatchGetCachedMeetingByTx(txHash: String): void;
-  dispatchGetCachedMeetingByContractAddress(txHash: String): void;
+  dispatchGetCachedMeetingById(id: String): void;
   dispatchUpdateRSVP(meetingAddress: String, user: User): Array<User>;
 }
 
@@ -29,11 +27,7 @@ export class MeetingView extends React.Component<IProps> {
   }
   
   componentWillMount() {
-    if (this.props.contractAddress) {
-      this.props.dispatchGetCachedMeetingByContractAddress(this.props.contractAddress);
-    } else if (this.props.txHash) {
-      this.props.dispatchGetCachedMeetingByTx(this.props.txHash);
-    }
+      this.props.dispatchGetCachedMeetingById(this.props.id);
   }
 
   componentDidMount() {
@@ -62,14 +56,14 @@ export class MeetingView extends React.Component<IProps> {
      * Otherwise retrieve it from the known txHash (and persist in DB).
      */
     this.etherService.rsvp(
-      this.props.cachedMeeting.meetingAddress,
-      this.props.cachedMeeting.stake,
+      this.props.cachedMeeting._id,
+      this.props.cachedMeeting.data.stake,
       this.callbackFn
     )
     .then((res: any) => {
       console.log("success rsvp ", res);
       // TODO: add loading animation while we wait for callback / TX to be mined
-      this.props.dispatchUpdateRSVP(this.props.cachedMeeting.meetingAddress, this.props.user);
+      this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user);
     }, (reason: any) => {
       console.log("reason rsvp ", reason);
       // TODO notify user
@@ -87,7 +81,7 @@ export class MeetingView extends React.Component<IProps> {
       // TODO: get user address
       
       this.etherService.getChange(
-        this.props.cachedMeeting.meetingAddress,
+        this.props.cachedMeeting._id,
         this.callbackFn
       )
       .then((res: any) => {
@@ -113,7 +107,7 @@ export class MeetingView extends React.Component<IProps> {
       // TODO: get user address
       
       this.etherService.eventCancel(
-        this.props.cachedMeeting.meetingAddress,
+        this.props.cachedMeeting._id,
         this.callbackFn
       )
       .then((res: any) => {
@@ -134,7 +128,7 @@ export class MeetingView extends React.Component<IProps> {
 
   handleCancelRSVP = (event: any) => {
     this.etherService.guyCancel(
-      this.props.cachedMeeting.meetingAddress,
+      this.props.cachedMeeting._id,
       this.callbackFn
     )
     .then((res: any) => {
@@ -157,7 +151,7 @@ export class MeetingView extends React.Component<IProps> {
       // TODO: get user address
       
       this.etherService.startEvent(
-        this.props.cachedMeeting.meetingAddress,
+        this.props.cachedMeeting._id,
         this.callbackFn
       )
       .then((res: any) => {
@@ -183,7 +177,7 @@ export class MeetingView extends React.Component<IProps> {
       // TODO: get user address
       
       this.etherService.endEvent(
-        this.props.cachedMeeting.meetingAddress,
+        this.props.cachedMeeting._id,
         this.callbackFn
       )
       .then((res: any) => {
@@ -209,7 +203,7 @@ export class MeetingView extends React.Component<IProps> {
       // TODO: get user address
       
       this.etherService.withdraw(
-        this.props.cachedMeeting.meetingAddress,
+        this.props.cachedMeeting._id,
         this.callbackFn
       )
       .then((res: any) => {
@@ -235,11 +229,11 @@ export class MeetingView extends React.Component<IProps> {
       // TODO: get user address
       
       this.etherService.nextMeeting(
-        this.props.cachedMeeting.meetingAddress,
-        this.props.cachedMeeting.startDateTime,
-        this.props.cachedMeeting.endDateTime,
-        this.props.cachedMeeting.stake,
-        this.props.cachedMeeting.maxParticipants,
+        this.props.cachedMeeting._id,
+        this.props.cachedMeeting.data.startDateTime,
+        this.props.cachedMeeting.data.endDateTime,
+        this.props.cachedMeeting.data.stake,
+        this.props.cachedMeeting.data.maxParticipants,
         this.callbackFn
       )
       .then((res: any) => {
@@ -270,16 +264,16 @@ export class MeetingView extends React.Component<IProps> {
               )
               : (
                 <div>
-                  <div>Name: { this.props.cachedMeeting.name }</div><br />
-                  <div>Stake: {this.props.cachedMeeting.stake}</div><br />
-                  <div>Max participants: {this.props.cachedMeeting.maxParticipants}</div><br />
-                  <div>Start time: { new Date(this.props.cachedMeeting.startDateTime * 1000).toUTCString() }</div><br />
-                  <div>End time: { new Date(this.props.cachedMeeting.endDateTime * 1000).toUTCString() }</div><br />
-                  <div>Location: { this.props.cachedMeeting.location }</div><br />
-                  <div>Description: { this.props.cachedMeeting.description }</div><br />
-                  <div>Organizer address: { this.props.cachedMeeting.organizerAddress }</div><br />
-                  <div>Meeting contract: { this.props.cachedMeeting.meetingAddress }</div><br />
-                  <div>Deployer contract: { this.props.cachedMeeting.deployerContractAddress }</div><br />
+                  <div>Name: { this.props.cachedMeeting.data.name }</div><br />
+                  <div>Stake: {this.props.cachedMeeting.data.stake}</div><br />
+                  <div>Max participants: {this.props.cachedMeeting.data.maxParticipants}</div><br />
+                  <div>Start time: { new Date(this.props.cachedMeeting.data.startDateTime * 1000).toUTCString() }</div><br />
+                  <div>End time: { new Date(this.props.cachedMeeting.data.endDateTime * 1000).toUTCString() }</div><br />
+                  <div>Location: { this.props.cachedMeeting.data.location }</div><br />
+                  <div>Description: { this.props.cachedMeeting.data.description }</div><br />
+                  <div>Organizer address: { this.props.cachedMeeting.data.organizerAddress }</div><br />
+                  <div>Meeting contract: { this.props.cachedMeeting._id }</div><br />
+                  <div>Deployer contract: { this.props.cachedMeeting.data.deployerContractAddress }</div><br />
                 
 
 
