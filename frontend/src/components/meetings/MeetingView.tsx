@@ -4,6 +4,8 @@ import { Meeting } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
+import { NotificationList } from '../../containers/notifications/NotificationList';
+import { Notification } from '../../store/notifications/actions';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
 import { Button, CircularProgress, Container, Grid } from '@material-ui/core';
@@ -21,6 +23,8 @@ export interface IProps {
 
   dispatchUpdateRsvpConfirmationLoading(status: Boolean): void;
   dispatchUpdateRsvpCancellationConfirmationLoading(status: Boolean): void;
+
+  dispatchAddNotification(notification: Notification): void;
 }
 
 export class MeetingView extends React.Component<IProps> {
@@ -42,6 +46,36 @@ export class MeetingView extends React.Component<IProps> {
   }
 
   componentDidMount() {
+    const notification1: Notification = {
+      message: 'Hello1',
+      variant: 'filled',
+      severity: 'error',
+      display: true
+    };
+    const notification2: Notification = {
+      message: 'Hello2',
+      variant: 'filled',
+      severity: 'error',
+      display: true
+    };
+    const notification3: Notification = {
+      message: 'Hello3',
+      variant: 'filled',
+      severity: 'error',
+      display: true
+    };
+    const notification4: Notification = {
+      message: 'Hello4',
+      variant: 'filled',
+      severity: 'error',
+      display: true
+    };
+
+    this.props.dispatchAddNotification(notification1);
+    this.props.dispatchAddNotification(notification2);
+    this.props.dispatchAddNotification(notification3);
+    this.props.dispatchAddNotification(notification4);
+
     // TODO: refactor
     this.etherService
       .requestConnection()
@@ -93,7 +127,7 @@ export class MeetingView extends React.Component<IProps> {
 				console.log("success get change ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
 			}, (reason: any) => {
-				console.log("reason get change ", reason);
+        console.log("reason get change ", reason);
 				// TODO notify user
 			})
 			.catch((err: any) => {
@@ -261,6 +295,7 @@ export class MeetingView extends React.Component<IProps> {
 
     return (
       <div>
+          <NotificationList />
           {
             this.props.loading.cachedMeeting && cachedMeeting
               ? (

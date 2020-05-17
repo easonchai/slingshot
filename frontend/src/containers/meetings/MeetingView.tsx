@@ -4,6 +4,7 @@ import { Action, compose } from 'redux';
 import { connect } from 'react-redux';
 import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
+import { actions as notificationActions, Notification } from '../../store/notifications/actions';
 import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
 import { actions as userActions, User } from '../../store/users/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
@@ -75,6 +76,10 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
 
     dispatchUpdateRsvpCancellationConfirmationLoading: (status: boolean) => {
       dispatch(loadingActions.UpdateRsvpCancellationConfirmationLoading(status));
+    },
+
+    dispatchAddNotification: (notification: Notification) => {
+      dispatch(notificationActions.AddNotification(notification));
     }
     
   };
