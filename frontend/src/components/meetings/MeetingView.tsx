@@ -25,6 +25,13 @@ export interface IProps {
   dispatchUpdateRsvpConfirmationLoading(status: Boolean): void;
   dispatchUpdateRsvpCancellationConfirmationLoading(status: Boolean): void;
 
+  dispatchUpdateHandleStartMeetingConfirmationLoading(status: Boolean): void;
+  dispatchUpdateHandleStartMeeting(meetingAddress: String): void;
+  dispatchUpdateHandleEndMeeting(meetingAddress: string): void;
+  dispatchUpdateHandleEndMeetingConfirmationLoading(status: boolean): void;
+  dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
+  dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
+
   dispatchAddErrorNotification(message: String): void;
 }
 
@@ -99,11 +106,10 @@ export class MeetingView extends React.Component<IProps> {
   handleCancelEvent = (event: any) => {
     this.etherService.eventCancel(
       this.props.cachedMeeting._id,
-      this.callbackFn
+      confirmation => this.props.dispatchUpdateHandleCancelMeetingConfirmationLoading(false)
     )
     .then((res: any) => {
-      console.log("success cancel event ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
+      this.props.dispatchUpdateHandleCancelMeeting(this.props.cachedMeeting._id);
     }, (reason: any) => {
       this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
     })
@@ -130,11 +136,10 @@ export class MeetingView extends React.Component<IProps> {
   handleStart = (event: any) => {
     this.etherService.startEvent(
       this.props.cachedMeeting._id,
-      this.callbackFn
+      confirmation => this.props.dispatchUpdateHandleStartMeetingConfirmationLoading(false)
     )
     .then((res: any) => {
-      console.log("success start event ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
+      this.props.dispatchUpdateHandleStartMeeting(this.props.cachedMeeting._id);
     }, (reason: any) => {
       this.props.dispatchAddErrorNotification('handleStart: ' + reason);
     })
@@ -146,11 +151,10 @@ export class MeetingView extends React.Component<IProps> {
   handleEnd = (event: any) => {
     this.etherService.endEvent(
       this.props.cachedMeeting._id,
-      this.callbackFn
+      confirmation => this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false)
     )
     .then((res: any) => {
-      console.log("success endEvent ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
+      this.props.dispatchUpdateHandleEndMeeting(this.props.cachedMeeting._id);
     }, (reason: any) => {
       this.props.dispatchAddErrorNotification('handleEnd: ' + reason);
     })
@@ -209,6 +213,9 @@ export class MeetingView extends React.Component<IProps> {
               : (
                 <div>
                   <div>Name: { cachedMeeting.data.name }</div>
+                  <div>Is cancelled: { String(cachedMeeting.data.isCancelled) }</div>
+                  <div>Is started: { String(cachedMeeting.data.isStarted) }</div>
+                  <div>Is ended: { String(cachedMeeting.data.isEnded) }</div>
                   <div>Stake: { cachedMeeting.data.stake }</div>
                   <div>Max participants: { cachedMeeting.data.maxParticipants }</div>
                   <div>Start time: { new Date(cachedMeeting.data.startDateTime * 1000).toUTCString() }</div>

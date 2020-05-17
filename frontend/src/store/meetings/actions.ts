@@ -64,6 +64,9 @@ export const ReadCachedMeeting = actionCreator<Meeting>(AppActions.READ_CACHED_M
 export const UpdateMeetingContractAddress = actionCreator<GroupHashAndAddress>(AppActions.UPDATE_MEETING_CONTRACT_ADDRESS);
 export const UpdateRSVPList = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_MEETING_RSVP_LIST);
 export const UpdateRSVPListCancellation = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_MEETING_RSVP_LIST_CANCELLATION);
+export const UpdateStartMeeting = actionCreator<string>(AppActions.UPDATE_START_MEETING);
+export const UpdateEndMeeting = actionCreator<string>(AppActions.UPDATE_END_MEETING);
+export const UpdateCancelMeeting = actionCreator<string>(AppActions.UPDATE_CANCEL_MEETING);
 
 export const actions = {
   CreateFirstMeeting,
@@ -71,5 +74,8 @@ export const actions = {
   ReadCachedMeeting,
   UpdateMeetingContractAddress,
   UpdateRSVPList,
-  UpdateRSVPListCancellation
+  UpdateRSVPListCancellation,
+  UpdateStartMeeting,
+  UpdateEndMeeting,
+  UpdateCancelMeeting
 };

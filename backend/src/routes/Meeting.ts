@@ -2,7 +2,6 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Models } from '../models';
 import { ModelType } from '../models/Item';
-import { Model } from 'mongoose';
 
 const router = Router();
 
@@ -173,6 +172,72 @@ router.put('/rsvp/cancel', async (req: Request, res: Response, next: NextFunctio
                         .json(meeting);
                 })
                 .catch(err => next(err));
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Update status of the meeting (isStarted).
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/start', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            { $set: { 'data.isStarted': true } },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Update status of the meeting (isEnded).
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/end', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            { $set: { 'data.isEnded': true } },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Update status of the meeting (isCancelled).
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/cancel', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            { $set: { 'data.isCancelled': true } },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
         })
         .catch(err => next(err));
 });

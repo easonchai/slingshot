@@ -8,6 +8,9 @@ const initState: IState = {
     meetingDeployment: false,
     rsvpConfirmation: false,
     rsvpCancellationConfirmation: false,
+    startMeetingConfirmation: false,
+    endMeetingConfirmation: false,
+    cancelMeetingConfirmation: false,
   }
 };
 
@@ -52,6 +55,36 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       loading: {
         ...state.loading,
         rsvpCancellationConfirmation: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateStartMeetingConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        startMeetingConfirmation: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateEndMeetingConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        endMeetingConfirmation: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateCancelMeetingConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        cancelMeetingConfirmation: action.payload
       }
     };
   }

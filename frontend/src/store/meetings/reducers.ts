@@ -135,5 +135,44 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     }
   }
 
+  if(isType(action, actions.UpdateStartMeeting)) {
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          isStarted: true
+        }
+      }
+    };
+  }
+
+  if(isType(action, actions.UpdateEndMeeting)) {
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          isEnded: true
+        }
+      }
+    };
+  }
+
+  if(isType(action, actions.UpdateCancelMeeting)) {
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          isCancelled: true
+        }
+      }
+    };
+  }
+
   return state;
 }

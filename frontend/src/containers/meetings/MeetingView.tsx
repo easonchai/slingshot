@@ -101,8 +101,62 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       };
 
       dispatch(notificationActions.AddNotification(notification));
-    }
-    
+    },
+
+    dispatchUpdateHandleStartMeeting: (meetingAddress: string) => {
+      dispatch(loadingActions.UpdateStartMeetingConfirmationLoading(true));
+
+      const payload = {
+        meetingAddress: meetingAddress,
+      };
+
+      axios
+        .put('/api/meeting/start', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateStartMeeting(meetingAddress));
+        });
+    },
+
+    dispatchUpdateHandleStartMeetingConfirmationLoading: (status: boolean) => {
+      dispatch(loadingActions.UpdateStartMeetingConfirmationLoading(status));
+    },
+
+    dispatchUpdateHandleEndMeeting: (meetingAddress: string) => {
+      dispatch(loadingActions.UpdateEndMeetingConfirmationLoading(true));
+
+      const payload = {
+        meetingAddress: meetingAddress,
+      };
+
+      axios
+        .put('/api/meeting/end', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateEndMeeting(meetingAddress));
+        });
+    },
+
+    dispatchUpdateHandleEndMeetingConfirmationLoading: (status: boolean) => {
+      dispatch(loadingActions.UpdateEndMeetingConfirmationLoading(status));
+    },
+
+    dispatchUpdateHandleCancelMeeting: (meetingAddress: string) => {
+      dispatch(loadingActions.UpdateCancelMeetingConfirmationLoading(true));
+
+      const payload = {
+        meetingAddress: meetingAddress,
+      };
+
+      axios
+        .put('/api/meeting/cancel', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateCancelMeeting(meetingAddress));
+        });
+    },
+
+    dispatchUpdateHandleCancelMeetingConfirmationLoading: (status: boolean) => {
+      dispatch(loadingActions.UpdateCancelMeetingConfirmationLoading(status));
+    },
+
   };
 };
 
