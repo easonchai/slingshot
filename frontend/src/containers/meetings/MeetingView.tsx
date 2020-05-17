@@ -6,7 +6,7 @@ import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
 import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
-import { actions as userActions, User } from '../../store/users/actions';
+import { actions as userActions, User, ModelType } from '../../store/users/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
 
 const mapStateToProps = (state: IAppState, props: any) => {
@@ -36,7 +36,17 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
      * TODO: refactor duplicate function.
      * See containers/MeetingAdd.tsx
      */
-    dispatchUpdateUserEthereumAddress: (payload: User) => {
+    dispatchUpdateUserEthereumAddress: (userAddress: string) => {
+      // TODO: retrieve full user data from backend
+      const payload: User = {
+        _id: userAddress,
+        type: ModelType.USER,
+        cancel: [],
+        rsvp: [],
+        attend: [],
+        withdraw: []
+      };
+
       dispatch(userActions.UpdateUserEthereumAddress(payload));
     },
     
@@ -79,6 +89,17 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
     },
 
     dispatchAddNotification: (notification: Notification) => {
+      dispatch(notificationActions.AddNotification(notification));
+    },
+
+    dispatchAddErrorNotification: (message: string) => {
+      const notification: Notification = {
+        message: message,
+        variant: 'filled',
+        severity: 'error',
+        display: true
+      };
+
       dispatch(notificationActions.AddNotification(notification));
     }
     

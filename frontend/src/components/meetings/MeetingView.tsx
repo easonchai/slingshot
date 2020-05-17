@@ -5,7 +5,6 @@ import { User } from '../../store/users/actions';
 import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import { NotificationList } from '../../containers/notifications/NotificationList';
-import { Notification } from '../../store/notifications/actions';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
 import { Button, CircularProgress, Container, Grid } from '@material-ui/core';
@@ -18,13 +17,15 @@ export interface IProps {
   
   dispatchGetCachedMeetingById(id: String): void;
 
+  dispatchUpdateUserEthereumAddress(userAddress: String): void;
+
   dispatchUpdateRSVP(meetingAddress: String, userAddress: String): Array<User>;
   dispatchUpdateRsvpCancellation(meetingAddress: String, userAddress: String): void;
 
   dispatchUpdateRsvpConfirmationLoading(status: Boolean): void;
   dispatchUpdateRsvpCancellationConfirmationLoading(status: Boolean): void;
 
-  dispatchAddNotification(notification: Notification): void;
+  dispatchAddErrorNotification(message: String): void;
 }
 
 export class MeetingView extends React.Component<IProps> {
@@ -46,48 +47,16 @@ export class MeetingView extends React.Component<IProps> {
   }
 
   componentDidMount() {
-    const notification1: Notification = {
-      message: 'Hello1',
-      variant: 'filled',
-      severity: 'error',
-      display: true
-    };
-    const notification2: Notification = {
-      message: 'Hello2',
-      variant: 'filled',
-      severity: 'error',
-      display: true
-    };
-    const notification3: Notification = {
-      message: 'Hello3',
-      variant: 'filled',
-      severity: 'error',
-      display: true
-    };
-    const notification4: Notification = {
-      message: 'Hello4',
-      variant: 'filled',
-      severity: 'error',
-      display: true
-    };
-
-    this.props.dispatchAddNotification(notification1);
-    this.props.dispatchAddNotification(notification2);
-    this.props.dispatchAddNotification(notification3);
-    this.props.dispatchAddNotification(notification4);
-
-    // TODO: refactor
+    // TODO: refactor (bring up to a higher component)
     this.etherService
       .requestConnection()
-      .then((res: any) => {
-        console.log(res);
-        // TODO: update user
-        // this.props.user = res;
+      .then((account: string) => {
+        this.props.dispatchUpdateUserEthereumAddress(account);
       }, (reason: any) => {
-        console.log(reason);
+        this.props.dispatchAddErrorNotification('MetaMask authorization: ' + reason);
       })
       .catch((err: any) => {
-        console.log(err);
+        this.props.dispatchAddErrorNotification('MetaMask authorization: ' + err);
       })
   }
 
@@ -104,65 +73,43 @@ export class MeetingView extends React.Component<IProps> {
     .then((res: any) => {
       this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
     }, (reason: any) => {
-      console.log("reason rsvp ", reason);
-      // TODO notify user
+      this.props.dispatchAddErrorNotification('handleRSVP: ' + reason);
     })
     .catch((err: any) => {
-      console.log("error rsvp ", err);
-      // TODO notify user
+      this.props.dispatchAddErrorNotification('handleRSVP: ' + err);
     });
   }
 
   handleGetChange = (event: any) => {
-    console.log(event);
-
-    if (this.props.cachedMeeting) {
-      // TODO: get user address
-      
-      this.etherService.getChange(
-        this.props.cachedMeeting._id,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success get change ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-        console.log("reason get change ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error get change ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.getChange(
+      this.props.cachedMeeting._id,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success get change ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleGetChange: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleGetChange: ' + err);
+    });
   }
 
   handleCancelEvent = (event: any) => {
-    console.log(event);
-
-    if (this.props.cachedMeeting) {
-      // TODO: get user address
-      
-      this.etherService.eventCancel(
-        this.props.cachedMeeting._id,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success cancel event ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-				console.log("reason cancel event ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error cancel event ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.eventCancel(
+      this.props.cachedMeeting._id,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success cancel event ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleCancelEvent: ' + err);
+    });
   }
 
   handleCancelRSVP = (event: any) => {
@@ -173,121 +120,79 @@ export class MeetingView extends React.Component<IProps> {
     .then((res: any) => {
       this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
     }, (reason: any) => {
-      console.log("reason cancel rsvp ", reason);
-      // TODO notify user
+      this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + reason);
     })
     .catch((err: any) => {
-      console.log("error cancel rsvp ", err);
-      // TODO notify user
+      this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + err);
     });
   }
 
   handleStart = (event: any) => {
-    console.log(event);
-
-    if (this.props.cachedMeeting) {
-      // TODO: get user address
-      
-      this.etherService.startEvent(
-        this.props.cachedMeeting._id,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success start event ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-				console.log("reason start event ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error start event ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.startEvent(
+      this.props.cachedMeeting._id,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success start event ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleStart: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleStart: ' + err);
+    });
   }
   
   handleEnd = (event: any) => {
-    console.log(event);
-
-    if (this.props.cachedMeeting) {
-      // TODO: get user address
-      
-      this.etherService.endEvent(
-        this.props.cachedMeeting._id,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success endEvent ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-				console.log("reason endEvent ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error endEvent ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.endEvent(
+      this.props.cachedMeeting._id,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success endEvent ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleEnd: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleEnd: ' + err);
+    });
   }
 
   handleWithdraw = (event: any) => {
-    console.log(event);
-
-    if (this.props.cachedMeeting) {
-      // TODO: get user address
-      
-      this.etherService.withdraw(
-        this.props.cachedMeeting._id,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success withdraw ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-				console.log("reason withdraw ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error withdraw ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.withdraw(
+      this.props.cachedMeeting._id,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success withdraw ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleWithdraw: ' + err);
+    });
   }
 
   handleNextMeeting = (event: any) => {
-    console.log(event);
-
-    if (this.props.cachedMeeting) {
-      // TODO: get user address
-      
-      this.etherService.nextMeeting(
-        this.props.cachedMeeting._id,
-        this.props.cachedMeeting.data.startDateTime,
-        this.props.cachedMeeting.data.endDateTime,
-        this.props.cachedMeeting.data.stake,
-        this.props.cachedMeeting.data.maxParticipants,
-        this.callbackFn
-      )
-      .then((res: any) => {
-				console.log("success next meeting ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-			}, (reason: any) => {
-				console.log("reason next meeting ", reason);
-				// TODO notify user
-			})
-			.catch((err: any) => {
-				console.log("error next meeting ", err);
-				// TODO notify user
-			});
-    } else {
-      // TODO: button disabled
-    }
+    this.etherService.nextMeeting(
+      this.props.cachedMeeting._id,
+      this.props.cachedMeeting.data.startDateTime,
+      this.props.cachedMeeting.data.endDateTime,
+      this.props.cachedMeeting.data.stake,
+      this.props.cachedMeeting.data.maxParticipants,
+      this.callbackFn
+    )
+    .then((res: any) => {
+      console.log("success next meeting ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
+    });
   }
 
   render() {
