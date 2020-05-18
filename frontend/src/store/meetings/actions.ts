@@ -67,6 +67,7 @@ export const UpdateRSVPListCancellation = actionCreator<GroupMeetingAndUserAddre
 export const UpdateStartMeeting = actionCreator<string>(AppActions.UPDATE_START_MEETING);
 export const UpdateEndMeeting = actionCreator<string>(AppActions.UPDATE_END_MEETING);
 export const UpdateCancelMeeting = actionCreator<string>(AppActions.UPDATE_CANCEL_MEETING);
+export const UpdateHandleAttendance = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_HANDLE_ATTENDANCE);
 
 export const actions = {
   CreateFirstMeeting,
@@ -77,5 +78,6 @@ export const actions = {
   UpdateRSVPListCancellation,
   UpdateStartMeeting,
   UpdateEndMeeting,
-  UpdateCancelMeeting
+  UpdateCancelMeeting,
+  UpdateHandleAttendance
 };

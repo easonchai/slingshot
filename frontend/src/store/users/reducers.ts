@@ -54,5 +54,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if(isType(action, meetingActions.UpdateHandleAttendance)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+        attend: [...state.user.attend, action.payload.meetingAddress]
+      }
+    };
+  }
+
   return state;
 }

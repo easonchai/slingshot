@@ -11,6 +11,8 @@ const initState: IState = {
     startMeetingConfirmation: false,
     endMeetingConfirmation: false,
     cancelMeetingConfirmation: false,
+
+    markAttendanceConfirmation: false,
   }
 };
 
@@ -89,5 +91,15 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, actions.UpdateMarkAttendanceConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        markAttendanceConfirmation: action.payload
+      }
+    };
+  }
+  
   return state;
 }

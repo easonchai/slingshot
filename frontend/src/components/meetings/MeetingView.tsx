@@ -151,7 +151,7 @@ export class MeetingView extends React.Component<IProps> {
   handleEnd = (event: any) => {
     this.etherService.endEvent(
       this.props.cachedMeeting._id,
-      confirmation => this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false)
+      confirmation => {console.log(confirmation); this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false)}
     )
     .then((res: any) => {
       this.props.dispatchUpdateHandleEndMeeting(this.props.cachedMeeting._id);

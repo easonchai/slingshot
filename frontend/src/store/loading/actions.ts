@@ -9,6 +9,8 @@ export interface Loading {
   startMeetingConfirmation: boolean;
   endMeetingConfirmation: boolean;
   cancelMeetingConfirmation: boolean;
+
+  markAttendanceConfirmation: boolean;
 }
 
 const actionCreator = actionCreatorFactory();
@@ -20,6 +22,8 @@ export const UpdateRsvpCancellationConfirmationLoading = actionCreator<boolean>(
 export const UpdateStartMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_START_MEETING_CONFIRMATION_LOADING);
 export const UpdateEndMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_END_MEETING_CONFIRMATION_LOADING);
 export const UpdateCancelMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_CANCEL_MEETING_CONFIRMATION_LOADING);
+export const UpdateMarkAttendanceConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_MARK_ATTENDANCE_CONFIRMATION_LOADING);
+
 
 export const actions = {
   UpdateCachedMeetingLoading,
@@ -29,4 +33,5 @@ export const actions = {
   UpdateStartMeetingConfirmationLoading,
   UpdateEndMeetingConfirmationLoading,
   UpdateCancelMeetingConfirmationLoading,
+  UpdateMarkAttendanceConfirmationLoading
 };

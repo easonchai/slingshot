@@ -2,14 +2,49 @@ import React from 'react';
 import { Button, CircularProgress, Grid } from '@material-ui/core';
 import { Meeting } from '../../store/meetings/actions';
 import { Loading } from '../../store/loading/actions';
+import EtherService from '../../services/EtherService';
 
 interface IProps {
-    cachedMeeting: Meeting,
-    userWallet: string,
-    loading: Loading
+    cachedMeeting: Meeting;
+    userWallet: string;
+    loading: Loading;
+
+    dispatchHandleStartMeetingConfirmationLoading(status: boolean): void;
+    dispatchHandleMarkAttendance(meetingAddress: string, userAddress: string): void;
+
+    dispatchAddErrorNotification(message: String): void;
 }
 
 export class UsersList extends React.Component<IProps> {
+  etherService: EtherService;
+
+  constructor(props: any) {
+    super(props);
+
+    this.etherService = new EtherService();
+    /**
+     * TODO: Before every meaningful interaction with etherService,
+     * validate that the meeting contract address is available.
+     * Otherwise retrieve it from the known txHash (and persist in DB).
+     */
+  }
+
+  handleAttendance = (event: any) => {
+    this.etherService.markAttendance(
+      this.props.cachedMeeting._id,
+      this.props.userWallet,
+      confirmation => this.props.dispatchHandleStartMeetingConfirmationLoading(false)
+    )
+    .then((res: any) => {
+      this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, this.props.userWallet);
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleAttendance: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleAttendance: ' + err);
+    });
+  }
+
   render() {
     return (
         <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={ 2 }>
@@ -42,9 +77,10 @@ export class UsersList extends React.Component<IProps> {
 
                                     {
                                         this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                                            <Button disabled={ false } type="submit" variant="outlined" color="primary">
-                                                MARK ATTENDANCE
-                                            </Button>
+                                          !this.props.cachedMeeting.attend.includes(participantWallet) &&
+                                              <Button disabled={ false } onClick={ this.handleAttendance} type="submit" variant="outlined" color="primary">
+                                                  MARK ATTENDANCE
+                                              </Button>
                                     }
                                 </Grid> 
                             );

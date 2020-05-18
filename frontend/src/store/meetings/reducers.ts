@@ -174,5 +174,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if(isType(action, actions.UpdateHandleAttendance)) {
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        rsvp: state.cachedMeeting.rsvp.filter(user => user !== action.payload.userAddress),
+        attend: [...state.cachedMeeting.attend, action.payload.userAddress]
+      }
+    };
+  }
+
   return state;
 }
