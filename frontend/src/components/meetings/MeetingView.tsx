@@ -33,6 +33,9 @@ export interface IProps {
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
 
   dispatchAddErrorNotification(message: String): void;
+
+  dispatchAddEvent(meting: Meeting, hash: string): void;
+  dispatchUpdateetingDeploymentConfirmationLoading(status: boolean): void;
 }
 
 export class MeetingView extends React.Component<IProps> {
@@ -194,17 +197,18 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting.data.endDateTime,
       this.props.cachedMeeting.data.stake,
       this.props.cachedMeeting.data.maxParticipants,
-      this.callbackFn
+      confirmation => {console.log(confirmation); this.props.dispatchUpdateetingDeploymentConfirmationLoading(false)}
     )
-      .then((res: any) => {
-        console.log("success next meeting ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-      }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
-      })
-      .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
-      });
+    .then((res: any) => {
+      console.log("success next meeting ", res);
+      // TODO: add loading animation while we wait for callback / TX to be mined
+      this.props.dispatchAddEvent(this.props.cachedMeeting, res.hash);
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
+    })
+    .catch((err: any) => {
+      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
+    });
   }
 
   render() {

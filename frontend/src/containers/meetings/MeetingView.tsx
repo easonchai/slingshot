@@ -157,6 +157,31 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       dispatch(loadingActions.UpdateCancelMeetingConfirmationLoading(status));
     },
 
+    dispatchUpdateetingDeploymentConfirmationLoading: (status: boolean) => {
+      dispatch(loadingActions.UpdateMeetingDeploymentLoading(status));
+    },
+
+    dispatchAddEvent: (meeting: Meeting, hash: string) => {
+      // TODO: new vs first
+      dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
+
+      meeting._id = hash;
+      meeting.data.name = meeting.data.name + '#';
+      meeting.data.isCancelled = false;
+      meeting.data.isEnded = false;
+      meeting.data.isStarted = false;
+      meeting.cancel = []
+      meeting.rsvp = []
+      meeting.attend = []
+      meeting.withdraw = []
+
+      axios
+        .post('/api/meeting/create', meeting)
+        .then(res => {
+          dispatch(meetingActions.CreateFirstMeeting(meeting));
+        });
+    }
+
   };
 };
 
