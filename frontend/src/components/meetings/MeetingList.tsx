@@ -17,40 +17,40 @@ export class MeetingList extends React.Component<IProps> {
     const status: string = isEnded ? 'Finished' : 'Active';
 
     return (
-      <Grid item xs={ 12 }>
-        <h1>{ status } Meetings</h1>
+      <Grid item xs={12}>
+        {/* <h1>{status} Meetings</h1> */}
 
-        <Grid container alignItems="center" justify="center" spacing={ 6 }>
+        <Grid container alignItems="center" justify="center" spacing={6}>
 
           {
             !isEnded &&
-              <Grid item xs={ 6 }>
-                <Link style={ { textDecoration: 'none' } } to='/meeting/create'>
-                  <Card raised={ true } className="meeting-create">
-                    <CardContent>
-                      <CardActions>
-                        <AddCircleIcon fontSize="large" color="primary" />
+            <Grid item xs={6}>
+              <Link style={{ textDecoration: 'none' }} to='/meeting/create'>
+                <Card raised={true} className="meeting-create">
+                  <CardContent>
+                    <CardActions>
+                      <AddCircleIcon fontSize="large" color="primary" />
                         Add your meeting here
                       </CardActions>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </Grid>
+                  </CardContent>
+                </Card>
+              </Link>
+            </Grid>
           }
-          
+
           {
             meetings.length === 0 ?
               (
-                <Grid container alignItems="center" justify="center" item xs={ 12 }>
-                  <div>There are currently no { status } meetings.</div>
+                <Grid container alignItems="center" justify="center" item xs={12}>
+                  <div>There are currently no {status} meetings.</div>
                 </Grid>
               )
               :
               (
                 meetings.map((meeting) => {
                   return (
-                    <Grid key={ meeting._id } item xs={ 6 }>
-                      <MeetingPreview key={ meeting._id } meeting={ meeting } />
+                    <Grid key={meeting._id} item xs={6}>
+                      <MeetingPreview key={meeting._id} meeting={meeting} />
                     </Grid>
                   );
                 })
