@@ -14,7 +14,7 @@ export interface IProps {
   user: User;
   cachedMeeting: Meeting;
   loading: Loading;
-  
+
   dispatchGetCachedMeetingById(id: String): void;
 
   dispatchUpdateUserEthereumAddress(userAddress: String): void;
@@ -42,21 +42,29 @@ export class MeetingView extends React.Component<IProps> {
     super(props);
 
     this.etherService = new EtherService();
-   /**
-     * TODO: Before every meaningful interaction with etherService,
-     * validate that the meeting contract address is available.
-     * Otherwise retrieve it from the known txHash (and persist in DB).
-     */
+    /**
+      * TODO: Before every meaningful interaction with etherService,
+      * validate that the meeting contract address is available.
+      * Otherwise retrieve it from the known txHash (and persist in DB).
+      */
   }
-  
+
   componentWillMount() {
-      this.props.dispatchGetCachedMeetingById(this.props.id);
+    this.props.dispatchGetCachedMeetingById(this.props.id);
+  }
+
+  accChangeCallback(accounts: string[]) {
+    console.log(accounts[0]);
+  }
+
+  chainChangeCallback(chainID: string) {
+    console.log(chainID)
   }
 
   componentDidMount() {
     // TODO: refactor (bring up to a higher component)
     this.etherService
-      .requestConnection()
+      .requestConnection(this.chainChangeCallback, this.accChangeCallback)
       .then((account: string) => {
         this.props.dispatchUpdateUserEthereumAddress(account);
       }, (reason: any) => {
@@ -70,21 +78,21 @@ export class MeetingView extends React.Component<IProps> {
   callbackFn = (result: any) => {
     console.log("cb fn ", result);
   }
-  
+
   handleRSVP = (event: any) => {
     this.etherService.rsvp(
       this.props.cachedMeeting._id,
       this.props.cachedMeeting.data.stake,
       confirmation => this.props.dispatchUpdateRsvpConfirmationLoading(false)
     )
-    .then((res: any) => {
-      this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleRSVP: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleRSVP: ' + err);
-    });
+      .then((res: any) => {
+        this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleRSVP: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleRSVP: ' + err);
+      });
   }
 
   handleGetChange = (event: any) => {
@@ -92,15 +100,15 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting._id,
       this.callbackFn
     )
-    .then((res: any) => {
-      console.log("success get change ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleGetChange: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleGetChange: ' + err);
-    });
+      .then((res: any) => {
+        console.log("success get change ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleGetChange: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleGetChange: ' + err);
+      });
   }
 
   handleCancelEvent = (event: any) => {
@@ -108,14 +116,14 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting._id,
       confirmation => this.props.dispatchUpdateHandleCancelMeetingConfirmationLoading(false)
     )
-    .then((res: any) => {
-      this.props.dispatchUpdateHandleCancelMeeting(this.props.cachedMeeting._id);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleCancelEvent: ' + err);
-    });
+      .then((res: any) => {
+        this.props.dispatchUpdateHandleCancelMeeting(this.props.cachedMeeting._id);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleCancelEvent: ' + err);
+      });
   }
 
   handleCancelRSVP = (event: any) => {
@@ -123,14 +131,14 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting._id,
       confirmation => this.props.dispatchUpdateRsvpCancellationConfirmationLoading(false)
     )
-    .then((res: any) => {
-      this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + err);
-    });
+      .then((res: any) => {
+        this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + err);
+      });
   }
 
   handleStart = (event: any) => {
@@ -138,29 +146,29 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting._id,
       confirmation => this.props.dispatchUpdateHandleStartMeetingConfirmationLoading(false)
     )
-    .then((res: any) => {
-      this.props.dispatchUpdateHandleStartMeeting(this.props.cachedMeeting._id);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleStart: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleStart: ' + err);
-    });
+      .then((res: any) => {
+        this.props.dispatchUpdateHandleStartMeeting(this.props.cachedMeeting._id);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleStart: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleStart: ' + err);
+      });
   }
-  
+
   handleEnd = (event: any) => {
     this.etherService.endEvent(
       this.props.cachedMeeting._id,
-      confirmation => {console.log(confirmation); this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false)}
+      confirmation => { console.log(confirmation); this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false) }
     )
-    .then((res: any) => {
-      this.props.dispatchUpdateHandleEndMeeting(this.props.cachedMeeting._id);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleEnd: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleEnd: ' + err);
-    });
+      .then((res: any) => {
+        this.props.dispatchUpdateHandleEndMeeting(this.props.cachedMeeting._id);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleEnd: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleEnd: ' + err);
+      });
   }
 
   handleWithdraw = (event: any) => {
@@ -168,15 +176,15 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting._id,
       this.callbackFn
     )
-    .then((res: any) => {
-      console.log("success withdraw ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleWithdraw: ' + err);
-    });
+      .then((res: any) => {
+        console.log("success withdraw ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleWithdraw: ' + err);
+      });
   }
 
   handleNextMeeting = (event: any) => {
@@ -188,15 +196,15 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting.data.maxParticipants,
       this.callbackFn
     )
-    .then((res: any) => {
-      console.log("success next meeting ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
-    });
+      .then((res: any) => {
+        console.log("success next meeting ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
+      });
   }
 
   render() {
@@ -204,90 +212,90 @@ export class MeetingView extends React.Component<IProps> {
 
     return (
       <div>
-          <NotificationList />
-          {
-            this.props.loading.cachedMeeting && cachedMeeting
-              ? (
-                <CircularProgress />
-              )
-              : (
-                <div>
-                  <div>Name: { cachedMeeting.data.name }</div>
-                  <div>Is cancelled: { String(cachedMeeting.data.isCancelled) }</div>
-                  <div>Is started: { String(cachedMeeting.data.isStarted) }</div>
-                  <div>Is ended: { String(cachedMeeting.data.isEnded) }</div>
-                  <div>Stake: { cachedMeeting.data.stake }</div>
-                  <div>Max participants: { cachedMeeting.data.maxParticipants }</div>
-                  <div>Start time: { new Date(cachedMeeting.data.startDateTime * 1000).toUTCString() }</div>
-                  <div>End time: { new Date(cachedMeeting.data.endDateTime * 1000).toUTCString() }</div>
-                  <div>Location: { cachedMeeting.data.location }</div>
-                  <div>Description: { cachedMeeting.data.description }</div>
-                  <div>Organizer address: { cachedMeeting.data.organizerAddress }</div>
-                  
-                  {
-                      this.props.loading.meetingDeployment
-                      ? (
-                        <div>Meeting tx: { cachedMeeting._id } <CircularProgress /></div>
-                      )
-                      : (
-                        // display contract address
-                        <div>Meeting contract: { cachedMeeting._id }</div>
-                      )
-                  }
+        <NotificationList />
+        {
+          this.props.loading.cachedMeeting && cachedMeeting
+            ? (
+              <CircularProgress />
+            )
+            : (
+              <div>
+                <div>Name: {cachedMeeting.data.name}</div>
+                <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
+                <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
+                <div>Is ended: {String(cachedMeeting.data.isEnded)}</div>
+                <div>Stake: {cachedMeeting.data.stake}</div>
+                <div>Max participants: {cachedMeeting.data.maxParticipants}</div>
+                <div>Start time: {new Date(cachedMeeting.data.startDateTime * 1000).toUTCString()}</div>
+                <div>End time: {new Date(cachedMeeting.data.endDateTime * 1000).toUTCString()}</div>
+                <div>Location: {cachedMeeting.data.location}</div>
+                <div>Description: {cachedMeeting.data.description}</div>
+                <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
 
-                  <div>Deployer contract: { cachedMeeting.data.deployerContractAddress }</div>
-                
-                  <Container maxWidth={ false }>
-                    <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={ 2 }>
-                      <Grid container spacing={ 2 }>
-                        {
-                          // TODO: organize buttons per role (organizer / participant) and per state (active / finished meeting).
-                        }
+                {
+                  this.props.loading.meetingDeployment
+                    ? (
+                      <div>Meeting tx: { cachedMeeting._id} <CircularProgress /></div>
+                    )
+                    : (
+                      // display contract address
+                      <div>Meeting contract: { cachedMeeting._id}</div>
+                    )
+                }
 
-                        <Grid item xs={ 12 }>
-                          <Link to='/'>
-                            <Button>
-                              <HomeIcon fontSize="large" color="primary" />
-                            </Button>
-                          </Link>
-                          <Button disabled={ false } onClick={ this.handleRSVP } variant="outlined" color="primary">
-                            RSVP
-                          </Button>
-                          <Button disabled={ false } onClick={ this.handleCancelRSVP } variant="outlined" color="primary">
-                            CANCEL RSVP
-                          </Button>
-                          <Button disabled={ false } onClick={ this.handleGetChange } variant="outlined" color="primary">
-                            GET CHANGE
-                          </Button>
-                          <Button disabled={ false } onClick={ this.handleWithdraw } variant="outlined" color="primary">
-                            WITHDRAW PAYOUT
-                          </Button>
-                        </Grid>
+                <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
 
+                <Container maxWidth={false}>
+                  <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
+                    <Grid container spacing={2}>
+                      {
+                        // TODO: organize buttons per role (organizer / participant) and per state (active / finished meeting).
+                      }
 
-                        <Grid item xs={ 12 }>
-                          <Button disabled={ false } onClick={ this.handleCancelEvent } variant="outlined" color="primary">
-                            CANCEL EVENT
+                      <Grid item xs={12}>
+                        <Link to='/'>
+                          <Button>
+                            <HomeIcon fontSize="large" color="primary" />
                           </Button>
-                          <Button disabled={ false } onClick={ this.handleStart } variant="outlined" color="primary">
-                            START EVENT
+                        </Link>
+                        <Button disabled={false} onClick={this.handleRSVP} variant="outlined" color="primary">
+                          RSVP
                           </Button>
-                          <Button disabled={ false } onClick={ this.handleEnd } variant="outlined" color="primary">
-                            END EVENT
+                        <Button disabled={false} onClick={this.handleCancelRSVP} variant="outlined" color="primary">
+                          CANCEL RSVP
                           </Button>
-                          <Button disabled={ false } onClick={ this.handleNextMeeting } variant="outlined" color="primary">
-                            NEXT MEETING
+                        <Button disabled={false} onClick={this.handleGetChange} variant="outlined" color="primary">
+                          GET CHANGE
                           </Button>
-                        </Grid>
-
+                        <Button disabled={false} onClick={this.handleWithdraw} variant="outlined" color="primary">
+                          WITHDRAW PAYOUT
+                          </Button>
                       </Grid>
-                    </Grid>
 
-                    <UsersList />
-                  </Container>
-                </div>
-              )
-            }
+
+                      <Grid item xs={12}>
+                        <Button disabled={false} onClick={this.handleCancelEvent} variant="outlined" color="primary">
+                          CANCEL EVENT
+                          </Button>
+                        <Button disabled={false} onClick={this.handleStart} variant="outlined" color="primary">
+                          START EVENT
+                          </Button>
+                        <Button disabled={false} onClick={this.handleEnd} variant="outlined" color="primary">
+                          END EVENT
+                          </Button>
+                        <Button disabled={false} onClick={this.handleNextMeeting} variant="outlined" color="primary">
+                          NEXT MEETING
+                          </Button>
+                      </Grid>
+
+                    </Grid>
+                  </Grid>
+
+                  <UsersList />
+                </Container>
+              </div>
+            )
+        }
       </div>
     );
   }

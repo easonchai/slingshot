@@ -7,6 +7,7 @@ import EtherService from '../../services/EtherService';
 import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import { NotificationList } from '../../containers/notifications/NotificationList';
 
 interface IProps {
 	history: History;
@@ -15,6 +16,7 @@ interface IProps {
 	dispatchCreateFirstMeeting(payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress, history: History): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
+	dispatchAddErrorNotification(message: String): void;
 }
 
 interface IState {
@@ -62,8 +64,19 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.etherService = new EtherService();
 	}
 
+	accChangeCallback(accounts: string[]) {
+		console.log(accounts[0]);
+	}
+
+	chainChangeCallback = (chainID: string) => {
+		if (chainID !== '4') {
+			this.props.dispatchAddErrorNotification('You are not on Rinkeby!');
+			console.log(".")
+		}
+	}
+
 	componentDidMount() {
-		this.etherService.requestConnection()
+		this.etherService.requestConnection(this.chainChangeCallback, this.accChangeCallback)
 			.then((account: string) => {
 				// TODO: keep the whole object consistent (i.e. reload the arrays of meetings for the new wallet addres.)
 				const user = {
@@ -166,6 +179,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	render() {
 		return (
 			<Container maxWidth={false}>
+				<NotificationList />
 				<Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
 					<form onSubmit={this.handleSubmit} className="add-meeting-form">
 						<Grid container spacing={2}>
