@@ -13,8 +13,8 @@ interface IProps {
 	history: History;
 	user: User;
 
-	dispatchCreateFirstMeeting(payload: Meeting): void;
-	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress, history: History): void;
+	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
+	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
 	dispatchAddErrorNotification(message: String): void;
 }
@@ -113,7 +113,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			meetingAddress: meeting.args.contractAddr
 		};
 
-		this.props.dispatchUpdateMeetingContractAddress(payload, this.props.history);
+		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
 	handleSubmit = (event: any) => {
@@ -142,41 +142,38 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			this.callbackDeployedMeeting
 		)
 			.then((res: any) => {
-				this.props.dispatchCreateFirstMeeting({
-					_id: res.hash,
-					type: ModelType.PENDING,
-					data: {
-						name: event.target.meetingName.value,
-						location: event.target.location.value,
-						description: event.target.description.value,
-						startDateTime: startDateTime,
-						endDateTime: endDateTime,
-						stake: parseFloat(event.target.stake.value),
-						maxParticipants: parseInt(event.target.maxParticipants.value),
-						prevStake: 0,
-						payout: 0,
-						isCancelled: false,
-						isStarted: false,
-						isEnded: false,
-						deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
-						organizerAddress: this.props.user._id,
-						parent: '',
-						child: '',
-					},
-					cancel: [],
-					rsvp: [],
-					attend: [],
-					withdraw: []
-				});
-
-				this.props.history.push('/meeting/' + res.hash);
+				this.props.dispatchCreateFirstMeeting(this.props.history,
+					{
+						_id: res.hash,
+						type: ModelType.PENDING,
+						data: {
+							name: event.target.meetingName.value,
+							location: event.target.location.value,
+							description: event.target.description.value,
+							startDateTime: startDateTime,
+							endDateTime: endDateTime,
+							stake: parseFloat(event.target.stake.value),
+							maxParticipants: parseInt(event.target.maxParticipants.value),
+							prevStake: 0,
+							payout: 0,
+							isCancelled: false,
+							isStarted: false,
+							isEnded: false,
+							deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+							organizerAddress: this.props.user._id,
+							parent: '',
+							child: '',
+						},
+						cancel: [],
+						rsvp: [],
+						attend: [],
+						withdraw: []
+					});
 			}, (reason: any) => {
-				console.log("reason deploy ", reason);
-				// TODO notify user
+				this.props.dispatchAddErrorNotification("There was an error creating this meeting: " + reason);
 			})
 			.catch((err: any) => {
-				console.log("error deploy ", err);
-				// TODO notify user
+				this.props.dispatchAddErrorNotification("There was an error creating this meeting: " + err);
 			});
 	};
 
@@ -329,6 +326,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						</Grid>
 					</form>
 				</Grid>
-			</Container>);
+			</Container>
+		);
 	}
 }

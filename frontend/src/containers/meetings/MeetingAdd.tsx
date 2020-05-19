@@ -13,23 +13,23 @@ import { actions as notificationActions, Notification } from '../../store/notifi
 const mapStateToProps = (state: IAppState) => {
   return {
     user: state.userReducer.user,
-    //cachedMeeting: state.meetingsReducer.cachedMeeting
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
-    dispatchCreateFirstMeeting: (payload: Meeting, txHash: string) => {
-        dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
+    dispatchCreateFirstMeeting: (history: History, payload: Meeting) => {
+      dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
 
-      axios
+      return axios
         .post('/api/meeting/create', payload)
         .then(res => {
           dispatch(meetingActions.CreateFirstMeeting(payload));
+          history.push('/meeting/' + payload._id);
         });
     },
 
-    dispatchUpdateMeetingContractAddress: (payload: GroupHashAndAddress, history: History) => {
+    dispatchUpdateMeetingContractAddress: (history: History, payload: GroupHashAndAddress) => {
       axios
         .put('/api/meeting/update', payload)
         .then(res => {

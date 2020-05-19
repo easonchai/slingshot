@@ -78,7 +78,8 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       if (meeting._id === action.payload.txHash) {
         return {
           ...meeting,
-          _id: action.payload.meetingAddress
+          _id: action.payload.meetingAddress,
+          type: ModelType.MEETING
         };
       }
 
@@ -90,7 +91,8 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        _id: action.payload.meetingAddress
+        _id: action.payload.meetingAddress,
+        type: ModelType.MEETING
       }
     };
   }

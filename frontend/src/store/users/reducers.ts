@@ -20,6 +20,7 @@ export interface IState {
 
 export const reducer = (state: IState = initState, action: Action): IState => {
   if (isType(action, userActions.UpdateUserEthereumAddress)) {
+    // TODO: update the whole user object (retrieve array data from the backend.)
     return {
       ...state,
       user: {
