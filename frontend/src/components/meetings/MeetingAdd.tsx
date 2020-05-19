@@ -67,7 +67,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			step: 0.001,
 		};
 
-		this.etherService = new EtherService();
+		this.etherService = EtherService.getInstance();
 	}
 
 	accChangeCallback(accounts: string[]) {
@@ -105,12 +105,13 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			});
 	}
 
-	callbackDeployedMeeting = (meeting: any) => {
+	callbackDeployedMeeting = (confirmation: any) => {
 		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
 
+		console.log(confirmation);
 		const payload: GroupHashAndAddress = {
-			txHash: meeting.transactionHash,
-			meetingAddress: meeting.args.contractAddr
+			txHash: confirmation.transactionHash,
+			meetingAddress: confirmation.args.contractAddr
 		};
 
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);

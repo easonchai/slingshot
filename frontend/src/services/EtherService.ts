@@ -14,7 +14,9 @@ export default class EtherService {
   deployerABI: Array<string>;
   meetingABI: Array<string>;
 
-  constructor() {
+  private static instance: EtherService;
+
+  private constructor() {
     this.network = 'rinkeby';
     this.ethereum = (window as any).ethereum;
 
@@ -71,6 +73,14 @@ export default class EtherService {
       'function setPrevStake(uint _prevStake) external payable'
       // ...
     ];
+  }
+
+  public static getInstance(): EtherService {
+    if (!EtherService.instance) {
+      EtherService.instance = new EtherService();
+    }
+
+    return EtherService.instance;
   }
 
   private isEthereumNodeAvailable(): boolean {

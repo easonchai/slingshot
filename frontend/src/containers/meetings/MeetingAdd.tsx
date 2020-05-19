@@ -21,7 +21,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
     dispatchCreateFirstMeeting: (history: History, payload: Meeting) => {
       dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
 
-      return axios
+      axios
         .post('/api/meeting/create', payload)
         .then(res => {
           dispatch(meetingActions.CreateFirstMeeting(payload));

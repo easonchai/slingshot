@@ -44,7 +44,7 @@ export class MeetingView extends React.Component<IProps> {
   constructor(props: any) {
     super(props);
 
-    this.etherService = new EtherService();
+    this.etherService = EtherService.getInstance();
     /**
       * TODO: Before every meaningful interaction with etherService,
       * validate that the meeting contract address is available.
@@ -197,18 +197,18 @@ export class MeetingView extends React.Component<IProps> {
       this.props.cachedMeeting.data.endDateTime,
       this.props.cachedMeeting.data.stake,
       this.props.cachedMeeting.data.maxParticipants,
-      confirmation => {console.log(confirmation); this.props.dispatchUpdateetingDeploymentConfirmationLoading(false)}
+      confirmation => { console.log(confirmation); this.props.dispatchUpdateetingDeploymentConfirmationLoading(false) }
     )
-    .then((res: any) => {
-      console.log("success next meeting ", res);
-      // TODO: add loading animation while we wait for callback / TX to be mined
-      this.props.dispatchAddEvent(this.props.cachedMeeting, res.hash);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
-    })
-    .catch((err: any) => {
-      this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
-    });
+      .then((res: any) => {
+        console.log("success next meeting ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchAddEvent(this.props.cachedMeeting, res.hash);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
+      });
   }
 
   render() {
