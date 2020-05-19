@@ -5,24 +5,26 @@ import { MeetingPreview } from '../../containers/meetings/MeetingPreview';
 import { Grid } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { Card, CardContent, CardActions } from '@material-ui/core';
+import { styled } from '@material-ui/core/styles';
 
 interface IProps {
   meetings: Array<Meeting>;
   isEnded: boolean;
 }
 
+const Test = styled(Grid)({
+  border: '3px solid black'
+})
+
 export class MeetingList extends React.Component<IProps> {
   render() {
     const { meetings, isEnded } = this.props;
-    const status: string = isEnded ? 'Finished' : 'Active';
+    const status: string = isEnded ? 'past' : 'active';
 
     return (
-      <Grid item xs={12}>
-        {/* <h1>{status} Meetings</h1> */}
+      <Grid container spacing={4} alignItems="center" justify="center">
 
-        <Grid container alignItems="center" justify="center" spacing={6}>
-
-          {
+        {/* {
             !isEnded &&
             <Grid item xs={6}>
               <Link style={{ textDecoration: 'none' }} to='/meeting/create'>
@@ -36,27 +38,27 @@ export class MeetingList extends React.Component<IProps> {
                 </Card>
               </Link>
             </Grid>
-          }
+          } */}
 
-          {
-            meetings.length === 0 ?
-              (
-                <Grid container alignItems="center" justify="center" item xs={12}>
-                  <div>There are currently no {status} meetings.</div>
-                </Grid>
-              )
-              :
-              (
-                meetings.map((meeting) => {
-                  return (
-                    <Grid key={meeting._id} item xs={6}>
-                      <MeetingPreview key={meeting._id} meeting={meeting} />
-                    </Grid>
-                  );
-                })
-              )
-          }
-        </Grid>
+        {
+          meetings.length === 0 ?
+            (
+              <Grid container alignItems="center" justify="center" item xs={12}>
+                <div>There are currently no {status} meetings.</div>
+              </Grid>
+            )
+            :
+            (
+              meetings.map((meeting) => {
+                return (
+                  <Grid item key={meeting._id} xs={6}>
+                    <MeetingPreview key={meeting._id} meeting={meeting} />
+                  </Grid>
+
+                );
+              })
+            )
+        }
       </Grid>
     );
   }

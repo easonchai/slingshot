@@ -21,7 +21,6 @@ const Hero = styled(Container)({
   background: 'white',
   padding: '30px 80px',
   height: '300px',
-  width: '10000px'
 })
 
 const Middle = styled(Grid)({
@@ -43,29 +42,32 @@ export class Home extends React.Component<IProps> {
         <CssBaseline />
         <Grid container>
           {/* Top Section */}
-          <Grid item xs={12}>
-            <Hero maxWidth="sm">
-              <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-                Slingshot
-                </Typography>
-              <Typography variant="h5" align="center" color="textSecondary" paragraph>
-                Launch your next event forward.
-                </Typography>
-              <br />
-              <Grid container spacing={2} justify="center">
-                <Grid item>
-                  <Link style={{ textDecoration: 'none' }} to='/meeting/create'>
-                    <MyButton>Host an Event</MyButton>
-                  </Link>
-                </Grid>
-              </Grid>
-            </Hero>
-          </Grid>
+          <Hero maxWidth={false}>
+            <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
+              Slingshot
+            </Typography>
+            <Typography variant="h5" align="center" color="textSecondary" paragraph>
+              Launch your next meeting forward.
+            </Typography>
+            <br />
+            <Grid container spacing={2} justify="center">
+              <Link style={{ textDecoration: 'none' }} to='/meeting/create'>
+                <MyButton>Host a Meeting</MyButton>
+              </Link>
+            </Grid>
+          </Hero>
 
           {/* Card Section */}
           <Middle item container className="meetings-list" spacing={2}>
-            <Container maxWidth="sm">
+            <Container maxWidth="md">
+              <Typography variant="h3" align="center" color="textPrimary" paragraph>
+                Active Meetings
+              </Typography>
               <MeetingList isEnded={false} />
+              <br /><br /><br />
+              <Typography variant="h3" align="center" color="textPrimary" paragraph>
+                Past Meetings
+              </Typography>
               <MeetingList isEnded={true} />
             </Container>
           </Middle>
