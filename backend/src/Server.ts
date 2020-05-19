@@ -20,7 +20,7 @@ const app = express();
  ***********************************************************************************/
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Show routes called in console during development
@@ -52,7 +52,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 const frontendDir = path.join(__dirname, '../build/frontend');
 app.use(express.static(frontendDir));
-
+app.use((req, res) => res.sendFile(path.resolve(frontendDir + '/index.html')));
 
 // Export express instance
 export default app;
