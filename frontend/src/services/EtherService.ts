@@ -126,8 +126,8 @@ export default class EtherService {
 
         // Notify frontend about successful deployment (TX mined)
         contract
-          .on("NewMeetingEvent", (ownerAddr, contractAddr, event) => eventCallback(event))
-          .on("error", console.error);
+          .once("NewMeetingEvent", (ownerAddr, contractAddr, event) => eventCallback(event))
+          .once("error", console.error);
 
         // Send TX
         contract
@@ -157,8 +157,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("RSVPEvent", (addr, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("RSVPEvent", (addr, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -179,8 +179,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("GetChange", (event) => eventCallback(event))
-        .on("error", console.error);
+        .once("GetChange", (event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -201,8 +201,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("EventCancelled", (event) => eventCallback(event))
-        .on("error", console.error);
+        .once("EventCancelled", (event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -223,8 +223,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("GuyCancelled", (participant, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("GuyCancelled", (participant, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -246,8 +246,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("MarkAttendance", (participant, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("MarkAttendance", (participant, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -268,8 +268,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("StartEvent", (addr, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("StartEvent", (addr, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -290,8 +290,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("EndEvent", (addr, attendance, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("EndEvent", (addr, attendance, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -312,8 +312,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("WithdrawEvent", (addr, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("WithdrawEvent", (addr, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
@@ -338,8 +338,8 @@ export default class EtherService {
 
       // Notify frontend about successful RSVP (TX mined)
       contract
-        .on("NextMeeting", (_startDate, _endDate, _minStake, _registrationLimit, _meeting, event) => eventCallback(event))
-        .on("error", console.error);
+        .once("NextMeeting", (_startDate, _endDate, _minStake, _registrationLimit, _meeting, event) => eventCallback(event))
+        .once("error", console.error);
 
       // Send TX
       contract
