@@ -44,7 +44,11 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-
+// Check for new content before sending cached version
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-cache');
+    next();
+})
 
 /************************************************************************************
  *                              Serve front-end content
