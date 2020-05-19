@@ -12,7 +12,7 @@ import { NotificationList } from '../../containers/notifications/NotificationLis
 interface IProps {
 	history: History;
 	user: User;
-	//cachedMeeting: Meeting;
+
 	dispatchCreateFirstMeeting(payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(payload: GroupHashAndAddress, history: History): void;
 	dispatchUpdateUserEthereumAddress(payload: User): void;
@@ -40,21 +40,27 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		super(props);
 
 		/**
-		 * Pre-fill starting date to current time +24 hours.
-		 * Pre-fill ending date to current time +25 hours (1 hour meeting).
-		 * TODO: round up to next hour
+		 * Pre-fill starting time to current time +24 hours.
+		 * Pre-fill ending time to current time +25 hours (1 hour meeting).
+		 * Round time up to the next full hour.
 		 */
+		const msInAnHour = 60 * 60 * 1000;
+		const currentTime = new Date().getTime();
+		const currentRoundedTime = currentTime + msInAnHour - currentTime % msInAnHour;
+		const startTime = currentRoundedTime + 24 * msInAnHour;
+		const endTime = startTime + msInAnHour;
+
 		this.state = {
 			form: {
-				startDate: new Date(new Date().getTime() + (24 * 60 * 60 * 1000)),
-				startTime: new Date(new Date().getTime()),
-				endDate: new Date(new Date().getTime() + (25 * 60 * 60 * 1000)),
-				endTime: new Date(new Date().getTime() + (25 * 60 * 60 * 1000))
+				startDate: new Date(startTime),
+				startTime: new Date(startTime),
+				endDate: new Date(endTime),
+				endTime: new Date(endTime)
 			}
 		};
 
 		/**
-		 * HTML5 input element attributes for type=number used to decorate stake amount field.
+		 * HTML input element attributes for type=number used to decorate stake amount field.
 		 */
 		this.stakeInputProps = {
 			min: 0.001,
@@ -114,13 +120,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		event.preventDefault();
 		event.persist();
 
-		// TODO: pay attention to timezone
 		const startDate = new Date(this.state.form.startDate.toDateString());
 		const startHour = this.state.form.startTime.getHours();
 		const startMinute = this.state.form.startTime.getMinutes();
 		const startDateTime = (new Date(startDate)).getTime() / 1000 + (startHour * 60 + startMinute) * 60;
 
-		// TODO: pay attention to timezone
 		const endDate = new Date(this.state.form.endDate.toDateString());
 		const endHour = this.state.form.endTime.getHours();
 		const endMinute = this.state.form.endTime.getMinutes();
@@ -176,6 +180,46 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			});
 	};
 
+	/**
+	 * Given a new start date, calculate the difference with previous filled in date.
+	 * Adjust the end date with that exact difference.
+	 */
+	handleStartDateChange = (datetime: any) => {
+		const difference = this.state.form.startDate - datetime;
+		const newStartTime = new Date(this.state.form.startTime - difference);
+		const newEndDate = new Date(this.state.form.endDate - difference);
+		const newEndDateTime = new Date(this.state.form.endTime - difference);
+
+		this.setState({
+			form: {
+				...this.state.form,
+				startDate: datetime,
+				startTime: newStartTime,
+				endDate: newEndDate,
+				endTime: newEndDateTime
+			}
+		});
+	}
+
+	/**
+	 * Given a new start time, calculate the difference with previous filled in time.
+	 * Adjust the end time with that exact difference.
+	 */
+	handleStartTimeChange = (datetime: any) => {
+		const difference = this.state.form.startTime - datetime;
+		const newEndDate = new Date(this.state.form.endDate - difference);
+		const newEndDateTime = new Date(this.state.form.endTime - difference);
+
+		this.setState({
+			form: {
+				...this.state.form,
+				startTime: datetime,
+				endDate: newEndDate,
+				endTime: newEndDateTime
+			}
+		});
+	}
+
 	render() {
 		return (
 			<Container maxWidth={false}>
@@ -218,7 +262,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											label="Start Date"
 											format="MM/dd/yyyy"
 											value={this.state.form.startDate}
-											onChange={(d) => this.setState({ form: { ...this.state.form, startDate: d } })}
+											onChange={this.handleStartDateChange}
 										/>
 									</Grid>
 									<Grid item xs={12}>
@@ -228,7 +272,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											id="startTime"
 											label="Start Time"
 											value={this.state.form.startTime}
-											onChange={(t) => this.setState({ form: { ...this.state.form, startTime: t } })}
+											onChange={this.handleStartTimeChange}
 										/>
 									</Grid>
 
@@ -254,6 +298,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										/>
 									</Grid>
 								</MuiPickersUtilsProvider>
+							</Grid>
+
+							<Grid item xs={12}>
+								* The time is in your local timezone.
 							</Grid>
 
 							<Grid item xs={12}>
