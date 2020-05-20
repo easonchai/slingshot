@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { IAppState } from '../../store/index';
 import { UsersList as Component } from '../../components/users/UsersList';
 import { actions as loadingActions } from '../../store/loading/actions';
-import { actions as meetingActions, GroupMeetingAndUserAddress } from '../../store/meetings/actions';
+import { actions as meetingActions } from '../../store/meetings/actions';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
 
 const mapStateToProps = (state: IAppState) => {
@@ -18,16 +18,16 @@ const mapStateToProps = (state: IAppState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
-    dispatchHandleStartMeetingConfirmationLoading: (status: boolean) => {
+    dispatchHandleMarkAttendanceConfirmationLoading: (status: boolean) => {
       dispatch(loadingActions.UpdateMarkAttendanceConfirmationLoading(status));
     },
 
-    dispatchHandleMarkAttendance: (meetingAddress: string, userAddress: string) => {
+    dispatchHandleMarkAttendance: (meetingAddress: string, participantAddress: string) => {
       dispatch(loadingActions.UpdateMarkAttendanceConfirmationLoading(true));
 
       const payload = {
         meetingAddress: meetingAddress,
-        userAddress: userAddress
+        userAddress: participantAddress
       };
 
       axios

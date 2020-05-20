@@ -2,18 +2,19 @@ import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
 import { actions, Meeting, ModelType } from './actions';
 import { actions as userActions } from '../users/actions';
+import { act } from 'react-dom/test-utils';
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
   cachedMeeting: Meeting;
-}    
+}
 
 const initState: IState = {
   meetings: [],
   cachedMeeting: {
     _id: '',
     type: ModelType.PENDING,
-    
+
     data: {
       // BACKEND
       //txHash: string;  // only used as primary key for pending TX's
@@ -21,7 +22,7 @@ const initState: IState = {
       name: '',
       location: '',
       description: '',
-  
+
       // SOLIDITY
       startDateTime: 0,
       endDateTime: 0,
@@ -96,30 +97,51 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       }
     };
   }
-  
-  if(isType(action, actions.UpdateRSVPList)) {
-    // TODO: update the entry in overall meetings array too.
-    // TODO: verify whether we need to update the nested data field
+
+  if (isType(action, actions.UpdateRSVPList)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          cancel: meeting.cancel.filter(user => user !== action.payload.userAddress),
+          rsvp: [...meeting.rsvp, action.payload.userAddress]
+        }
+      }
+
+      return meeting;
+    });
+
     return {
       ...state,
+      meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        rsvp: [
-          ...state.cachedMeeting.rsvp,
-          action.payload.userAddress
-        ]
+        cancel: state.cachedMeeting.cancel.filter(user => user !== action.payload.userAddress),
+        rsvp: [...state.cachedMeeting.rsvp, action.payload.userAddress]
       }
     };
   }
 
-  if(isType(action, actions.UpdateRSVPListCancellation)) {
-    // TODO: update the entry in overall meetings array too.
-    // TODO: verify whether we need to update the nested data field
+  if (isType(action, actions.UpdateRSVPListCancellation)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          rsvp: meeting.rsvp.filter(user => user !== action.payload.userAddress),
+          cancel: [...meeting.cancel, action.payload.userAddress]
+        }
+      }
+
+      return meeting;
+    });
+
     return {
       ...state,
+      meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        rsvp: state.cachedMeeting.rsvp.filter((address) => address !== action.payload.userAddress)
+        rsvp: state.cachedMeeting.rsvp.filter((userAddress) => userAddress !== action.payload.userAddress),
+        cancel: [...state.cachedMeeting.cancel, action.payload.userAddress]
       }
     };
   }
@@ -137,7 +159,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     }
   }
 
-  if(isType(action, actions.UpdateStartMeeting)) {
+  if (isType(action, actions.UpdateStartMeeting)) {
     return {
       ...state,
       cachedMeeting: {
@@ -150,7 +172,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
-  if(isType(action, actions.UpdateEndMeeting)) {
+  if (isType(action, actions.UpdateEndMeeting)) {
     return {
       ...state,
       cachedMeeting: {
@@ -163,7 +185,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
-  if(isType(action, actions.UpdateCancelMeeting)) {
+  if (isType(action, actions.UpdateCancelMeeting)) {
     return {
       ...state,
       cachedMeeting: {
@@ -176,9 +198,22 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
-  if(isType(action, actions.UpdateHandleAttendance)) {
+  if (isType(action, actions.UpdateHandleAttendance)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          rsvp: meeting.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
+          attend: [...meeting.attend, action.payload.userAddress]
+        };
+      }
+
+      return meeting;
+    });
+
     return {
       ...state,
+      meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
         rsvp: state.cachedMeeting.rsvp.filter(user => user !== action.payload.userAddress),

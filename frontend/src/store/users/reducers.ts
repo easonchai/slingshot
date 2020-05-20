@@ -29,33 +29,30 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       }
     };
   }
-    
-  if(isType(action, meetingActions.UpdateRSVPList)) {
+
+  if (isType(action, meetingActions.UpdateRSVPList)) {
     return {
       ...state,
       user: {
         ...state.user,
-        rsvp: [
-          ...state.user.rsvp,
-          action.payload.meetingAddress
-        ]
+        cancel: state.user.cancel.filter(meeting => meeting !== action.payload.meetingAddress),
+        rsvp: [...state.user.rsvp, action.payload.meetingAddress]
       }
     };
   }
 
-  if(isType(action, meetingActions.UpdateRSVPListCancellation)) {
-    // TODO: update the entry in overall meetings array too.
-    // TODO: verify whether we need to update the nested data field
+  if (isType(action, meetingActions.UpdateRSVPListCancellation)) {
     return {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter((address) => address !== action.payload.meetingAddress)
+        rsvp: state.user.rsvp.filter((address) => address !== action.payload.meetingAddress),
+        cancel: [...state.user.cancel, action.payload.meetingAddress]
       }
     };
   }
 
-  if(isType(action, meetingActions.UpdateHandleAttendance)) {
+  if (isType(action, meetingActions.UpdateHandleAttendance)) {
     return {
       ...state,
       user: {

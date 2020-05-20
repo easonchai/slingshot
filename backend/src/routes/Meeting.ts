@@ -39,23 +39,25 @@ router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
  * @returns Meeting
  */
 router.get('/id/:id', async (req: Request, res: Response, next: NextFunction) => {
-     Models.Item
-         .findOne({
-             $and: [
+    Models.Item
+        .findOne({
+            $and: [
                 { _id: req.params.id },
-                { $or: [
-                    { type: ModelType.MEETING },
-                    { type: ModelType.PENDING }
-                ]}
-             ]
-         })
-         .select('-__v')
-         .then(document => {
-             res
-                 .status(OK)
-                 .json(document);
-         })
-         .catch(err => next(err));
+                {
+                    $or: [
+                        { type: ModelType.MEETING },
+                        { type: ModelType.PENDING }
+                    ]
+                }
+            ]
+        })
+        .select('-__v')
+        .then(document => {
+            res
+                .status(OK)
+                .json(document);
+        })
+        .catch(err => next(err));
 });
 
 /**
@@ -124,14 +126,20 @@ router.put('/rsvp/add', async (req: Request, res: Response, next: NextFunction) 
     Models.Item
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
-            { $push: { 'rsvp': req.body['userAddress'] } },
+            {
+                $push: { 'rsvp': req.body['userAddress'] },
+                $pull: { 'cancel': req.body['userAddress'] },
+            },
             { safe: true, upsert: true }
         )
         .then(meeting => {
             Models.Item
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
-                    { $push: { 'rsvp': req.body['meetingAddress'] } },
+                    {
+                        $push: { 'rsvp': req.body['meetingAddress'] },
+                        $pull: { 'cancel': req.body['meetingAddress'] },
+                    },
                     { safe: true, upsert: true }
                 )
                 .then(user => {
@@ -156,14 +164,20 @@ router.put('/rsvp/cancel', async (req: Request, res: Response, next: NextFunctio
     Models.Item
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
-            { $pull: { 'rsvp': req.body['userAddress'] } },
+            {
+                $push: { 'cancel': req.body['userAddress'] },
+                $pull: { 'rsvp': req.body['userAddress'] },
+            },
             { safe: true, upsert: true }
         )
         .then(meeting => {
             Models.Item
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
-                    { $pull: { 'rsvp': req.body['meetingAddress'] } },
+                    {
+                        $push: { 'cancel': req.body['meetingAddress'] },
+                        $pull: { 'rsvp': req.body['meetingAddress'] }
+                    },
                     { safe: true, upsert: true }
                 )
                 .then(user => {
@@ -238,6 +252,44 @@ router.put('/cancel', async (req: Request, res: Response, next: NextFunction) =>
             res
                 .status(OK)
                 .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Update rsvp & attend lists both for provided meeting as well as the participant.
+ * 
+ * @params  meetingAddress  The meeting's address to look for.
+ * @params  userAddress     The user's address to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/attendance', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'attend': req.body['userAddress'] },
+                $pull: { 'rsvp': req.body['userAddress'] }
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            Models.Item
+                .updateOne(
+                    { _id: req.body['userAddress'], type: ModelType.USER },
+                    {
+                        $push: { 'attend': req.body['meetingAddress'] },
+                        $pull: { 'rsvp': req.body['meetingAddress'] }
+                    },
+                    { safe: true, upsert: true }
+                )
+                .then(user => {
+                    res
+                        .status(OK)
+                        .json(meeting);
+                })
+                .catch(err => next(err));
         })
         .catch(err => next(err));
 });

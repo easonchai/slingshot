@@ -10,7 +10,7 @@ interface IProps {
   userWallet: string;
   loading: Loading;
 
-  dispatchHandleStartMeetingConfirmationLoading(status: boolean): void;
+  dispatchHandleMarkAttendanceConfirmationLoading(status: boolean): void;
   dispatchHandleMarkAttendance(meetingAddress: string, userAddress: string): void;
 
   dispatchAddErrorNotification(message: String): void;
@@ -42,10 +42,10 @@ export class UsersList extends React.Component<IProps, IState> {
     this.etherService.markAttendance(
       this.props.cachedMeeting._id,
       participantWallet,
-      confirmation => this.props.dispatchHandleStartMeetingConfirmationLoading(false)
+      confirmation => this.props.dispatchHandleMarkAttendanceConfirmationLoading(false)
     )
       .then((res: any) => {
-        this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, this.props.userWallet);
+        this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleAttendance: ' + reason);
       })
