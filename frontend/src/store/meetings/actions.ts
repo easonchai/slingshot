@@ -11,7 +11,7 @@ export const ModelType = {
 export interface Meeting {
   _id: string,
   type: string,
-  
+
   data: {
     // BACKEND
     //txHash: string;  // only used as primary key for pending TX's
@@ -58,6 +58,7 @@ export interface GroupMeetingAndUserAddress {
 
 const actionCreator = actionCreatorFactory();
 
+export const UpdateOrganiserEthereumAddress = actionCreator<string>(AppActions.UPDATE_ORGANIZER_ETHEREUM_ADDRESS);
 export const CreateFirstMeeting = actionCreator<Meeting>(AppActions.CREATE_FIRST_MEETING);
 export const ReadAllMeetings = actionCreator<Array<Meeting>>(AppActions.READ_ALL_MEETINGS);
 export const ReadCachedMeeting = actionCreator<Meeting>(AppActions.READ_CACHED_MEETING);
@@ -70,6 +71,7 @@ export const UpdateCancelMeeting = actionCreator<string>(AppActions.UPDATE_CANCE
 export const UpdateHandleAttendance = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_HANDLE_ATTENDANCE);
 
 export const actions = {
+  UpdateOrganiserEthereumAddress,
   CreateFirstMeeting,
   ReadAllMeetings,
   ReadCachedMeeting,

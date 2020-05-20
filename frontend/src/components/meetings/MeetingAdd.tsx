@@ -15,7 +15,7 @@ interface IProps {
 
 	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
-	dispatchUpdateUserEthereumAddress(payload: User): void;
+	dispatchUpdateOrganiserEthereumAddress(organiserAddress: string): void;
 	dispatchAddErrorNotification(message: String): void;
 }
 
@@ -70,38 +70,32 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.etherService = EtherService.getInstance();
 	}
 
-	accChangeCallback(accounts: string[]) {
+	accChangeCallback = (accounts: string[]) => {
 		console.log(accounts[0]);
+		this.props.dispatchUpdateOrganiserEthereumAddress(accounts[0]);
 	}
 
 	chainChangeCallback = (chainID: string) => {
-		if (chainID !== '4') {
+		if (chainID !== '4' && chainID !== 'rinkeby') {
 			this.props.dispatchAddErrorNotification('You are not on Rinkeby!');
 			console.log(".")
 		}
 	}
 
+	componentWillUnmount() {
+		this.etherService.removeAllListeners();
+	}
+
 	componentDidMount() {
 		this.etherService.requestConnection(this.chainChangeCallback, this.accChangeCallback)
 			.then((account: string) => {
-				// TODO: keep the whole object consistent (i.e. reload the arrays of meetings for the new wallet addres.)
-				const user = {
-					_id: account,
-					type: ModelType.USER,
-					cancel: [],
-					rsvp: [],
-					attend: [],
-					withdraw: []
-				};
-
-				this.props.dispatchUpdateUserEthereumAddress(user);
+				this.accChangeCallback([account]);
+				this.etherService.getNetwork().then(network => this.chainChangeCallback(network))
 			}, (reason: string) => {
-				console.log('Rejection:', reason);
-				// TODO notify user
+				this.props.dispatchAddErrorNotification('Error connecting to MetaMask: ' + reason);
 			})
 			.catch((error: string) => {
-				console.log('Error:', error);
-				// TODO notify user
+				this.props.dispatchAddErrorNotification('Error connecting to MetaMask: ' + error);
 			});
 	}
 

@@ -85,7 +85,7 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map((participantWallet) => {
                   return (
                     <span key={participantWallet}>
-                      {participantWallet}
+                      {participantWallet} <br />
                     </span>
                   );
                 })
@@ -98,7 +98,7 @@ export class UsersList extends React.Component<IProps, IState> {
               // TODO: switch tabindex to 'cancel' upon confirmation
               this.props.loading.rsvpCancellationConfirmation &&
               <span key={this.props.userWallet}>
-                Cancelling ... {this.props.userWallet}
+                Cancelling ... {this.props.userWallet} <br />
               </span>
             }
 
@@ -123,6 +123,8 @@ export class UsersList extends React.Component<IProps, IState> {
                           MARK ATTENDANCE
                         </Button>
                       }
+
+                      <br />
                     </span>
                   );
                 })
@@ -135,7 +137,7 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map((participantWallet) => {
                   return (
                     <span key={participantWallet}>
-                      {participantWallet}
+                      {participantWallet} <br />
                     </span>
                   );
                 })
@@ -148,7 +150,7 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map((participantWallet) => {
                   return (
                     <span key={participantWallet}>
-                      {participantWallet}
+                      {participantWallet} <br />
                     </span>
                   );
                 })

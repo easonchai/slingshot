@@ -87,11 +87,23 @@ export default class EtherService {
     return typeof this.ethereum !== 'undefined';
   }
 
-  public async requestConnection(chainChangeCallback: (chainID: string) => void, accChangeCallback: (accounts: string[]) => void, ): Promise<string> {
+  public async getNetwork(): Promise<string> {
+    const network = (await this.provider.getNetwork()).name;
+    return network;
+  }
+
+  public removeAllListeners(): void {
+    this.ethereum.removeAllListeners('networkChanged');
+    this.ethereum.removeAllListeners('accountsChanged');
+  }
+  //public removeListenerNetworkChange: (this.chainChangeCallback);
+
+  public async requestConnection(chainChangeCallback: (chainID: string) => void, accChangeCallback: (accounts: string[]) => void): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
       if (this.isEthereumNodeAvailable()) {
         this.ethereum.on('networkChanged', chainChangeCallback);
         this.ethereum.on('accountsChanged', accChangeCallback);
+
         const accounts =
           await this.ethereum
             .enable()

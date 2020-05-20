@@ -52,24 +52,30 @@ export class MeetingView extends React.Component<IProps> {
       */
   }
 
-  componentWillMount() {
-    this.props.dispatchGetCachedMeetingById(this.props.id);
-  }
-
-  accChangeCallback(accounts: string[]) {
+  accChangeCallback = (accounts: string[]) => {
     console.log(accounts[0]);
+    this.props.dispatchUpdateUserEthereumAddress(accounts[0]);
   }
 
-  chainChangeCallback(chainID: string) {
-    console.log(chainID)
+  chainChangeCallback = (chainID: string) => {
+    if (chainID !== '4' && chainID !== 'rinkeby') {
+      this.props.dispatchAddErrorNotification('You are not on Rinkeby!');
+      console.log(".")
+    }
   }
 
+  componentWillUnmount() {
+    this.etherService.removeAllListeners();
+  }
   componentDidMount() {
+    this.props.dispatchGetCachedMeetingById(this.props.id);
+
     // TODO: refactor (bring up to a higher component)
     this.etherService
       .requestConnection(this.chainChangeCallback, this.accChangeCallback)
       .then((account: string) => {
-        this.props.dispatchUpdateUserEthereumAddress(account);
+        this.accChangeCallback([account]);
+        this.etherService.getNetwork().then(network => this.chainChangeCallback(network))
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('MetaMask authorization: ' + reason);
       })

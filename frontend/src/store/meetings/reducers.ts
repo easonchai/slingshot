@@ -1,8 +1,6 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
 import { actions, Meeting, ModelType } from './actions';
-import { actions as userActions } from '../users/actions';
-import { act } from 'react-dom/test-utils';
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
@@ -146,14 +144,14 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
-  if (isType(action, userActions.UpdateUserEthereumAddress)) {
+  if (isType(action, actions.UpdateOrganiserEthereumAddress)) {
     return {
       ...state,
       cachedMeeting: {
         ...state.cachedMeeting,
         data: {
           ...state.cachedMeeting.data,
-          organizerAddress: action.payload._id
+          organizerAddress: action.payload
         }
       }
     }

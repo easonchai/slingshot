@@ -40,8 +40,8 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
-    dispatchUpdateUserEthereumAddress: (payload: User) => {
-      dispatch(userActions.UpdateUserEthereumAddress(payload));
+    dispatchUpdateOrganiserEthereumAddress: (organiserAddress: string) => {
+      dispatch(meetingActions.UpdateOrganiserEthereumAddress(organiserAddress));
     },
 
     dispatchAddNotification: (notification: Notification) => {
