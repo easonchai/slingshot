@@ -51,7 +51,7 @@ export class Home extends React.Component<IProps> {
             </Typography>
             <br />
             <Grid container spacing={2} justify="center">
-              <Link style={{ textDecoration: 'none' }} to='/meeting/create'>
+              <Link style={{ textDecoration: 'none' }} to='/meeting/create/first'>
                 <MyButton>Host a Meeting</MyButton>
               </Link>
             </Grid>

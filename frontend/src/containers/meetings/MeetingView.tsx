@@ -11,10 +11,10 @@ import { actions as loadingActions } from '../../store/loading/actions';
 
 const mapStateToProps = (state: IAppState, props: any) => {
   return {
-      id: props.match.params.id,
-      user: state.userReducer.user,
-      cachedMeeting: state.meetingsReducer.cachedMeeting,
-      loading: state.loadingReducer.loading,
+    id: props.match.params.id,
+    user: state.userReducer.user,
+    cachedMeeting: state.meetingsReducer.cachedMeeting,
+    loading: state.loadingReducer.loading,
   };
 };
 
@@ -49,7 +49,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
 
       dispatch(userActions.UpdateUserEthereumAddress(payload));
     },
-    
+
     dispatchUpdateRSVP: (meetingAddress: string, userAddress: string) => {
       dispatch(loadingActions.UpdateRsvpConfirmationLoading(true));
 
@@ -57,7 +57,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         meetingAddress: meetingAddress,
         userAddress: userAddress
       };
-      
+
       axios
         .put('/api/meeting/rsvp/add', payload)
         .then(res => {
@@ -78,10 +78,10 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       };
 
       axios
-      .put('/api/meeting/rsvp/cancel', payload)
-      .then(res => {
-        dispatch(meetingActions.UpdateRSVPListCancellation(payload));
-      });
+        .put('/api/meeting/rsvp/cancel', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateRSVPListCancellation(payload));
+        });
     },
 
     dispatchUpdateRsvpCancellationConfirmationLoading: (status: boolean) => {
@@ -155,33 +155,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
 
     dispatchUpdateHandleCancelMeetingConfirmationLoading: (status: boolean) => {
       dispatch(loadingActions.UpdateCancelMeetingConfirmationLoading(status));
-    },
-
-    dispatchUpdateetingDeploymentConfirmationLoading: (status: boolean) => {
-      dispatch(loadingActions.UpdateMeetingDeploymentLoading(status));
-    },
-
-    dispatchAddEvent: (meeting: Meeting, hash: string) => {
-      // TODO: new vs first
-      dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
-
-      meeting._id = hash;
-      meeting.data.name = meeting.data.name + '#';
-      meeting.data.isCancelled = false;
-      meeting.data.isEnded = false;
-      meeting.data.isStarted = false;
-      meeting.cancel = []
-      meeting.rsvp = []
-      meeting.attend = []
-      meeting.withdraw = []
-
-      axios
-        .post('/api/meeting/create', meeting)
-        .then(res => {
-          dispatch(meetingActions.CreateFirstMeeting(meeting));
-        });
     }
-
   };
 };
 

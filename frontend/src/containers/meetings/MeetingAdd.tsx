@@ -5,14 +5,15 @@ import { connect } from 'react-redux';
 import { History } from 'history';
 import { actions as meetingActions, Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
-import { actions as userActions, User } from '../../store/users/actions';
 import { IAppState } from '../../store/index';
 import { MeetingAdd as Component } from '../../components/meetings/MeetingAdd';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
 
-const mapStateToProps = (state: IAppState) => {
+const mapStateToProps = (state: IAppState, props: any) => {
   return {
+    parent: props.match.params.parent,
     user: state.userReducer.user,
+    cachedMeeting: state.meetingsReducer.cachedMeeting,
   };
 };
 
@@ -33,6 +34,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       axios
         .put('/api/meeting/update', payload)
         .then(res => {
+          console.log(res, payload);
           dispatch(meetingActions.UpdateMeetingContractAddress(payload));
           dispatch(loadingActions.UpdateMeetingDeploymentLoading(false));
 
@@ -57,6 +59,17 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       };
 
       dispatch(notificationActions.AddNotification(notification));
+    },
+
+    dispatchCreateNextMeeting: (history: History, meeting: Meeting) => {
+      dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
+      // TODO: update parent / child links
+      axios
+        .post('/api/meeting/create', meeting)
+        .then(res => {
+          dispatch(meetingActions.CreateNextMeeting(meeting));
+          history.push('/meeting/' + meeting._id);
+        });
     }
   };
 }

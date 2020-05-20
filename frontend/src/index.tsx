@@ -10,15 +10,18 @@ import { store } from './store/index';
 import './index.css';
 
 ReactDOM.render(
-  <Provider store={ store }>
+  <Provider store={store}>
     <BrowserRouter>
       <Switch>
-        <Route path='/meeting/create' component={ MeetingAdd } />
+        <Route
+          path='/meeting/create/:parent'
+          render={(props) => <MeetingAdd {...props} />}
+        />
         <Route
           path='/meeting/:id'
-          render={ (props) => <MeetingView { ...props } isContractAddress={ false } /> }
+          render={(props) => <MeetingView {...props} />}
         />
-        <Route path='/' component={ App } />
+        <Route path='/' component={App} />
       </Switch>
     </BrowserRouter>
   </Provider>,

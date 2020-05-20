@@ -24,8 +24,8 @@ const initState: IState = {
       // SOLIDITY
       startDateTime: 0,
       endDateTime: 0,
-      stake: 0.0,
-      maxParticipants: 0,
+      stake: 0.001,
+      maxParticipants: 50,
       //registered: number,  // redundant -> rsvp.length + attend.length + withdraw.length
       prevStake: 0,
       payout: 0,
@@ -79,6 +79,14 @@ export const reducer = (state: IState = initState, action: Action): IState => {
           ...meeting,
           _id: action.payload.meetingAddress,
           type: ModelType.MEETING
+        };
+      } else if (meeting.data.child === action.payload.txHash) {
+        return {
+          ...meeting,
+          data: {
+            ...meeting.data,
+            child: action.payload.meetingAddress
+          }
         };
       }
 
@@ -217,6 +225,28 @@ export const reducer = (state: IState = initState, action: Action): IState => {
         rsvp: state.cachedMeeting.rsvp.filter(user => user !== action.payload.userAddress),
         attend: [...state.cachedMeeting.attend, action.payload.userAddress]
       }
+    };
+  }
+
+  if (isType(action, actions.CreateNextMeeting)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.data.parent) {
+        return {
+          ...meeting,
+          data: {
+            ...meeting.data,
+            child: action.payload._id
+          }
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: action.payload
     };
   }
 

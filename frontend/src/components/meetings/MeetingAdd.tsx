@@ -11,12 +11,16 @@ import { NotificationList } from '../../containers/notifications/NotificationLis
 
 interface IProps {
 	history: History;
+	parent: string;
 	user: User;
+	cachedMeeting: Meeting;
 
 	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateOrganiserEthereumAddress(organiserAddress: string): void;
 	dispatchAddErrorNotification(message: String): void;
+
+	dispatchCreateNextMeeting(history: History, meting: Meeting): void;
 }
 
 interface IState {
@@ -100,10 +104,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			});
 	}
 
-	callbackDeployedMeeting = (confirmation: any) => {
+	callbackDeployedFirstMeeting = (confirmation: any) => {
 		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
 
-		console.log(confirmation);
+		console.log(confirmation.transactionHash, confirmation);
 		const payload: GroupHashAndAddress = {
 			txHash: confirmation.transactionHash,
 			meetingAddress: confirmation.args.contractAddr
@@ -112,20 +116,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
-	handleSubmit = (event: any) => {
-		event.preventDefault();
-		event.persist();
-
-		const startDate = new Date(this.state.form.startDate.toDateString());
-		const startHour = this.state.form.startTime.getHours();
-		const startMinute = this.state.form.startTime.getMinutes();
-		const startDateTime = (new Date(startDate)).getTime() / 1000 + (startHour * 60 + startMinute) * 60;
-
-		const endDate = new Date(this.state.form.endDate.toDateString());
-		const endHour = this.state.form.endTime.getHours();
-		const endMinute = this.state.form.endTime.getMinutes();
-		const endDateTime = (new Date(endDate)).getTime() / 1000 + (endHour * 60 + endMinute) * 60;
-
+	handleFirstMeeting = (event: any, startDateTime: number, endDateTime: number) => {
 		/**
 		 * TODO: verify that the user is still connected to MetaMask.
 		 * Preferably listen to events (network change, account change, logout).
@@ -135,7 +126,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			endDateTime,
 			event.target.stake.value,
 			event.target.maxParticipants.value,
-			this.callbackDeployedMeeting
+			this.callbackDeployedFirstMeeting
 		)
 			.then((res: any) => {
 				this.props.dispatchCreateFirstMeeting(this.props.history,
@@ -171,6 +162,84 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			.catch((err: any) => {
 				this.props.dispatchAddErrorNotification("There was an error creating this meeting: " + err);
 			});
+	}
+
+	callbackDeployedNextMeeting = (confirmation: any) => {
+		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
+
+		console.log(confirmation.transactionHash, confirmation);
+		const payload: GroupHashAndAddress = {
+			txHash: confirmation.transactionHash,
+			meetingAddress: confirmation.args._nextMeeting
+		};
+
+		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
+	}
+
+	handleNextMeeting = (event: any, startDateTime: number, endDateTime: number) => {
+		this.etherService.nextMeeting(
+			this.props.cachedMeeting._id,
+			startDateTime,
+			endDateTime,
+			parseFloat(event.target.stake.value),
+			parseInt(event.target.maxParticipants.value),
+			this.callbackDeployedNextMeeting
+		)
+			.then((res: any) => {
+				console.log("success next meeting ", res);
+				this.props.dispatchCreateNextMeeting(this.props.history, {
+					_id: res.hash,
+					type: ModelType.PENDING,
+					data: {
+						name: event.target.meetingName.value,
+						location: event.target.location.value,
+						description: event.target.description.value,
+						startDateTime: startDateTime,
+						endDateTime: endDateTime,
+						stake: parseFloat(event.target.stake.value),
+						maxParticipants: parseInt(event.target.maxParticipants.value),
+						prevStake: 0,  // TODO: carry over from parent meeting (wait for next contract release)
+						payout: 0,  // TODO: calculate from parent meeting / reward pool (wait for next contract release)
+						isCancelled: false,
+						isStarted: false,
+						isEnded: false,
+						deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+						organizerAddress: this.props.user._id,
+						parent: this.props.parent,
+						child: '',
+					},
+					cancel: [],
+					rsvp: [],
+					attend: [],
+					withdraw: []
+				});
+			}, (reason: any) => {
+				this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
+			})
+			.catch((err: any) => {
+				this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
+			});
+	}
+
+	handleSubmit = (event: any) => {
+		event.preventDefault();
+		event.persist();
+
+		const startDate = new Date(this.state.form.startDate.toDateString());
+		const startHour = this.state.form.startTime.getHours();
+		const startMinute = this.state.form.startTime.getMinutes();
+		const startDateTime = (new Date(startDate)).getTime() / 1000 + (startHour * 60 + startMinute) * 60;
+
+		const endDate = new Date(this.state.form.endDate.toDateString());
+		const endHour = this.state.form.endTime.getHours();
+		const endMinute = this.state.form.endTime.getMinutes();
+		const endDateTime = (new Date(endDate)).getTime() / 1000 + (endHour * 60 + endMinute) * 60;
+
+		if (this.props.parent === 'first') {
+			this.handleFirstMeeting(event, startDateTime, endDateTime);
+		} else {
+			this.handleNextMeeting(event, startDateTime, endDateTime);
+		}
 	};
 
 	/**
@@ -214,6 +283,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	}
 
 	render() {
+		const { cachedMeeting } = this.props;
+
 		return (
 			<Container maxWidth={false}>
 				<NotificationList />
@@ -221,7 +292,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					<form onSubmit={this.handleSubmit} className="add-meeting-form">
 						<Grid container spacing={2}>
 							<Grid item xs={12}>
-								<TextField id="meetingName" label="Meeting Name" />
+								<TextField defaultValue={cachedMeeting.data.name} id="meetingName" label="Meeting Name" />
 							</Grid>
 
 							<Grid item xs={12}>
@@ -231,7 +302,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									inputProps={this.stakeInputProps}
 									id="stake"
 									label="Stake Amount (ETH)"
-									defaultValue={0.01}
+									defaultValue={cachedMeeting.data.stake}
 								/>
 							</Grid>
 
@@ -241,7 +312,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									type="number"
 									id="maxParticipants"
 									label="Max participants"
-									defaultValue={100}
+									defaultValue={cachedMeeting.data.maxParticipants}
 								/>
 							</Grid>
 
@@ -298,11 +369,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 							</Grid>
 
 							<Grid item xs={12}>
-								<TextField id="location" label="Location" />
+								<TextField defaultValue={cachedMeeting.data.location} id="location" label="Location" />
 							</Grid>
 
 							<Grid item xs={12}>
-								<TextareaAutosize id="description" aria-label="Description" rowsMin={10} placeholder="Description" />
+								<TextareaAutosize defaultValue={cachedMeeting.data.description} id="description" aria-label="Description" rowsMin={10} placeholder="Description" />
 							</Grid>
 
 							<Grid item xs={12}>

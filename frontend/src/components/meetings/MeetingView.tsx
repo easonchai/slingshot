@@ -33,12 +33,13 @@ export interface IProps {
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
 
   dispatchAddErrorNotification(message: String): void;
-
-  dispatchAddEvent(meting: Meeting, hash: string): void;
-  dispatchUpdateetingDeploymentConfirmationLoading(status: boolean): void;
 }
 
-export class MeetingView extends React.Component<IProps> {
+interface IState {
+  id: String;
+}
+
+export class MeetingView extends React.Component<IProps, IState> {
   etherService: EtherService;
 
   constructor(props: any) {
@@ -50,6 +51,10 @@ export class MeetingView extends React.Component<IProps> {
       * validate that the meeting contract address is available.
       * Otherwise retrieve it from the known txHash (and persist in DB).
       */
+
+    this.state = {
+      id: this.props.id
+    };
   }
 
   accChangeCallback = (accounts: string[]) => {
@@ -68,6 +73,7 @@ export class MeetingView extends React.Component<IProps> {
   componentWillUnmount() {
     this.etherService.removeAllListeners();
   }
+
   componentDidMount() {
     this.props.dispatchGetCachedMeetingById(this.props.id);
 
@@ -83,6 +89,13 @@ export class MeetingView extends React.Component<IProps> {
       .catch((err: any) => {
         this.props.dispatchAddErrorNotification('MetaMask authorization: ' + err);
       })
+  }
+
+  componentDidUpdate() {
+    if (this.state.id !== this.props.id) {
+      this.props.dispatchGetCachedMeetingById(this.props.id);
+      this.setState({ id: this.props.id });
+    }
   }
 
   callbackFn = (result: any) => {
@@ -197,29 +210,9 @@ export class MeetingView extends React.Component<IProps> {
       });
   }
 
-  handleNextMeeting = (event: any) => {
-    this.etherService.nextMeeting(
-      this.props.cachedMeeting._id,
-      this.props.cachedMeeting.data.startDateTime,
-      this.props.cachedMeeting.data.endDateTime,
-      this.props.cachedMeeting.data.stake,
-      this.props.cachedMeeting.data.maxParticipants,
-      confirmation => { console.log(confirmation); this.props.dispatchUpdateetingDeploymentConfirmationLoading(false) }
-    )
-      .then((res: any) => {
-        console.log("success next meeting ", res);
-        // TODO: add loading animation while we wait for callback / TX to be mined
-        this.props.dispatchAddEvent(this.props.cachedMeeting, res.hash);
-      }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
-      })
-      .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
-      });
-  }
-
   render() {
     const { cachedMeeting } = this.props;
+    const { parent, child } = cachedMeeting.data;
 
     return (
       <div>
@@ -294,11 +287,25 @@ export class MeetingView extends React.Component<IProps> {
                         <Button disabled={false} onClick={this.handleEnd} variant="outlined" color="primary">
                           END EVENT
                           </Button>
-                        <Button disabled={false} onClick={this.handleNextMeeting} variant="outlined" color="primary">
-                          NEXT MEETING
+                        <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
+                          <Button disabled={false} variant="outlined" color="primary">
+                            NEW MEETING
                           </Button>
+                        </Link>
                       </Grid>
 
+                      <Grid item xs={12}>
+                        <Link style={{ textDecoration: 'none' }} to={'/meeting/' + parent}>
+                          <Button disabled={parent === ''} variant="outlined" color="primary">
+                            PREVIOUS MEETING
+                          </Button>
+                        </Link>
+                        <Link style={{ textDecoration: 'none' }} to={'/meeting/' + child}>
+                          <Button disabled={child === ''} variant="outlined" color="primary">
+                            NEXT MEETING
+                          </Button>
+                        </Link>
+                      </Grid>
                     </Grid>
                   </Grid>
 

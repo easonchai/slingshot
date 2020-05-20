@@ -69,6 +69,7 @@ export const UpdateStartMeeting = actionCreator<string>(AppActions.UPDATE_START_
 export const UpdateEndMeeting = actionCreator<string>(AppActions.UPDATE_END_MEETING);
 export const UpdateCancelMeeting = actionCreator<string>(AppActions.UPDATE_CANCEL_MEETING);
 export const UpdateHandleAttendance = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_HANDLE_ATTENDANCE);
+export const CreateNextMeeting = actionCreator<Meeting>(AppActions.CREATE_NEXT_MEETING);
 
 export const actions = {
   UpdateOrganiserEthereumAddress,
@@ -81,5 +82,6 @@ export const actions = {
   UpdateStartMeeting,
   UpdateEndMeeting,
   UpdateCancelMeeting,
-  UpdateHandleAttendance
+  UpdateHandleAttendance,
+  CreateNextMeeting
 };

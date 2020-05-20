@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Models } from '../models';
 import { ModelType } from '../models/Item';
+import { ModelOptions } from 'mongoose';
 
 const router = Router();
 
@@ -70,10 +71,27 @@ router.get('/id/:id', async (req: Request, res: Response, next: NextFunction) =>
 router.post('/create', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
         .create(req.body)
-        .then(document => {
-            res
-                .status(CREATED)
-                .json(document);
+        .then((document: any) => {
+
+            if (document?.data?.parent) {
+                Models.Item
+                    .updateOne(
+                        { _id: document.data.parent, type: ModelType.MEETING },
+                        { $set: { 'data.child': document._id } },
+                        { safe: true }
+                    )
+                    .then(parent => {
+                        res
+                            .status(CREATED)
+                            .json(document);
+                    })
+                    .catch(err => next(err));
+            } else {
+                res
+                    .status(CREATED)
+                    .json(document);
+            }
+
         })
         .catch(err => next(err));
 });
@@ -90,6 +108,8 @@ router.post('/create', async (req: Request, res: Response, next: NextFunction) =
  * @returns Meeting
  */
 router.put('/update', async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body);
+
     Models.Item
         .findById(req.body['txHash'])
         .then((original: any) => {
@@ -101,11 +121,22 @@ router.put('/update', async (req: Request, res: Response, next: NextFunction) =>
                 .save()
                 .then((document: any) => {
                     Models.Item
-                        .findByIdAndDelete(req.body['txHash'])
-                        .then((oldDoc: any) => {
-                            res
-                                .status(CREATED)
-                                .json(result);
+                        .updateOne(
+                            { _id: document.data.parent, type: ModelType.MEETING },
+                            { $set: { 'data.child': document._id } },
+                            { safe: true }
+                        )
+                        .then(parent => {
+
+                            Models.Item
+                                .findByIdAndDelete(req.body['txHash'])
+                                .then((oldDoc: any) => {
+                                    res
+                                        .status(CREATED)
+                                        .json(result);
+                                })
+                                .catch(err => next(err));
+
                         })
                         .catch(err => next(err));
                 })
