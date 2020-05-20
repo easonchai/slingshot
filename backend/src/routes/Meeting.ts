@@ -24,6 +24,7 @@ router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
             ]
         })
         .select('-__v')
+        .sort({ 'data.startDateTime': 1 })
         .then(documents => {
             res
                 .status(OK)
