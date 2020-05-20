@@ -58,6 +58,7 @@ export class MeetingView extends React.Component<IProps> {
   }
 
   chainChangeCallback = (chainID: string) => {
+    // TODO: refactor duplicate callback (see MeetingAdd)
     if (chainID !== '4' && chainID !== 'rinkeby') {
       this.props.dispatchAddErrorNotification('You are not on Rinkeby!');
       console.log(".")
@@ -75,7 +76,7 @@ export class MeetingView extends React.Component<IProps> {
       .requestConnection(this.chainChangeCallback, this.accChangeCallback)
       .then((account: string) => {
         this.accChangeCallback([account]);
-        this.etherService.getNetwork().then(network => this.chainChangeCallback(network))
+        this.chainChangeCallback(this.etherService.getNetwork());
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('MetaMask authorization: ' + reason);
       })

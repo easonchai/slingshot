@@ -76,7 +76,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	}
 
 	chainChangeCallback = (chainID: string) => {
-		if (chainID !== '4' && chainID !== 'rinkeby') {
+		// TODO: remove the magic numbers
+		if (chainID !== '4') {
 			this.props.dispatchAddErrorNotification('You are not on Rinkeby!');
 			console.log(".")
 		}
@@ -90,7 +91,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.etherService.requestConnection(this.chainChangeCallback, this.accChangeCallback)
 			.then((account: string) => {
 				this.accChangeCallback([account]);
-				this.etherService.getNetwork().then(network => this.chainChangeCallback(network))
+				this.chainChangeCallback(this.etherService.getNetwork());
 			}, (reason: string) => {
 				this.props.dispatchAddErrorNotification('Error connecting to MetaMask: ' + reason);
 			})

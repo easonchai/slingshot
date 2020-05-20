@@ -87,9 +87,8 @@ export default class EtherService {
     return typeof this.ethereum !== 'undefined';
   }
 
-  public async getNetwork(): Promise<string> {
-    const network = (await this.provider.getNetwork()).name;
-    return network;
+  public getNetwork(): string {
+    return this.ethereum.networkVersion;
   }
 
   public removeAllListeners(): void {
