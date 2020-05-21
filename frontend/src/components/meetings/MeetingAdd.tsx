@@ -465,7 +465,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											multiline
 											rows={6}
 											variant="outlined"
-											defaultValue={cachedMeeting.data.location}
+											defaultValue={cachedMeeting.data.description}
 										/>
 									</Grid>
 									<Grid item container xs={12}>
