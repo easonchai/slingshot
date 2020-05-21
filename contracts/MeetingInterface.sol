@@ -15,7 +15,7 @@ interface MeetingInterface {
 	function endEvent() external;
 	function setStartDate(uint dateTimestamp) external;
 	function setEndDate(uint dateTimestamp) external;
-	function setMinStake(uint stakeAmt) external;
+	function setRequiredStake(uint stakeAmt) external;
 	function setRegistrationLimit(uint max) external;
 	function withdraw() external;
 	function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address);

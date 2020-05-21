@@ -11,7 +11,7 @@ contract Meeting is Ownable {
 
     uint public startDate;
     uint public endDate;
-    uint public minStake; //should be entered in GWEI by frontend
+    uint public requiredStake; 
     uint public registrationLimit;
     uint public registered;
     uint public prevStake;
@@ -20,8 +20,6 @@ contract Meeting is Ownable {
     bool public isCancelled;
     bool public isEnded;
     bool public isActive; //Event started.
-    address parentAddress; //Address of deployer contract.
-    address prevMeeting; //Address of the previous meeting contract.
 
 
     struct Participant{
@@ -34,6 +32,7 @@ contract Meeting is Ownable {
 
     DeployerInterface public deployer;
     MeetingInterface public meeting;
+    ClubInterface public club;
 
     event EventCancelled();
     event GetChange();
@@ -48,7 +47,7 @@ contract Meeting is Ownable {
     event EditEndDateEvent(uint timeStamp);
     event EditMaxLimitEvent(uint max);
     event Refund(address addr, uint refund);
-    event NextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _nextMeeting);
+    event NextMeeting(uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit, address _nextMeeting);
     event SetPrevStake(uint prevStake);
     event SendStake(uint _amnt);
 
@@ -71,18 +70,17 @@ contract Meeting is Ownable {
        @dev Constructor explanation
        @param _startDate - The date the event starts
        @param _endDate - The date the event is expected to end
-       @param _minStake - Minimum each participant is required to stake
+       @param _requiredStake - Minimum each participant is required to stake
        @param _registrationLimit - Max attendees
      */
 
     constructor (
-        uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _parentAddress, address _prevMeeting) public {
+        uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit, address _parentAddress, address _prevMeeting) public {
         startDate = _startDate;
         endDate = _endDate;
-        minStake = _minStake;
+        requiredStake = _requiredStake;
         registrationLimit = _registrationLimit;
-        parentAddress = _parentAddress; //For deployment of next event contract.
-        prevMeeting = _prevMeeting;
+        club = Club(msg.sender);
     }
 
     /**@dev Start of functions */
@@ -90,8 +88,8 @@ contract Meeting is Ownable {
     function rsvp() external payable{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(!isEnded, 'Event finished');
-        require(amnt < minStake, 'Already registered');
-        require(msg.value.add(amnt) == minStake, 'Incorrect stake');
+        require(amnt < requiredStake, 'Already registered');
+        require(msg.value.add(amnt) == requiredStake, 'Incorrect stake');
         require(registered < registrationLimit, 'Limit reached');
         addressToParticipant[msg.sender] = Participant(uint32(now), msg.value, false);
         registered++;
@@ -103,7 +101,7 @@ contract Meeting is Ownable {
     function getChange() external{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(amnt > 0);
-        msg.sender.transfer(amnt.sub(minStake)); //Give change if user has overpaid. This can be done before or after the event.
+        msg.sender.transfer(amnt.sub(requiredStake)); //Give change if user has overpaid. This can be done before or after the event.
     
         emit GetChange();
     }
@@ -111,7 +109,7 @@ contract Meeting is Ownable {
     function eventCancel() public notActive onlyOwner notCancelled{
         //If it is the owner who calls this, it will cancel the event
         isCancelled = true;
-        minStake = 0; //This allows refunds to be claimed through getChange()
+        requiredStake = 0; //This allows refunds to be claimed through getChange()
         if (address(meeting) != address(0)){ //Send stake to new event if it has been created.
             sendStake(prevStake);
         }
@@ -136,7 +134,7 @@ contract Meeting is Ownable {
         //will pass in a list as parameter and use attendanceCount = list.length;
         Participant memory participant = addressToParticipant[_participant];
         require(participant.attended == false, 'already marked');
-        require(participant.stakedAmount >= minStake, 'Stake too low');
+        require(participant.stakedAmount >= requiredStake, 'Stake too low');
         addressToParticipant[_participant].attended = true;
         attendanceCount++;
         emit MarkAttendance(_participant);
@@ -179,12 +177,12 @@ contract Meeting is Ownable {
         emit EditEndDateEvent(dateTimestamp);
     }
 
-    function setMinStake(uint stakeAmt) external onlyOwner notActive{
+    function setRequiredStake(uint stakeAmt) external onlyOwner notActive{
         require(startDate > now.add(24 hours), 'Within 24 hours of event');
-        if (minStake < stakeAmt){
+        if (requiredStake < stakeAmt){
             registered = 0; //All participants need to increase stake.
             } 
-        minStake = stakeAmt;
+        requiredStake = stakeAmt;
         emit SetStakeEvent(stakeAmt);
     }
 
@@ -205,21 +203,23 @@ contract Meeting is Ownable {
         emit WithdrawEvent(msg.sender, payout);
     }
 
+
     /**@dev Deploys next event contract.*/
-    function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyOwner returns(address) { //Or internal
+    /*
+    function nextMeeting(uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit) external onlyOwner returns(address) { //Or internal
         //Cooldown period not necessary since we want owner to, at any time, be able to create chains of events.
         require(address(meeting) == address(0), 'Only be called once');
         deployer = DeployerInterface(parentAddress); //Define deployer contract.
-        meeting = MeetingInterface(deployer.deploy(_startDate, _endDate, _minStake, _registrationLimit)); //Deploy next event contract
+        meeting = MeetingInterface(deployer.deploy(_startDate, _endDate, _requiredStake, _registrationLimit)); //Deploy next event contract
         if (isEnded){
             sendStake(address(this).balance.sub(prevStake));
         }
         if (isCancelled){
             sendStake(prevStake);
         }
-        emit NextMeeting (_startDate, _endDate, _minStake, _registrationLimit, address(meeting));
+        emit NextMeeting (_startDate, _endDate, _requiredStake, _registrationLimit, address(meeting));
         return address(meeting);
-    }
+    }*/
 
     //@dev This function is called by the previous contract to set the stake amount.
     function setPrevStake(uint _prevStake) external payable {
