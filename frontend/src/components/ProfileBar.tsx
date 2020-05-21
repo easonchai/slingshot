@@ -1,4 +1,10 @@
+import axios from 'axios';
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { IAppState } from '../store/index';
+import EtherService from '../services/EtherService';
+import { actions as userActions, ModelType, User } from '../store/users/actions';
+import { actions as notificationActions, Notification } from '../store/notifications/actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -41,6 +47,9 @@ const Transition = React.forwardRef(function Transition(
 
 export default function ProfileBar() {
     const [open, setOpen] = React.useState(false);
+    const user = useSelector((state: IAppState) => state.userReducer.user);
+    const dispatch = useDispatch();
+    const etherService = EtherService.getInstance();
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -50,6 +59,52 @@ export default function ProfileBar() {
         setOpen(false);
     };
 
+    const accChangeCallback = (accounts: string[]) => {
+        const address = accounts[0];
+
+        if (address) {
+            axios
+                .get('/api/user/id/' + address)
+                .then(res => res.data as User)
+                .then(user => dispatch(userActions.UpdateUserEthereumAddress(user)));
+        }
+    }
+
+    const chainChangeCallback = (chainID: string) => {
+        // TODO: remove the magic number for Rinkeby network/chain id
+        if (chainID !== '4') {
+            const notification: Notification = {
+                message: 'You are not on Rinkeby!',
+                variant: 'filled',
+                severity: 'error',
+                display: true
+            };
+
+            dispatch(notificationActions.AddNotification(notification));
+        }
+    }
+
+    // componentDidMount alternative
+    React.useEffect(() => {
+        const selectedAddress = etherService.getUserAddress();
+
+        if (selectedAddress && selectedAddress !== user._id) {
+            /**
+             * Edge case that requires manual dispatch call.
+             *
+             * Sometimes window.ethereum.selectAddress is already
+             * pre-filled before we start listening for account changes.
+             * So we manually invoke the callback function to update userEthAddress.
+             */
+
+            accChangeCallback([selectedAddress]);
+        }
+
+        etherService.addAllListeners(chainChangeCallback, accChangeCallback);
+
+        // componentWillUnmount alternative
+        return () => etherService.removeAllListeners();
+    }, []);
 
     return (
         <React.Fragment>
@@ -81,8 +136,14 @@ export default function ProfileBar() {
                                         Address
                                     </Typography>
                                     <AddressButton endIcon={<CopyIcon />}>
-                                        0x7CA92A76778F89C578FA30290ee84132975F6835
+                                        {
+                                            user._id || 'Please sign in to MetaMask to link your account.'
+                                        }
                                     </AddressButton>
+                                    {
+                                        // TODO: add a button to authorize MetaMask for future interactions:
+                                        //  onClick = {await etherService.requestConnection()}
+                                    }
                                     <hr />
                                     <Typography variant="subtitle1" align="left" color="textPrimary" paragraph>
                                         ENS Domain

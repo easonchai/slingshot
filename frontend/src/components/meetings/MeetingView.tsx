@@ -79,17 +79,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     this.props.dispatchGetCachedMeetingById(this.props.id);
 
     // TODO: refactor (bring up to a higher component)
-    this.etherService
-      .requestConnection(this.chainChangeCallback, this.accChangeCallback)
-      .then((account: string) => {
-        this.accChangeCallback([account]);
-        this.chainChangeCallback(this.etherService.getNetwork());
-      }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('MetaMask authorization: ' + reason);
-      })
-      .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('MetaMask authorization: ' + err);
-      })
+    this.etherService.addAllListeners(this.chainChangeCallback, this.accChangeCallback);
   }
 
   componentDidUpdate() {

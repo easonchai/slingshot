@@ -88,21 +88,34 @@ export default class EtherService {
   }
 
   public getNetwork(): string {
-    return this.ethereum.networkVersion;
+    return this.ethereum?.networkVersion;
+  }
+
+  public getUserAddress(): string {
+    return this.ethereum?.selectedAddress;
+  }
+
+  public addNetworkListener(chainChangeCallback: (chainID: string) => void) {
+    this.ethereum.on('networkChanged', chainChangeCallback);
+  }
+
+  public addAccountListener(accChangeCallback: (accounts: string[]) => void) {
+    this.ethereum.on('accountsChanged', accChangeCallback);
+  }
+
+  public addAllListeners(chainChangeCallback: (chainID: string) => void, accChangeCallback: (accounts: string[]) => void): void {
+    this.addNetworkListener(chainChangeCallback);
+    this.addAccountListener(accChangeCallback);
   }
 
   public removeAllListeners(): void {
     this.ethereum.removeAllListeners('networkChanged');
     this.ethereum.removeAllListeners('accountsChanged');
   }
-  //public removeListenerNetworkChange: (this.chainChangeCallback);
 
-  public async requestConnection(chainChangeCallback: (chainID: string) => void, accChangeCallback: (accounts: string[]) => void): Promise<string> {
+  public async requestConnection(): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
       if (this.isEthereumNodeAvailable()) {
-        this.ethereum.on('networkChanged', chainChangeCallback);
-        this.ethereum.on('accountsChanged', accChangeCallback);
-
         const accounts =
           await this.ethereum
             .enable()
