@@ -4,6 +4,7 @@ import { Meeting } from '../../store/meetings/actions';
 import { Card, CardContent, CardHeader, IconButton, Typography, CardActions, Button } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import ShareIcon from "@material-ui/icons/Share";
+import SharePopup from "../SharePopup"
 
 const CustButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -17,6 +18,7 @@ const CustButton = styled(Button)({
 
 const DisplayCard = styled(Card)({
   maxWidth: 280,
+  maxHeight: 380,
 })
 
 export interface IProps {
@@ -30,20 +32,20 @@ export class MeetingPreview extends React.Component<IProps> {
     const stake = 'Stake Required: ' + this.props.meeting.data.stake + ' ETH';
 
     return (
-      <Link style={{ textDecoration: 'none' }} to={url}>
-        <DisplayCard raised={true} className="meeting-preview">
-          <CardHeader
-            action={
-              <IconButton aria-label="share">
-                <ShareIcon />
-              </IconButton>
-            }
-            title={title}
-            subheader={stake}
-          />
+      <DisplayCard raised={true} className="meeting-preview">
+        <CardHeader
+          action={
+            <SharePopup />
+          }
+          title={title}
+          subheader={stake}
+        />
+        <Link style={{ textDecoration: 'none' }} to={url}>
           <CardContent>
             <Typography variant="body2" color="textSecondary" component="p">
-              {this.props.meeting.data.description}
+              {this.props.meeting.data.description.length > 250 ?
+                this.props.meeting.data.description.substring(0, 249) + '...' :
+                this.props.meeting.data.description}
             </Typography>
             <br />
             <Typography variant="body2" color="textSecondary" component="p">
@@ -55,8 +57,9 @@ export class MeetingPreview extends React.Component<IProps> {
               RSVP
             </CustButton>
           </CardActions>
-        </DisplayCard>
-      </Link>
+        </Link>
+      </DisplayCard >
+
     );
   }
 }

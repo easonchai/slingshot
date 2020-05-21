@@ -4,10 +4,37 @@ import { History } from 'history';
 import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
-import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline } from '@material-ui/core';
+import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline, Typography, InputAdornment } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { NotificationList } from '../../containers/notifications/NotificationList';
+import { styled } from '@material-ui/core/styles';
+
+const Hero = styled(Container)({
+	margin: 0,
+	background: 'white',
+	padding: '30px 80px',
+	height: '200px',
+})
+
+const Middle = styled(Grid)({
+	padding: '60px 20px'
+})
+
+const MyButton = styled(Button)({
+	background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+	border: 0,
+	borderRadius: 3,
+	boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+	color: 'white',
+	height: 48,
+	padding: '0 10px',
+	width: 140,
+});
+
+const Test = styled(Grid)({
+	border: '2px solid black',
+})
 
 interface IProps {
 	history: History;
@@ -286,114 +313,183 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		const { cachedMeeting } = this.props;
 
 		return (
-			<Container maxWidth={false}>
+			<React.Fragment>
+				<CssBaseline />
 				<NotificationList />
-				<Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
-					<form onSubmit={this.handleSubmit} className="add-meeting-form">
-						<Grid container spacing={2}>
-							<Grid item xs={12}>
-								<TextField defaultValue={cachedMeeting.data.name} id="meetingName" label="Meeting Name" />
-							</Grid>
+				<Grid container>
+					{/* Top Section */}
+					<Hero maxWidth={false}>
+						<Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
+							Host a Meeting
+            		</Typography>
+						<Typography variant="h5" align="center" color="textSecondary" paragraph>
+							Ready for your next event?
+            		</Typography>
+					</Hero>
 
-							<Grid item xs={12}>
-								<TextField
-									required={true}
-									type="number"
-									inputProps={this.stakeInputProps}
-									id="stake"
-									label="Stake Amount (ETH)"
-									defaultValue={cachedMeeting.data.stake}
-								/>
-							</Grid>
-
-							<Grid item xs={12}>
-								<TextField
-									required={true}
-									type="number"
-									id="maxParticipants"
-									label="Max participants"
-									defaultValue={cachedMeeting.data.maxParticipants}
-								/>
-							</Grid>
-
-							<Grid item xs={12}>
-								<MuiPickersUtilsProvider utils={DateFnsUtils}>
+					{/* Card Section */}
+					<Middle item container spacing={2}>
+						<Container maxWidth="md">
+							<Typography variant="h6" align="center" color="textSecondary" paragraph>
+								First, fill in the important details
+              				</Typography>
+							<form onSubmit={this.handleSubmit} className="add-meeting-form">
+								<Grid container spacing={3} >
 									<Grid item xs={12}>
-										<KeyboardDatePicker
-											required={true}
-											margin="normal"
-											id="startDate"
-											label="Start Date"
-											format="MM/dd/yyyy"
-											value={this.state.form.startDate}
-											onChange={this.handleStartDateChange}
+										<TextField
+											fullWidth
+											required
+											id="meetingName"
+											label="Event Name"
+											defaultValue={cachedMeeting.data.name}
+											variant="outlined"
 										/>
 									</Grid>
-									<Grid item xs={12}>
-										<KeyboardTimePicker
-											required={true}
-											margin="normal"
-											id="startTime"
-											label="Start Time"
-											value={this.state.form.startTime}
-											onChange={this.handleStartTimeChange}
+									<Grid item xs={3}>
+										<TextField
+											id="stake"
+											label="Stake Amount"
+											type="number"
+											InputLabelProps={{
+												shrink: true,
+											}}
+											variant="outlined"
+											inputProps={this.stakeInputProps}
+											InputProps={{
+												endAdornment: <InputAdornment position="end">ETH</InputAdornment>
+											}}
+											defaultValue={cachedMeeting.data.stake}
 										/>
 									</Grid>
-
-									<Grid item xs={12}>
-										<KeyboardDatePicker
-											required={true}
-											margin="normal"
-											id="endDate"
-											label="End Date"
-											format="MM/dd/yyyy"
-											value={this.state.form.endDate}
-											onChange={(d) => this.setState({ form: { ...this.state.form, endDate: d } })}
+									<Grid item xs={1} />
+									<Grid item xs={3}>
+										<TextField
+											id="maxParticipants"
+											label="Max Participants"
+											type="number"
+											InputLabelProps={{
+												shrink: true,
+											}}
+											variant="outlined"
+											defaultValue={cachedMeeting.data.maxParticipants}
 										/>
 									</Grid>
-									<Grid item xs={12}>
-										<KeyboardTimePicker
-											required={true}
-											margin="normal"
-											id="endTime"
-											label="End Time"
-											value={this.state.form.endTime}
-											onChange={(t) => this.setState({ form: { ...this.state.form, endTime: t } })}
+									<Grid item xs={1} />
+									<Grid item xs={4}>
+										<TextField
+											fullWidth
+											variant="outlined"
+											defaultValue={cachedMeeting.data.location}
+											id="location"
+											label="Location"
 										/>
 									</Grid>
-								</MuiPickersUtilsProvider>
-							</Grid>
+									<Grid item container xs={12} alignItems="flex-end" justify="center">
+										<Typography variant="h6" align="center" color="textSecondary" paragraph>
+											When does your event start?
+										</Typography>
+									</Grid>
 
-							<Grid item xs={12}>
-								* The time is in your local timezone.
-							</Grid>
+									<MuiPickersUtilsProvider utils={DateFnsUtils}>
+										<Grid item xs={3}>
+											<KeyboardDatePicker
+												disableToolbar
+												variant="inline"
+												format="MM/dd/yyyy"
+												margin="normal"
+												id="date-picker-inline"
+												label="Start Date"
+												value={new Date('2020-05-17T21:11:54')}
+												onChange={() => console.log("Do something")}
+												KeyboardButtonProps={{
+													'aria-label': 'change date',
+												}}
+											/>
+										</Grid>
+										<Grid item xs={3}>
+											<KeyboardTimePicker
+												margin="normal"
+												id="time-picker"
+												label="Start Time"
+												value={new Date('2020-05-17T21:11:54')}
+												onChange={() => console.log("Do something")}
+												KeyboardButtonProps={{
+													'aria-label': 'change time',
+												}}
+											/>
+										</Grid>
+										<Grid item xs={3}>
+											<KeyboardDatePicker
+												disableToolbar
+												variant="inline"
+												format="MM/dd/yyyy"
+												margin="normal"
+												id="date-picker-inline"
+												label="End Date"
+												value={new Date('2020-05-17T21:11:54')}
+												onChange={() => console.log("Do something")}
+												KeyboardButtonProps={{
+													'aria-label': 'change date',
+												}}
+											/>
+										</Grid>
+										<Grid item xs={3}>
+											<KeyboardTimePicker
+												margin="normal"
+												id="time-picker"
+												label="End Time"
+												value={new Date('2020-05-17T21:11:54')}
+												onChange={() => console.log("Do something")}
+												KeyboardButtonProps={{
+													'aria-label': 'change time',
+												}}
+											/>
+										</Grid>
+									</MuiPickersUtilsProvider>
+									<Grid item xs={12}>
+										<TextField
+											fullWidth={true}
+											id="outlined"
+											label="Event Description"
+											multiline
+											rows={6}
+											variant="outlined"
+										/>
+									</Grid>
+									<Grid item container xs={12}>
+										<Grid item xs={4} />
+										<Grid item xs={2} alignItems="center" justify="center">
+											<Link style={{ textDecoration: 'none' }} to={'/'}>
+												<MyButton>CANCEL</MyButton>
+											</Link>
+										</Grid>
+										<Grid item xs={2} alignItems="center" justify="center">
+											<Tooltip title={this.props.user._id === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
+												<span>
+													<MyButton disabled={this.props.user._id === ''} type="submit"
+														style={this.props.user._id === '' ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+															{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}
+													>
+														CREATE MEETING
+												</MyButton>
+												</span>
+											</Tooltip>
+										</Grid>
+										<Grid item xs={4} />
+									</Grid>
+								</Grid>
+							</form>
+						</Container>
+					</Middle>
 
-							<Grid item xs={12}>
-								<TextField defaultValue={cachedMeeting.data.location} id="location" label="Location" />
-							</Grid>
-
-							<Grid item xs={12}>
-								<TextareaAutosize defaultValue={cachedMeeting.data.description} id="description" aria-label="Description" rowsMin={10} placeholder="Description" />
-							</Grid>
-
-							<Grid item xs={12}>
-								<Link style={{ textDecoration: 'none' }} to={'/'}>
-									<Button variant="outlined" color="primary">
-										CANCEL
-									</Button>
-								</Link>
-								<Tooltip title={this.props.user._id === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
-									<span>
-										<Button disabled={this.props.user._id === ''} type="submit" variant="outlined" color="primary">
-											CREATE MEETING
-										</Button>
-									</span>
-								</Tooltip>
-							</Grid>
-						</Grid>
-					</form>
+					<Container>
+						<Typography variant="subtitle1" align="center" color="textSecondary" component="p">
+							Slingshot 2020
+            			</Typography>
+					</Container>
 				</Grid>
-			</Container>
+			</React.Fragment >
+
 		);
 	}
 }
