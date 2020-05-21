@@ -98,6 +98,7 @@ export default function ProfileBar() {
              */
 
             accChangeCallback([selectedAddress]);
+            chainChangeCallback(etherService.getNetwork());
         }
 
         etherService.addAllListeners(chainChangeCallback, accChangeCallback);
