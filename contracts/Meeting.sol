@@ -2,7 +2,6 @@ pragma solidity >= 0.6.2 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
-import './MeetingInterface.sol';
 import 'ClubInterface.sol';
 
 contract Meeting is Ownable {
@@ -17,8 +16,9 @@ contract Meeting is Ownable {
     uint public payout;
     uint public attendanceCount;
     bool public isCancelled;
-    bool public isEnded;
+    bool public isFinalised;
     bool public isActive; //Event started.
+    bool public pausedUntil;
 
 
     struct Participant{
@@ -29,7 +29,6 @@ contract Meeting is Ownable {
 
     mapping (address => Participant) addressToParticipant;
 
-    MeetingInterface public meeting;
     ClubInterface public club;
 
     event EventCancelled();
@@ -45,7 +44,7 @@ contract Meeting is Ownable {
     event EditEndDateEvent(uint timeStamp);
     event EditMaxLimitEvent(uint max);
     event Refund(address addr, uint refund);
-    event NextMeeting(uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit, address _nextMeeting);
+    event Pause(uint pausedUntil);
 
     modifier notActive() {
         require(!isActive, 'Event started');
@@ -58,7 +57,12 @@ contract Meeting is Ownable {
     }
     
     modifier duringEvent() {
-        require(isActive && !isEnded, "Event not happening");
+        require(isActive && !isFinalised, "Event not happening or already happened");
+        _;
+    }
+
+    modifier notPaused() {
+        require(now > pausedUntil, 'Event is paused')
         _;
     }
 
@@ -83,7 +87,7 @@ contract Meeting is Ownable {
 
     /**@dev Start of functions */
 
-    function rsvp() external payable{
+    function rsvp() external payable notPaused{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(!isEnded, 'Event finished');
         require(amnt < requiredStake, 'Already registered');
@@ -96,7 +100,7 @@ contract Meeting is Ownable {
         emit RSVPEvent(msg.sender);
     }
 
-    function getChange() external{
+    function getChange() external notPaused{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(amnt > 0);
         msg.sender.transfer(amnt.sub(requiredStake)); //Give change if user has overpaid. This can be done before or after the event.
@@ -125,7 +129,7 @@ contract Meeting is Ownable {
     }
 
     /**@dev Organizer's management functions */
-    function markAttendance(address _participant) external onlyOwner duringEvent{
+    function markAttendance(address _participant) external onlyOwner duringEvent notPaused{
         //will pass in a list as parameter and use attendanceCount = list.length;
         Participant memory participant = addressToParticipant[_participant];
         require(participant.attended == false, 'already marked');
@@ -135,14 +139,15 @@ contract Meeting is Ownable {
         emit MarkAttendance(_participant);
     }
 
-    function startEvent() external onlyOwner notActive notCancelled{
+    function startEvent() external onlyOwner notActive notCancelled notPaused{
         require(startDate < now && now < endDate, "Can't start out of scope");
-        //Not sure we need but means organiser cannot start event at arbitrary times.
+        //Means organiser cannot start event at arbitrary times.
         isActive = true;
         emit StartEvent(msg.sender); //Maybe not necessary to msg.sender
     }
 
-    function endEvent() external onlyOwner duringEvent{
+    function finaliseEvent() external onlyOwner duringEvent notPaused{
+        require(now > endDate.add(7 days), 'Cooldown period.');
         if (attendanceCount == 0){
             isActive = false;
             eventCancel();
@@ -153,7 +158,8 @@ contract Meeting is Ownable {
             payout = clubPool.div(attendanceCount);
             if (meetingPool > clubPool){ //Set balance to current club balance.
                 club.transfer(meetingPool.sub(clubPool));
-            }else{
+            }
+            if (meetingPool < clubPool) {
                 club.poolPayout(clubPool.sub(meetingPool));
             }    
         }
@@ -161,22 +167,23 @@ contract Meeting is Ownable {
     }
 
     /**@dev Organizer's `edit event` functions */
-    function setStartDate(uint dateTimestamp) external onlyOwner notActive{
+    function setStartDate(uint dateTimestamp) external onlyOwner notActive notPaused{
         //Check if new date is not within 24 hours of today or less
         require(dateTimestamp > now.add(24 hours), 'Within 24 hours of event');
         startDate = dateTimestamp;
         emit EditStartDateEvent(dateTimestamp);
     }
 
-    function setEndDate(uint dateTimestamp) external onlyOwner notActive{
+    function setEndDate(uint dateTimestamp) external onlyOwner notActive notPaused notCancelled{
         //Check if new date is not within 24 hours of today or less && not before start date
-        require(dateTimestamp > now.add(24 hours), 'Within 24 hours of event');
+        require(startDate> now.add(24 hours), 'Within 24 hours of event');
+        require(dateTimestamp > now, 'Cannot set in the past.')
         require(dateTimestamp > startDate, 'End must be after start');
         endDate = dateTimestamp;
         emit EditEndDateEvent(dateTimestamp);
     }
 
-    function setRequiredStake(uint stakeAmt) external onlyOwner notActive{
+    function setRequiredStake(uint stakeAmt) external onlyOwner notActive notPaused{
         require(startDate > now.add(24 hours), 'Within 24 hours of event');
         if (requiredStake < stakeAmt){
             registered = 0; //All participants need to increase stake.
@@ -185,7 +192,7 @@ contract Meeting is Ownable {
         emit SetStakeEvent(stakeAmt);
     }
 
-    function setRegistrationLimit(uint max) external onlyOwner notActive{
+    function setRegistrationLimit(uint max) external onlyOwner notActive notPaused{
         require(max >= registered, "Cant set less than registered");
         //Ben: no reason for admin to not be able to lower limit if less than registered I think.
         registrationLimit = max;
@@ -193,7 +200,7 @@ contract Meeting is Ownable {
     }
 
     /**@dev Smart Contract's functions */
-    function withdraw() external {
+    function withdraw() external notPaused{
         //Either manually withdraw or automatic send back
         require(addressToParticipant[msg.sender].attended, "Did not attend");
         require(payout != 0, 'no payout');
@@ -202,10 +209,21 @@ contract Meeting is Ownable {
         emit WithdrawEvent(msg.sender, payout);
     }
 
-    function destroyAndSend() onlyOwner public {
-        require(now >endDate.add(14 days), 'Within cooldown period');  //Cooldown period 14 days
-        selfdestruct(address(club));
+    function destroyAndSend() onlyOwner external notPaused{
+        require(now >endDate.add(14 days), 'Within cooldown period');  //Cooldown period 14 days. setEndDate() is limited to prevent early destruction.
+        selfdestruct(address(club)); //This sends users leftover balances to club contract.
     }
+
+    function pause(uint _pausedUntil) external onlyClub{
+        pausedUntil = _pausedUntil;
+        emit Pause(_pausedUntil);
+    }
+
+    function unPause(address _newOwner) external onlyClub{
+        transferOwnership(_newOwner);
+        pauseUntil = now;
+        emit Pause(_pausedUntil);
+    } 
 
     //Temp function for testing
     function getBalance() external view returns (uint){
