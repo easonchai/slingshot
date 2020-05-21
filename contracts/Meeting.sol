@@ -2,8 +2,8 @@ pragma solidity >= 0.6.2 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
-import './DeployerInterface.sol';
 import './MeetingInterface.sol';
+import 'ClubInterface.sol';
 
 contract Meeting is Ownable {
 
@@ -14,7 +14,6 @@ contract Meeting is Ownable {
     uint public requiredStake; 
     uint public registrationLimit;
     uint public registered;
-    uint public prevStake;
     uint public payout;
     uint public attendanceCount;
     bool public isCancelled;
@@ -30,7 +29,6 @@ contract Meeting is Ownable {
 
     mapping (address => Participant) addressToParticipant;
 
-    DeployerInterface public deployer;
     MeetingInterface public meeting;
     ClubInterface public club;
 
@@ -41,15 +39,13 @@ contract Meeting is Ownable {
     event WithdrawEvent(address addr, uint payout);
     event RSVPEvent(address addr);
     event StartEvent(address addr);
-    event EndEvent(address addr, uint attendance);
+    event EndEvent(address addr, uint attendance, uint meetingPool, uint clubPool);
     event SetStakeEvent(uint stake);
     event EditStartDateEvent(uint timeStamp);
     event EditEndDateEvent(uint timeStamp);
     event EditMaxLimitEvent(uint max);
     event Refund(address addr, uint refund);
     event NextMeeting(uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit, address _nextMeeting);
-    event SetPrevStake(uint prevStake);
-    event SendStake(uint _amnt);
 
     modifier notActive() {
         require(!isActive, 'Event started');
@@ -83,6 +79,8 @@ contract Meeting is Ownable {
         club = Club(msg.sender);
     }
 
+    receive() external payable {}
+
     /**@dev Start of functions */
 
     function rsvp() external payable{
@@ -110,9 +108,6 @@ contract Meeting is Ownable {
         //If it is the owner who calls this, it will cancel the event
         isCancelled = true;
         requiredStake = 0; //This allows refunds to be claimed through getChange()
-        if (address(meeting) != address(0)){ //Send stake to new event if it has been created.
-            sendStake(prevStake);
-        }
         emit EventCancelled();
     }
     
@@ -153,12 +148,16 @@ contract Meeting is Ownable {
             eventCancel();
         }else{
             isEnded = true;
-            payout = prevStake.div(attendanceCount);
-            if (address(meeting) != address(0)){
-                sendStake(address(this).balance.sub(prevStake));
-            } 
-            emit EndEvent(msg.sender, attendanceCount); //Maybe not necessary to msg.sender
+            uint memory clubPool = club.getBalance();
+            uint memory meetingPool = address(this).balance;
+            payout = clubPool.div(attendanceCount);
+            if (meetingPool > clubPool){ //Set balance to current club balance.
+                club.transfer(meetingPool.sub(clubPool));
+            }else{
+                club.poolPayout(clubPool.sub(meetingPool));
+            }    
         }
+            emit EndEvent(msg.sender, attendanceCount, meetingPool, clubPool); //Maybe not necessary to msg.sender
     }
 
     /**@dev Organizer's `edit event` functions */
@@ -203,41 +202,9 @@ contract Meeting is Ownable {
         emit WithdrawEvent(msg.sender, payout);
     }
 
-
-    /**@dev Deploys next event contract.*/
-    /*
-    function nextMeeting(uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit) external onlyOwner returns(address) { //Or internal
-        //Cooldown period not necessary since we want owner to, at any time, be able to create chains of events.
-        require(address(meeting) == address(0), 'Only be called once');
-        deployer = DeployerInterface(parentAddress); //Define deployer contract.
-        meeting = MeetingInterface(deployer.deploy(_startDate, _endDate, _requiredStake, _registrationLimit)); //Deploy next event contract
-        if (isEnded){
-            sendStake(address(this).balance.sub(prevStake));
-        }
-        if (isCancelled){
-            sendStake(prevStake);
-        }
-        emit NextMeeting (_startDate, _endDate, _requiredStake, _registrationLimit, address(meeting));
-        return address(meeting);
-    }*/
-
-    //@dev This function is called by the previous contract to set the stake amount.
-    function setPrevStake(uint _prevStake) external payable {
-        require(msg.sender == prevMeeting, 'Sender != prevMeeting');
-        prevStake = _prevStake;
-        emit SetPrevStake(prevStake);
-    }
-
-    function sendStake(uint _amnt) internal {
-        if (_amnt != 0){ //Send current balance minus prevStake to new contract.
-            meeting.setPrevStake(_amnt);
-        }
-        
-        emit SendStake(_amnt);
-    }
-
-    function destroyAndSend(address payable _recipient) onlyOwner public {
-        selfdestruct(_recipient);
+    function destroyAndSend() onlyOwner public {
+        require(now >endDate.add(14 days), 'Within cooldown period');  //Cooldown period 14 days
+        selfdestruct(address(club));
     }
 
     //Temp function for testing

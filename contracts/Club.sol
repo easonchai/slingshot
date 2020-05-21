@@ -78,29 +78,30 @@ contract Club{
 
 	uint public proposalCounter;
 
-	Meeting public meeting; //Meeting variable for deploying new meetings.
-
 	modifier onlyAdmin(){
 		require(isAdmin[msg.sender] == true);
 		_;
 	}
 
 	constructor (){
-		//But actually should this be done here? Can create first meeting on the front end instead. This just saves the use a transaction.
+		isAdmin[msg.sender] = true;
+		totalAdmins = 1;
 	}
+
+	receive() external payable {}
 
 
 	function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin {
-		meeting = new Meeting(_startDate, _endDate, _minStake, _registrationLimit, address(this), msg.sender);
-		isMeeting[address(meeting)] = true;
-		emit NewMeetingEvent(msg.sender, address(meeting));
-		return address(meeting);
+		address memory meeting = address(new Meeting(_startDate, _endDate, _minStake, _registrationLimit, address(this), msg.sender));
+		isMeeting[meeting] = true;
+		emit NewMeetingEvent(msg.sender, meeting);
+		return meeting;
 	}
 
 	function poolPayout(uint _amount) external payable {
 		require (isMeeting[msg.sender] = true, 'Not a meeting or already paid out');
 		if (_amount != 0){
-			msg.sender.transfer()
+			msg.sender.transfer(_amount);
 		}
 
 		isMeeting[msg.sender] = false;
@@ -110,20 +111,7 @@ contract Club{
 	function getBalance() external view returns (uint){
         return address(this).balance;
     }
-
-	//Admins are able to create events with arbitrary organiser addresses.
-	//We want to remove those organiser addresses before organisers attempt to take the payout. So I guess this should be done by the guardians. 
-	//Seems like any admin should be trusted to be able to pull the eject button. This simplifies things because we only really care about the funds rather than the Meeting contracts other functions. 
-
-	//The eject botton could even simply send all funds to the pool again. Yes, that makes sense since the Organiser would later be removed.
-
-	//Okay, so do we need the guardian contract then? If any admin can send the funds back then that's really all that's necessary. However, we still need the ability to remove admins but that could just be a majourity of admins.
-
-	//It is worth bearing in mind that there may only be one admin.
-
-	//One problem with the eject idea is that there may be scenarios other than the admin stealing funds. E.g. the admin makes some mistakes but the meeting is otherwise legitimate so punishing the other participants would be bad. So perhaps a better result is if the payout is reversed so all participants get a refund and the reward pool remains the same. This is better in any case.
-
-	//So the question is what to do in the case that the the admin doesn't mark someone who should have been marked? So in that case it would be nice if other admins could step in and change the owner. So ultimately changing the owner is what we want. 
+ 
 
 	function approveProposal(uint _proposal) external onlyAdmin {
 		require (proposal[_proposal].isInFavour[msg.sender] == false, 'Already approved');
