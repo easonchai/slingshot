@@ -391,6 +391,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											When does your event start?
 										</Typography>
 									</Grid>
+									<Grid item container xs={12} alignItems="flex-end" justify="center">
+										<Typography variant="subtitle1" align="center" color="textSecondary" paragraph>
+											* The time is in your local timezone.
+										</Typography>
+									</Grid>
 
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
 										<Grid item xs={3}>
@@ -455,11 +460,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									<Grid item xs={12}>
 										<TextField
 											fullWidth={true}
-											id="outlined"
+											id="description"
 											label="Event Description"
 											multiline
 											rows={6}
 											variant="outlined"
+											defaultValue={cachedMeeting.data.location}
 										/>
 									</Grid>
 									<Grid item container xs={12}>
