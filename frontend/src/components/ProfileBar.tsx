@@ -140,10 +140,6 @@ export default function ProfileBar() {
                                             user._id || 'Please sign in to MetaMask to link your account.'
                                         }
                                     </AddressButton>
-                                    {
-                                        // TODO: add a button to authorize MetaMask for future interactions:
-                                        //  onClick = {await etherService.requestConnection()}
-                                    }
                                     <hr />
                                     <Typography variant="subtitle1" align="left" color="textPrimary" paragraph>
                                         ENS Domain

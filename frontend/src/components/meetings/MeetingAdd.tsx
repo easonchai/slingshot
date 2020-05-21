@@ -7,8 +7,8 @@ import EtherService from '../../services/EtherService';
 import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline, Typography, InputAdornment } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
-import { NotificationList } from '../../containers/notifications/NotificationList';
 import { styled } from '@material-ui/core/styles';
+import Header from '../Header'
 
 const Hero = styled(Container)({
 	margin: 0,
@@ -297,7 +297,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		return (
 			<React.Fragment>
 				<CssBaseline />
-				<NotificationList />
+				<Header />
 				<Grid container>
 					{/* Top Section */}
 					<Hero maxWidth={false}>

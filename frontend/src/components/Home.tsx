@@ -5,7 +5,7 @@ import {
 } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import ProfileBar from './ProfileBar'
+import Header from './Header'
 
 const MyButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -41,8 +41,8 @@ export class Home extends React.Component<IProps> {
     return (
       <React.Fragment>
         <CssBaseline />
+        <Header />
         <Grid container>
-          <ProfileBar />
           {/* Top Section */}
           <Hero maxWidth={false}>
             <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
@@ -74,6 +74,7 @@ export class Home extends React.Component<IProps> {
             </Container>
           </Middle>
 
+          { /* TODO: make this a separate footer component to re-use throughout different pages. */}
           <Container>
             <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
               Slingshot 2020
