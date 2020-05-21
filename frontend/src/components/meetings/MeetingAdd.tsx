@@ -347,6 +347,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									</Grid>
 									<Grid item xs={3}>
 										<TextField
+											required
 											id="stake"
 											label="Stake Amount"
 											type="number"
@@ -364,6 +365,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									<Grid item xs={1} />
 									<Grid item xs={3}>
 										<TextField
+											required
 											id="maxParticipants"
 											label="Max Participants"
 											type="number"
@@ -393,14 +395,15 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
 										<Grid item xs={3}>
 											<KeyboardDatePicker
+												required
 												disableToolbar
 												variant="inline"
-												format="MM/dd/yyyy"
 												margin="normal"
-												id="date-picker-inline"
+												id="startDate"
 												label="Start Date"
-												value={new Date('2020-05-17T21:11:54')}
-												onChange={() => console.log("Do something")}
+												format="MM/dd/yyyy"
+												value={this.state.form.startDate}
+												onChange={this.handleStartDateChange}
 												KeyboardButtonProps={{
 													'aria-label': 'change date',
 												}}
@@ -408,11 +411,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										</Grid>
 										<Grid item xs={3}>
 											<KeyboardTimePicker
+												required
 												margin="normal"
-												id="time-picker"
+												id="startTime"
 												label="Start Time"
-												value={new Date('2020-05-17T21:11:54')}
-												onChange={() => console.log("Do something")}
+												value={this.state.form.startTime}
+												onChange={this.handleStartTimeChange}
 												KeyboardButtonProps={{
 													'aria-label': 'change time',
 												}}
@@ -420,14 +424,15 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										</Grid>
 										<Grid item xs={3}>
 											<KeyboardDatePicker
+												required
 												disableToolbar
 												variant="inline"
 												format="MM/dd/yyyy"
 												margin="normal"
-												id="date-picker-inline"
+												id="endDate"
 												label="End Date"
-												value={new Date('2020-05-17T21:11:54')}
-												onChange={() => console.log("Do something")}
+												value={this.state.form.endDate}
+												onChange={(d) => this.setState({ form: { ...this.state.form, endDate: d } })}
 												KeyboardButtonProps={{
 													'aria-label': 'change date',
 												}}
@@ -435,11 +440,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										</Grid>
 										<Grid item xs={3}>
 											<KeyboardTimePicker
+												required
 												margin="normal"
-												id="time-picker"
+												id="endTime"
 												label="End Time"
-												value={new Date('2020-05-17T21:11:54')}
-												onChange={() => console.log("Do something")}
+												value={this.state.form.endTime}
+												onChange={(t) => this.setState({ form: { ...this.state.form, endTime: t } })}
 												KeyboardButtonProps={{
 													'aria-label': 'change time',
 												}}
