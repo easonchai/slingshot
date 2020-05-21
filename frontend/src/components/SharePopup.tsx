@@ -48,7 +48,7 @@ export default function SharePopup() {
                 <DialogTitle id="alert-dialog-slide-title">{"Share this event?"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
-                        Click the buttons below to share this event on social media
+                        Click the buttons below to share this event on social media!
           </DialogContentText>
                 </DialogContent>
                 <DialogActions>

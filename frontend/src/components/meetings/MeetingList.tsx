@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Meeting } from '../../store/meetings/actions';
 import { MeetingPreview } from '../../containers/meetings/MeetingPreview';
-import { Grid } from '@material-ui/core';
+import { Grid, Container } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { Card, CardContent, CardActions } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
@@ -22,7 +22,7 @@ export class MeetingList extends React.Component<IProps> {
     const status: string = isEnded ? 'past' : 'active';
 
     return (
-      <Grid container spacing={4} alignItems="center" justify="center">
+      <Grid container spacing={2} alignItems="center" justify="center">
 
         {/* {
             !isEnded &&
@@ -51,10 +51,9 @@ export class MeetingList extends React.Component<IProps> {
             (
               meetings.map((meeting) => {
                 return (
-                  <Grid item key={meeting._id} xs={6}>
+                  <Grid item key={meeting._id} xs={3}>
                     <MeetingPreview key={meeting._id} meeting={meeting} />
                   </Grid>
-
                 );
               })
             )
