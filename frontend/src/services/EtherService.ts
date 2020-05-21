@@ -1,8 +1,6 @@
 import { ethers } from 'ethers';
 import { Provider } from '@ethersproject/providers';
 
-// TODO: handle account change
-// TODO: handle network change
 // TODO: check that the retrieved provider / signer is valid
 // TOOD: window.ethereum.enable() will be deprecated by MetaMask => find a fallback solution
 export default class EtherService {

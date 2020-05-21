@@ -58,28 +58,8 @@ export class MeetingView extends React.Component<IProps, IState> {
     };
   }
 
-  accChangeCallback = (accounts: string[]) => {
-    console.log(accounts[0]);
-    this.props.dispatchUpdateUserEthereumAddress(accounts[0]);
-  }
-
-  chainChangeCallback = (chainID: string) => {
-    // TODO: refactor duplicate callback (see MeetingAdd)
-    if (chainID !== '4' && chainID !== 'rinkeby') {
-      this.props.dispatchAddErrorNotification('You are not on Rinkeby!');
-      console.log(".")
-    }
-  }
-
-  componentWillUnmount() {
-    this.etherService.removeAllListeners();
-  }
-
   componentDidMount() {
     this.props.dispatchGetCachedMeetingById(this.props.id);
-
-    // TODO: refactor (bring up to a higher component)
-    this.etherService.addAllListeners(this.chainChangeCallback, this.accChangeCallback);
   }
 
   componentDidUpdate() {
