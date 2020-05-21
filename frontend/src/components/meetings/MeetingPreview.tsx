@@ -28,7 +28,9 @@ export interface IProps {
 export class MeetingPreview extends React.Component<IProps> {
   render() {
     const url = '/meeting/' + this.props.meeting._id;
-    const title = this.props.meeting.data.name
+    const title = this.props.meeting.data.name.length > 15 ?
+      this.props.meeting.data.name.substring(0, 13) + '...' :
+      this.props.meeting.data.name
     const stake = 'Stake Required: ' + this.props.meeting.data.stake + ' ETH';
     const description = this.props.meeting.data.description.length > 150 ?
       this.props.meeting.data.description.substring(0, 149) + '...' :

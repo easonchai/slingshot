@@ -8,6 +8,7 @@ import { NotificationList } from '../../containers/notifications/NotificationLis
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
 import { Button, CircularProgress, Container, Grid } from '@material-ui/core';
+import ProfileBar from '../ProfileBar'
 
 export interface IProps {
   id: String;
