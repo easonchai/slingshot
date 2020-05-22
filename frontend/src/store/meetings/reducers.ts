@@ -159,7 +159,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
         ...state.cachedMeeting,
         data: {
           ...state.cachedMeeting.data,
-          organizerAddress: action.payload
+          organizerAddress: action.payload._id
         }
       }
     }

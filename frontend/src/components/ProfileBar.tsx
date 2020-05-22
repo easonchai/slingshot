@@ -69,6 +69,17 @@ export default function ProfileBar() {
                 .get('/api/user/id/' + address)
                 .then(res => res.data as User)
                 .then(user => dispatch(userActions.UpdateUserEthereumAddress(user)));
+        } else {
+            const user: User = {
+                _id: '',
+                type: ModelType.USER,
+                cancel: [],
+                rsvp: [],
+                attend: [],
+                withdraw: []
+            };
+
+            dispatch(userActions.UpdateUserEthereumAddress(user));
         }
     }
 

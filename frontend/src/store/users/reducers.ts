@@ -19,25 +19,11 @@ export interface IState {
 }
 
 export const reducer = (state: IState = initState, action: Action): IState => {
-  if (isType(action, meetingActions.UpdateOrganiserEthereumAddress)) {
-    // TODO: update the whole user object (retrieve array data from the backend.)
+  if (isType(action, meetingActions.UpdateOrganiserEthereumAddress) ||
+    isType(action, userActions.UpdateUserEthereumAddress)) {
     return {
       ...state,
-      user: {
-        ...state.user,
-        _id: action.payload
-      }
-    };
-  }
-
-  if (isType(action, userActions.UpdateUserEthereumAddress)) {
-    // TODO: update the whole user object (retrieve array data from the backend.)
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        _id: action.payload._id
-      }
+      user: action.payload
     };
   }
 
