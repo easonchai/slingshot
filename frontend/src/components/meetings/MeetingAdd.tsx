@@ -2,7 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
-import { actions as meetingActions, Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
+import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
 import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline, Typography, InputAdornment } from '@material-ui/core';
@@ -10,6 +10,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { styled } from '@material-ui/core/styles';
 import Header from '../Header'
+import skynet from '@nebulous/skynet';
 
 const Hero = styled(Container)({
 	margin: 0,

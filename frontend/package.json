@@ -20,6 +20,7 @@
     "react-scripts": "3.4.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "skynet-js": "0.0.1",
     "typescript": "^3.7.5"
   },
   "proxy": "http://localhost:3030",
@@ -57,7 +58,7 @@
     "@testing-library/user-event": "^7.2.1",
     "@types/date-fns": "^2.6.0",
     "@types/jest": "^24.9.1",
-    "@types/node": "^12.12.37",
+    "@types/node": "^12.12.42",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.7",
     "@types/react-redux": "^7.1.8",
