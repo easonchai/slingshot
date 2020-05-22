@@ -105,6 +105,7 @@ contract Meeting is Ownable {
     function getChange() external notPaused{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(amnt > 0);
+        addressToParticipant[msg.sender].stakedAmount = requiredStake;
         msg.sender.transfer(amnt.sub(requiredStake)); //Give change if user has overpaid. This can be done before or after the event.
     
         emit GetChange();
@@ -124,8 +125,8 @@ contract Meeting is Ownable {
 
         //Check if RSVP'd within 24 hours
         require(participant.rsvpDate + 1 days > now, "1 day notice");
-        msg.sender.transfer(participant.stakedAmount);
         addressToParticipant[msg.sender].stakedAmount = 0;
+        msg.sender.transfer(participant.stakedAmount);
         registered--;
         emit GuyCancelled(msg.sender);
     }
@@ -206,8 +207,8 @@ contract Meeting is Ownable {
         //Either manually withdraw or automatic send back
         require(addressToParticipant[msg.sender].attended, "Did not attend");
         require(payout != 0, 'no payout');
-        msg.sender.transfer(payout);
         addressToParticipant[msg.sender].attended = false;
+        msg.sender.transfer(payout);
         emit WithdrawEvent(msg.sender, payout);
     }
 

@@ -55,8 +55,8 @@ contract Club{
 
 	function poolPayout(uint _amount) external {
 		require (isMeeting[msg.sender] = true, 'Not a meeting or already paid out');
-		msg.sender.transfer(_amount);
 		isMeeting[msg.sender] = false;
+		msg.sender.transfer(_amount);
 		emit PoolPayout(_amount);
 	}
 
