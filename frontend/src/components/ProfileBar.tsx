@@ -18,7 +18,8 @@ import Slide from '@material-ui/core/Slide';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { styled } from '@material-ui/core/styles';
 import { Grid, Typography, Button } from '@material-ui/core';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import LockIcon from '@material-ui/icons/Lock';
+import CloseIcon from '@material-ui/icons/Close';
 
 const TopBar = styled(AppBar)({
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -33,7 +34,7 @@ const AddressButton = styled(Button)({
     textTransform: 'none'
 })
 
-const CopyIcon = styled(FileCopyIcon)({
+const SignInIcon = styled(LockIcon)({
     fontSize: "small",
     color: "#bdbdbd"
 })
@@ -50,6 +51,7 @@ export default function ProfileBar() {
     const user = useSelector((state: IAppState) => state.userReducer.user);
     const dispatch = useDispatch();
     const etherService = EtherService.getInstance();
+    let ensDomain = " ";
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -84,6 +86,15 @@ export default function ProfileBar() {
         }
     }
 
+    const signIn = () => {
+        etherService.requestConnection();
+    }
+
+    const resolve = (domain: string) => {
+        ensDomain = domain;
+        console.log("ENS: " + ensDomain);
+    }
+
     // componentDidMount alternative
     React.useEffect(() => {
         const selectedAddress = etherService.getUserAddress();
@@ -102,7 +113,8 @@ export default function ProfileBar() {
         }
 
         etherService.addAllListeners(chainChangeCallback, accChangeCallback);
-
+        //user._id ? ensDomain = etherService.findENSDomain("0xD422104E6310367aBE12456FC6017513601E5732") : console.log("Not retrieving")
+        console.log(etherService.findENSDomain("0xD422104E6310367aBE12456FC6017513601E5732", resolve))
         // componentWillUnmount alternative
         return () => etherService.removeAllListeners();
     }, []);
@@ -124,6 +136,7 @@ export default function ProfileBar() {
                                 <Avatar />
                             </IconButton>
                             <Dialog
+                                fullScreen
                                 open={open}
                                 TransitionComponent={Transition}
                                 keepMounted
@@ -131,23 +144,35 @@ export default function ProfileBar() {
                                 aria-labelledby="alert-dialog-slide-title"
                                 aria-describedby="alert-dialog-slide-description"
                             >
-                                <DialogTitle id="alert-dialog-slide-title">{"Account Details"}</DialogTitle>
+                                <DialogTitle id="alert-dialog-slide-title">{"Account Details"}
+                                    <IconButton aria-label="close" onClick={handleClose}>
+                                        <CloseIcon />
+                                    </IconButton>
+                                </DialogTitle>
                                 <DialogContent dividers>
                                     <Typography variant="subtitle1" align="left" color="textPrimary" paragraph>
                                         Address
                                     </Typography>
-                                    <AddressButton endIcon={<CopyIcon />}>
-                                        {
-                                            user._id || 'Please sign in to MetaMask to link your account.'
-                                        }
-                                    </AddressButton>
+                                    {
+                                        user._id ? (
+                                            <Typography variant="subtitle1" align="left" color="textPrimary">
+                                                {user._id}
+                                            </Typography>
+                                        ) :
+                                            <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                Click to sign in to MetaMask to link your account.
+                                            </AddressButton>
+                                    }
+
                                     <hr />
                                     <Typography variant="subtitle1" align="left" color="textPrimary" paragraph>
                                         ENS Domain
                                     </Typography>
-                                    <AddressButton endIcon={<CopyIcon />}>
-                                        eason.ethkl.eth
-                                    </AddressButton>
+                                    <Typography variant="subtitle1" align="left" color="textPrimary">
+                                        {
+                                            user._id ? ensDomain : "Please sign in to MetaMask"
+                                        }
+                                    </Typography>
                                 </DialogContent>
                             </Dialog>
                         </Grid>
