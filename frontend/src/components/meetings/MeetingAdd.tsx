@@ -1,7 +1,8 @@
+import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
-import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
+import { actions as meetingActions, Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
 import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline, Typography, InputAdornment } from '@material-ui/core';
@@ -44,7 +45,7 @@ interface IProps {
 
 	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
-	dispatchUpdateOrganiserEthereumAddress(organiserAddress: string): void;
+	dispatchUpdateOrganiserEthereumAddress(organizer: User): void;
 	dispatchAddErrorNotification(message: String): void;
 
 	dispatchCreateNextMeeting(history: History, meting: Meeting): void;
@@ -102,7 +103,25 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	}
 
 	accChangeCallback = (accounts: string[]) => {
-		this.props.dispatchUpdateOrganiserEthereumAddress(accounts[0]);
+		const address = accounts[0];
+
+		if (address) {
+			axios
+				.get('/api/user/id/' + address)
+				.then(res => res.data as User)
+				.then(user => this.props.dispatchUpdateOrganiserEthereumAddress(user));
+		} else {
+			const user: User = {
+				_id: '',
+				type: ModelType.USER,
+				cancel: [],
+				rsvp: [],
+				attend: [],
+				withdraw: []
+			};
+
+			this.props.dispatchUpdateOrganiserEthereumAddress(user);
+		}
 	}
 
 	componentWillUnmount() {

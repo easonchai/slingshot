@@ -4,6 +4,7 @@ import { compose, Action } from 'redux';
 import { connect } from 'react-redux';
 import { History } from 'history';
 import { actions as meetingActions, Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
+import { User } from '../../store/users/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
 import { IAppState } from '../../store/index';
 import { MeetingAdd as Component } from '../../components/meetings/MeetingAdd';
@@ -42,8 +43,8 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
-    dispatchUpdateOrganiserEthereumAddress: (organiserAddress: string) => {
-      dispatch(meetingActions.UpdateOrganiserEthereumAddress(organiserAddress));
+    dispatchUpdateOrganiserEthereumAddress: (user: User) => {
+      dispatch(meetingActions.UpdateOrganiserEthereumAddress(user));
     },
 
     dispatchAddNotification: (notification: Notification) => {

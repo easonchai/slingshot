@@ -4,7 +4,6 @@ import { Meeting } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
-import { NotificationList } from '../../containers/notifications/NotificationList';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
 import { Button, CircularProgress, Container, Grid } from '@material-ui/core';
