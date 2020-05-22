@@ -6,6 +6,6 @@ interface ClubInterface{
 	function getBalance() external view returns (uint);
 	function approveProposal(uint _proposal) external;
 	function executeProposal(uint _proposal) external;
-	function proposeAdminChange(address _target, address[] _addAdmins, address[] _removeAdmins) external;
+	function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external;
 	function pause(address _meeting, uint _pauseUntil) external;
 }

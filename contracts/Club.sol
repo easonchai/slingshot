@@ -10,6 +10,7 @@ contract Club{
 	event ProposalExecuted(address target, address[] addAdmins, address[] removeAdmins);
 	event ProposeAdminChange(address target, address[] addAdmins, address[] removeAdmins);
 	event ApproveProposal(uint proposal);
+	event PoolPayout(uint amount);
 
 	mapping (address => bool) isMeeting; //Records legitimate meeting addresses
 
@@ -18,12 +19,12 @@ contract Club{
 	uint public totalAdmins;
 
 	struct Proposal{
-		address target;
+		address payable target;
 		address[] addAdmins;
 		address[] removeAdmins;
 		uint totalInFavour;
 		mapping(address => bool) isInFavour;
-		uint32 creationTime;
+		uint creationTime;
 	}
 
 	mapping (uint => Proposal) proposal;
@@ -35,7 +36,7 @@ contract Club{
 		_;
 	}
 
-	constructor (){
+	constructor () public{
 		isAdmin[msg.sender] = true;
 		totalAdmins = 1;
 	}
@@ -43,10 +44,10 @@ contract Club{
 	receive() external payable {}
 
 
-	function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin {
+	function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin returns(address) {
 		require(now < _startDate, 'Event in past');
 		require(_startDate < _endDate, 'End before start');
-		address memory meeting = address(new Meeting(_startDate, _endDate, _minStake, _registrationLimit, address(this), msg.sender));
+		address meeting = address(new Meeting(_startDate, _endDate, _minStake, _registrationLimit));
 		isMeeting[meeting] = true;
 		emit NewMeetingEvent(msg.sender, meeting);
 		return meeting;
@@ -88,7 +89,7 @@ contract Club{
 			totalAdmins = totalAdmins.add(p.addAdmins.length).sub(p.removeAdmins.length);
 
 		} else{
-			require(isMeeting[p.target] == true, 'Invalid meeting')
+			require(isMeeting[p.target] == true, 'Invalid meeting');
 			Meeting(p.target).unPause(p.addAdmins[0]); //Meeting ownership transferred.
 		}
 		emit ProposalExecuted(p.target, p.addAdmins, p.removeAdmins);
@@ -96,17 +97,19 @@ contract Club{
 
 	}
 
-	function proposeAdminChange(address _target, address[] _addAdmins, address[] _removeAdmins) external onlyAdmin{
+	function proposeAdminChange(address payable _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external onlyAdmin{
 		//Store proposal
-		proposal[++proposalCounter] = Proposal({
-			target: _target,
-			addAdmins: _addAdmins,
-			removeAdmins: _removeAdmins,
-			creationTime: now});
+		uint counter = ++proposalCounter;
+		
+		proposal[counter].target = _target;
+		proposal[counter].addAdmins = _addAdmins;
+		proposal[counter].removeAdmins = _removeAdmins;
+		proposal[counter].creationTime = now;
+		
 		emit ProposeAdminChange(_target, _addAdmins, _removeAdmins);	
 	}
 
-	function pause(address _meeting, uint _pauseUntil) external onlyAdmin {
+	function pause(address payable _meeting, uint _pauseUntil) external onlyAdmin {
 		//Stops all functions in the _meeting contract for _duration amount of time.
 		require(_pauseUntil.sub(now) < 7 days);
 		Meeting(_meeting).pause(_pauseUntil);

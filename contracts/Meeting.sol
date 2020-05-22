@@ -1,7 +1,9 @@
 pragma solidity >= 0.6.2 < 0.7.0;
 
-import "./openzeppelin/Ownable.sol";
-import "./openzeppelin/SafeMath.sol";
+//import "./openzeppelin/Ownable.sol";
+//import "./openzeppelin/SafeMath.sol";
+import "./Ownable.sol";
+import "./SafeMath.sol";
 import 'ClubInterface.sol';
 
 contract Meeting is Ownable {
@@ -18,7 +20,7 @@ contract Meeting is Ownable {
     bool public isCancelled;
     bool public isFinalised;
     bool public isActive; //Event started.
-    bool public pausedUntil;
+    uint public pausedUntil;
 
 
     struct Participant{
@@ -62,7 +64,7 @@ contract Meeting is Ownable {
     }
 
     modifier notPaused() {
-        require(now > pausedUntil, 'Event is paused')
+        require(now > pausedUntil, 'Event is paused');
         _;
     }
 
@@ -75,12 +77,12 @@ contract Meeting is Ownable {
      */
 
     constructor (
-        uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit, address _parentAddress, address _prevMeeting) public {
+        uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit) public {
         startDate = _startDate;
         endDate = _endDate;
         requiredStake = _requiredStake;
         registrationLimit = _registrationLimit;
-        club = Club(msg.sender);
+        club = ClubInterface(msg.sender);
     }
 
     receive() external payable {}
@@ -89,7 +91,7 @@ contract Meeting is Ownable {
 
     function rsvp() external payable notPaused{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
-        require(!isEnded, 'Event finished');
+        require(!isFinalised, 'Event finalised');
         require(amnt < requiredStake, 'Already registered');
         require(msg.value.add(amnt) == requiredStake, 'Incorrect stake');
         require(registered < registrationLimit, 'Limit reached');
@@ -152,18 +154,18 @@ contract Meeting is Ownable {
             isActive = false;
             eventCancel();
         }else{
-            isEnded = true;
-            uint memory clubPool = club.getBalance();
-            uint memory meetingPool = address(this).balance;
+            isFinalised = true;
+            uint clubPool = club.getBalance();
+            uint meetingPool = address(this).balance;
             payout = clubPool.div(attendanceCount);
             if (meetingPool > clubPool){ //Set balance to current club balance.
-                club.transfer(meetingPool.sub(clubPool));
+                payable(address(club)).transfer(meetingPool.sub(clubPool));
             }
             if (meetingPool < clubPool) {
                 club.poolPayout(clubPool.sub(meetingPool));
             }    
-        }
             emit EndEvent(msg.sender, attendanceCount, meetingPool, clubPool); //Maybe not necessary to msg.sender
+        }
     }
 
     /**@dev Organizer's `edit event` functions */
@@ -177,7 +179,7 @@ contract Meeting is Ownable {
     function setEndDate(uint dateTimestamp) external onlyOwner notActive notPaused notCancelled{
         //Check if new date is not within 24 hours of today or less && not before start date
         require(startDate> now.add(24 hours), 'Within 24 hours of event');
-        require(dateTimestamp > now, 'Cannot set in the past.')
+        require(dateTimestamp > now, 'Cannot set in the past.');
         require(dateTimestamp > startDate, 'End must be after start');
         endDate = dateTimestamp;
         emit EditEndDateEvent(dateTimestamp);
@@ -211,7 +213,7 @@ contract Meeting is Ownable {
 
     function destroyAndSend() onlyOwner external notPaused{
         require(now >endDate.add(14 days), 'Within cooldown period');  //Cooldown period 14 days. setEndDate() is limited to prevent early destruction.
-        selfdestruct(address(club)); //This sends users leftover balances to club contract.
+        selfdestruct(payable(address(club))); //This sends users leftover balances to club contract.
     }
 
     function pause(uint _pausedUntil) external onlyClub{
@@ -221,8 +223,8 @@ contract Meeting is Ownable {
 
     function unPause(address _newOwner) external onlyClub{
         transferOwnership(_newOwner);
-        pauseUntil = now;
-        emit Pause(_pausedUntil);
+        pausedUntil = now;
+        emit Pause(now);
     } 
 
     //Temp function for testing
