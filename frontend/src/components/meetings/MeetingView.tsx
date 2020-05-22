@@ -201,7 +201,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     return (
       <React.Fragment>
         <CssBaseline />
-        {
+        {/* {
           this.props.loading.cachedMeeting && cachedMeeting
             ? (
               <Center display='flex'>
@@ -228,108 +228,108 @@ export class MeetingView extends React.Component<IProps, IState> {
                 </Grid>
               </Grid>
             )
-        }
+        } */}
 
-        {/* <div>
-        <Header />
-        {
-          this.props.loading.cachedMeeting && cachedMeeting
-            ? (
-              <CircularProgress />
-            )
-            : (
-              <div>
-                <div>Name: {cachedMeeting.data.name}</div>
-                <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
-                <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
-                <div>Is ended: {String(cachedMeeting.data.isEnded)}</div>
-                <div>Stake: {cachedMeeting.data.stake}</div>
-                <div>Max participants: {cachedMeeting.data.maxParticipants}</div>
-                <div>Start time: {new Date(cachedMeeting.data.startDateTime * 1000).toUTCString()}</div>
-                <div>End time: {new Date(cachedMeeting.data.endDateTime * 1000).toUTCString()}</div>
-                <div>Location: {cachedMeeting.data.location}</div>
-                <div>Description: {cachedMeeting.data.description}</div>
-                <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
+        <div>
+          <Header />
+          {
+            this.props.loading.cachedMeeting && cachedMeeting
+              ? (
+                <CircularProgress />
+              )
+              : (
+                <div>
+                  <div>Name: {cachedMeeting.data.name}</div>
+                  <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
+                  <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
+                  <div>Is ended: {String(cachedMeeting.data.isEnded)}</div>
+                  <div>Stake: {cachedMeeting.data.stake}</div>
+                  <div>Max participants: {cachedMeeting.data.maxParticipants}</div>
+                  <div>Start time: {new Date(cachedMeeting.data.startDateTime * 1000).toUTCString()}</div>
+                  <div>End time: {new Date(cachedMeeting.data.endDateTime * 1000).toUTCString()}</div>
+                  <div>Location: {cachedMeeting.data.location}</div>
+                  <div>Description: {cachedMeeting.data.description}</div>
+                  <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
 
-                {
-                  this.props.loading.meetingDeployment
-                    ? (
-                      <div>Meeting tx: { cachedMeeting._id} <CircularProgress /></div>
-                    )
-                    : (
-                      // display contract address
-                      <div>Meeting contract: { cachedMeeting._id}</div>
-                    )
-                }
+                  {
+                    this.props.loading.meetingDeployment
+                      ? (
+                        <div>Meeting tx: { cachedMeeting._id} <CircularProgress /></div>
+                      )
+                      : (
+                        // display contract address
+                        <div>Meeting contract: { cachedMeeting._id}</div>
+                      )
+                  }
 
-                <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
+                  <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
 
-                <Container maxWidth={false}>
-                  <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
-                    <Grid container spacing={2}>
-                      {
-                        // TODO: organize buttons per role (organizer / participant) and per state (active / finished meeting).
-                      }
+                  <Container maxWidth={false}>
+                    <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
+                      <Grid container spacing={2}>
+                        {
+                          // TODO: organize buttons per role (organizer / participant) and per state (active / finished meeting).
+                        }
 
-                      <Grid item xs={12}>
-                        <Link to='/'>
-                          <Button>
-                            <HomeIcon fontSize="large" color="primary" />
+                        <Grid item xs={12}>
+                          <Link to='/'>
+                            <Button>
+                              <HomeIcon fontSize="large" color="primary" />
+                            </Button>
+                          </Link>
+                          <Button disabled={false} onClick={this.handleRSVP} variant="outlined" color="primary">
+                            RSVP
                           </Button>
-                        </Link>
-                        <Button disabled={false} onClick={this.handleRSVP} variant="outlined" color="primary">
-                          RSVP
+                          <Button disabled={false} onClick={this.handleCancelRSVP} variant="outlined" color="primary">
+                            CANCEL RSVP
                           </Button>
-                        <Button disabled={false} onClick={this.handleCancelRSVP} variant="outlined" color="primary">
-                          CANCEL RSVP
+                          <Button disabled={false} onClick={this.handleGetChange} variant="outlined" color="primary">
+                            GET CHANGE
                           </Button>
-                        <Button disabled={false} onClick={this.handleGetChange} variant="outlined" color="primary">
-                          GET CHANGE
+                          <Button disabled={false} onClick={this.handleWithdraw} variant="outlined" color="primary">
+                            WITHDRAW PAYOUT
                           </Button>
-                        <Button disabled={false} onClick={this.handleWithdraw} variant="outlined" color="primary">
-                          WITHDRAW PAYOUT
-                          </Button>
-                      </Grid>
+                        </Grid>
 
 
-                      <Grid item xs={12}>
-                        <Button disabled={false} onClick={this.handleCancelEvent} variant="outlined" color="primary">
-                          CANCEL EVENT
+                        <Grid item xs={12}>
+                          <Button disabled={false} onClick={this.handleCancelEvent} variant="outlined" color="primary">
+                            CANCEL EVENT
                           </Button>
-                        <Button disabled={false} onClick={this.handleStart} variant="outlined" color="primary">
-                          START EVENT
+                          <Button disabled={false} onClick={this.handleStart} variant="outlined" color="primary">
+                            START EVENT
                           </Button>
-                        <Button disabled={false} onClick={this.handleEnd} variant="outlined" color="primary">
-                          END EVENT
+                          <Button disabled={false} onClick={this.handleEnd} variant="outlined" color="primary">
+                            END EVENT
                           </Button>
-                        <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
-                          <Button disabled={false} variant="outlined" color="primary">
-                            NEW MEETING
+                          <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
+                            <Button disabled={false} variant="outlined" color="primary">
+                              NEW MEETING
                           </Button>
-                        </Link>
-                      </Grid>
+                          </Link>
+                        </Grid>
 
-                      <Grid item xs={12}>
-                        <Link style={{ textDecoration: 'none' }} to={'/meeting/' + parent}>
-                          <Button disabled={parent === ''} variant="outlined" color="primary">
-                            PREVIOUS MEETING
+                        <Grid item xs={12}>
+                          <Link style={{ textDecoration: 'none' }} to={'/meeting/' + parent}>
+                            <Button disabled={parent === ''} variant="outlined" color="primary">
+                              PREVIOUS MEETING
                           </Button>
-                        </Link>
-                        <Link style={{ textDecoration: 'none' }} to={'/meeting/' + child}>
-                          <Button disabled={child === ''} variant="outlined" color="primary">
-                            NEXT MEETING
+                          </Link>
+                          <Link style={{ textDecoration: 'none' }} to={'/meeting/' + child}>
+                            <Button disabled={child === ''} variant="outlined" color="primary">
+                              NEXT MEETING
                           </Button>
-                        </Link>
+                          </Link>
+                        </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
 
-                  <UsersList />
-                </Container>
-              </div>
-            )
-        }
-      </div> */}
+                    <UsersList />
+                  </Container>
+                </div>
+              )
+          }
+        </div>
       </React.Fragment>
     );
   }

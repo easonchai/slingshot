@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Meeting } from '../../store/meetings/actions';
-import { Card, CardContent, CardHeader, IconButton, Typography, CardActions, Button, Container, CardMedia } from '@material-ui/core';
+import { Card, CardContent, CardHeader, IconButton, Typography, CardActions, Button, Container, CircularProgress, CardMedia } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import ShareIcon from "@material-ui/icons/Share";
 import SharePopup from "../SharePopup"
+import EtherService from '../../services/EtherService';
+import { User } from '../../store/users/actions';
+import { Loading } from '../../store/loading/actions';
 
 const CustButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -22,10 +25,6 @@ const DisplayCard = styled(Card)({
   maxHeight: 400,
 })
 
-const Header = styled(CardHeader)({
-
-})
-
 const CardImage = styled(CardMedia)({
   paddingTop: '56.25%',
 })
@@ -40,9 +39,39 @@ const Stake = styled(Typography)({
 
 export interface IProps {
   meeting: Meeting;
+  user: User;
+  loading: Loading;
+  cachedMeeting: Meeting;
+  dispatchUpdateRSVP(meetingAddress: String, userAddress: String): Array<User>;
+  dispatchUpdateRsvpConfirmationLoading(status: Boolean): void;
+  dispatchAddErrorNotification(message: String): void;
 }
 
 export class MeetingPreview extends React.Component<IProps> {
+  etherService: EtherService;
+
+  constructor(props: any) {
+    super(props);
+
+    this.etherService = EtherService.getInstance();
+  }
+
+  handleRSVP = (event: any) => {
+    this.etherService.rsvp(
+      this.props.meeting._id,
+      this.props.meeting.data.stake,
+      confirmation => this.props.dispatchUpdateRsvpConfirmationLoading(false)
+    )
+      .then((res: any) => {
+        this.props.dispatchUpdateRSVP(this.props.meeting._id, this.props.user._id);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleRSVP: ' + reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleRSVP: ' + err);
+      });
+  }
+
   render() {
     const url = '/meeting/' + this.props.meeting._id;
     const title = this.props.meeting.data.name
@@ -73,10 +102,27 @@ export class MeetingPreview extends React.Component<IProps> {
           </CardContent>
         </Link>
         <CardActions disableSpacing>
-          <CustButton size="small">
-            RSVP
-            </CustButton>
-          <Stake>
+          {this.props.cachedMeeting._id === this.props.meeting._id
+            ?
+            this.props.loading.rsvpConfirmation ? <CircularProgress /> :
+              (<CustButton size="small" onClick={this.handleRSVP}
+                disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
+                style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                  { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+                {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
+              </CustButton>)
+
+            : (
+              <CustButton size="small" onClick={this.handleRSVP}
+                disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
+                style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                  { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+                {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
+              </CustButton>
+            )
+          }
+
+          < Stake >
             {stake}
           </Stake>
         </CardActions>

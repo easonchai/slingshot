@@ -116,15 +116,15 @@ export const reducer = (state: IState = initState, action: Action): IState => {
 
       return meeting;
     });
-
+    const updatedCachedMeeting = state.meetings.find(m => m._id === action.payload.meetingAddress) || state.meetings[0];
     return {
       ...state,
       meetings: updatedMeetings,
       cachedMeeting: {
-        ...state.cachedMeeting,
-        cancel: state.cachedMeeting.cancel.filter(user => user !== action.payload.userAddress),
-        rsvp: [...state.cachedMeeting.rsvp, action.payload.userAddress]
-      }
+        ...updatedCachedMeeting,
+        cancel: updatedCachedMeeting.cancel.filter(user => user !== action.payload.userAddress),
+        rsvp: [...updatedCachedMeeting.rsvp, action.payload.userAddress]
+      },
     };
   }
 

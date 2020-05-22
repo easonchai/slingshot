@@ -65,7 +65,6 @@ const Transition = React.forwardRef(function Transition(
 
 export default function ProfileBar() {
     const [open, setOpen] = React.useState(false);
-    const [ensDomain, setEnsDomain] = React.useState('');
     const user = useSelector((state: IAppState) => state.userReducer.user);
     const dispatch = useDispatch();
     const etherService = EtherService.getInstance();
@@ -99,6 +98,9 @@ export default function ProfileBar() {
             const user: User = {
                 _id: '',
                 type: ModelType.USER,
+                data: {
+                    ensDomain: ''
+                },
                 cancel: [],
                 rsvp: [],
                 attend: [],
@@ -106,7 +108,7 @@ export default function ProfileBar() {
             };
 
             dispatch(userActions.UpdateUserEthereumAddress(user));
-            setEnsDomain('')
+            dispatch(userActions.UpdateUserENSDomain(" "));
         }
     }
 
@@ -129,7 +131,7 @@ export default function ProfileBar() {
     }
 
     const resolveDomain = (domain: string) => {
-        setEnsDomain(domain);
+        dispatch(userActions.UpdateUserENSDomain(domain));
     }
 
     const getRegistered = (rsvpArr: readonly string[]) => {
@@ -181,7 +183,7 @@ export default function ProfileBar() {
                         <Grid item xs={8} />
                         <Grid container item xs={3} alignItems="center" justify="flex-end">
                             <Domain variant="h6">
-                                {ensDomain}
+                                {user.data?.ensDomain}
                             </Domain>
                         </Grid>
                         <Grid item xs={1}>
@@ -221,11 +223,11 @@ export default function ProfileBar() {
                                         </Box>
                                         <Box fontSize="12" fontWeight="normal" fontStyle="italic" lineHeight={3}>
                                             {
-                                                user._id ? (ensDomain ? `${ensDomain} // ${user._id}` : user._id) :
+                                                user.data?.ensDomain ? (user.data?.ensDomain + " // " + user._id) :
 
-                                                    <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                    (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
                                                         Click to sign in to MetaMask to link your account.
-                                                </AddressButton>
+                                                    </AddressButton>)
                                             }
                                         </Box>
                                         <br />
@@ -250,11 +252,6 @@ export default function ProfileBar() {
                                         <Divider variant="middle" />
                                         <Box fontSize="16" fontWeight="500" lineHeight={2}>
                                             Attended
-                                        </Box>
-                                        <Box fontSize="12" fontWeight="normal" lineHeight={3}>
-                                            {
-                                                user._id ? ensDomain : "Please sign in to MetaMask"
-                                            }
                                         </Box>
                                         <br />
                                         <Divider />

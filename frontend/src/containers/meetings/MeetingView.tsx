@@ -41,6 +41,9 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       const payload: User = {
         _id: userAddress,
         type: ModelType.USER,
+        data: {
+          ensDomain: ''
+        },
         cancel: [],
         rsvp: [],
         attend: [],
