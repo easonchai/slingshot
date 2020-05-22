@@ -12,34 +12,21 @@ interface IProps {
   isEnded: boolean;
 }
 
+interface IState {
+  page: number
+}
+
 const Test = styled(Grid)({
   border: '3px solid black'
 })
 
-export class MeetingList extends React.Component<IProps> {
+export class MeetingList extends React.Component<IProps, IState> {
   render() {
     const { meetings, isEnded } = this.props;
     const status: string = isEnded ? 'past' : 'active';
 
     return (
       <Grid container spacing={2} alignItems="center" justify="center">
-
-        {/* {
-            !isEnded &&
-            <Grid item xs={6}>
-              <Link style={{ textDecoration: 'none' }} to='/meeting/create'>
-                <Card raised={true} className="meeting-create">
-                  <CardContent>
-                    <CardActions>
-                      <AddCircleIcon fontSize="large" color="primary" />
-                        Add your meeting here
-                      </CardActions>
-                  </CardContent>
-                </Card>
-              </Link>
-            </Grid>
-          } */}
-
         {
           meetings.length === 0 ?
             (

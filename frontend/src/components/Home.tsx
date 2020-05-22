@@ -6,6 +6,7 @@ import {
 import { styled } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import Header from './Header'
+import { Pagination } from '@material-ui/lab';
 
 const MyButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -33,6 +34,20 @@ interface IProps {
 }
 
 export class Home extends React.Component<IProps> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      page: 1
+    }
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    this.setState({
+      page: value
+    })
+  };
+
   componentWillMount() {
     this.props.dispatchGetAllMeetings();
   }
@@ -66,6 +81,7 @@ export class Home extends React.Component<IProps> {
                 Active Meetings
               </Typography>
               <MeetingList isEnded={false} />
+              {/* <Pagination count={10} page={this.state.page} onChange={this.handleChange} /> */}
               <br /><br /><br />
               <Typography variant="h3" align="center" color="textPrimary" paragraph>
                 Past Meetings

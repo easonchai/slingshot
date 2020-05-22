@@ -17,9 +17,10 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { styled } from '@material-ui/core/styles';
-import { Grid, Typography, Button } from '@material-ui/core';
+import { Grid, Typography, Button, Box, Divider } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
 import CloseIcon from '@material-ui/icons/Close';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 const TopBar = styled(AppBar)({
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -39,6 +40,22 @@ const SignInIcon = styled(LockIcon)({
     color: "#bdbdbd"
 })
 
+const CloseButton = styled(IconButton)({
+    position: 'absolute',
+    right: 23,
+    top: 7,
+    color: 'white',
+})
+
+const StyledDialogTitle = styled(DialogTitle)({
+    background: '#f05475',
+    color: 'white',
+})
+
+const Domain = styled(Typography)({
+    color: 'white',
+})
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
     ref: React.Ref<unknown>,
@@ -48,10 +65,13 @@ const Transition = React.forwardRef(function Transition(
 
 export default function ProfileBar() {
     const [open, setOpen] = React.useState(false);
+    const [ensDomain, setEnsDomain] = React.useState('');
     const user = useSelector((state: IAppState) => state.userReducer.user);
     const dispatch = useDispatch();
     const etherService = EtherService.getInstance();
-    let ensDomain = " ";
+    const meetings = useSelector((state: IAppState) => state.meetingsReducer.meetings);
+    const [registeredEvents, setRegistered] = React.useState(['']);
+    const [attendedEvents, setAttended] = React.useState(['']);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -68,7 +88,13 @@ export default function ProfileBar() {
             axios
                 .get('/api/user/id/' + address)
                 .then(res => res.data as User)
-                .then(user => dispatch(userActions.UpdateUserEthereumAddress(user)));
+                .then(user => {
+                    dispatch(userActions.UpdateUserEthereumAddress(user))
+                    getRegistered(user.rsvp)
+                });
+
+            etherService.findENSDomain(address, resolveDomain);
+
         } else {
             const user: User = {
                 _id: '',
@@ -80,6 +106,7 @@ export default function ProfileBar() {
             };
 
             dispatch(userActions.UpdateUserEthereumAddress(user));
+            setEnsDomain('')
         }
     }
 
@@ -101,9 +128,26 @@ export default function ProfileBar() {
         etherService.requestConnection();
     }
 
-    const resolve = (domain: string) => {
-        ensDomain = domain;
-        console.log("ENS: " + ensDomain);
+    const resolveDomain = (domain: string) => {
+        setEnsDomain(domain);
+    }
+
+    const getRegistered = (rsvpArr: readonly string[]) => {
+        console.log(rsvpArr)
+        //Get the array
+        // console.log(user.rsvp)
+        // //Find
+        // let registered = [];
+        // let userRSVP = user.rsvp;
+        // userRSVP.sort();
+        // meetings.sort();
+        // for (var i = 0; i < userRSVP.length; i += 1) {
+        //     if (meetings.indexOf(userRSVP[i]) > -1) {
+        //         registered.push(userRSVP[i]);
+        //     }
+        // }
+        //
+
     }
 
     // componentDidMount alternative
@@ -124,8 +168,7 @@ export default function ProfileBar() {
         }
 
         etherService.addAllListeners(chainChangeCallback, accChangeCallback);
-        //user._id ? ensDomain = etherService.findENSDomain("0xD422104E6310367aBE12456FC6017513601E5732") : console.log("Not retrieving")
-        console.log(etherService.findENSDomain("0xD422104E6310367aBE12456FC6017513601E5732", resolve))
+
         // componentWillUnmount alternative
         return () => etherService.removeAllListeners();
     }, []);
@@ -135,7 +178,12 @@ export default function ProfileBar() {
             <TopBar position="static">
                 <Toolbar>
                     <Grid container>
-                        <Grid item xs={11} />
+                        <Grid item xs={8} />
+                        <Grid container item xs={3} alignItems="center" justify="flex-end">
+                            <Domain variant="h6">
+                                {ensDomain}
+                            </Domain>
+                        </Grid>
                         <Grid item xs={1}>
                             <IconButton
                                 aria-label="account of current user"
@@ -155,34 +203,62 @@ export default function ProfileBar() {
                                 aria-labelledby="alert-dialog-slide-title"
                                 aria-describedby="alert-dialog-slide-description"
                             >
-                                <DialogTitle id="alert-dialog-slide-title">{"Account Details"}
-                                    <IconButton aria-label="close" onClick={handleClose}>
+                                <StyledDialogTitle id="alert-dialog-slide-title">
+                                    User Profile
+                                    <CloseButton aria-label="close" onClick={handleClose}>
                                         <CloseIcon />
-                                    </IconButton>
-                                </DialogTitle>
+                                    </CloseButton>
+                                </StyledDialogTitle>
                                 <DialogContent dividers>
-                                    <Typography variant="subtitle1" align="left" color="textPrimary" paragraph>
-                                        Address
-                                    </Typography>
-                                    {
-                                        user._id ? (
-                                            <Typography variant="subtitle1" align="left" color="textPrimary">
-                                                {user._id}
-                                            </Typography>
-                                        ) :
-                                            <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
-                                                Click to sign in to MetaMask to link your account.
-                                            </AddressButton>
-                                    }
 
-                                    <hr />
-                                    <Typography variant="subtitle1" align="left" color="textPrimary" paragraph>
-                                        ENS Domain
-                                    </Typography>
-                                    <Typography variant="subtitle1" align="left" color="textPrimary">
-                                        {
-                                            user._id ? ensDomain : "Please sign in to MetaMask"
-                                        }
+                                    <Typography component="div">
+                                        <Typography variant="h6" color="textPrimary">
+                                            Account Details
+                                        </Typography>
+                                        <br />
+                                        <Box fontSize="16" fontWeight="500" lineHeight={2}>
+                                            Address
+                                        </Box>
+                                        <Box fontSize="12" fontWeight="normal" fontStyle="italic" lineHeight={3}>
+                                            {
+                                                user._id ? (ensDomain ? `${ensDomain} // ${user._id}` : user._id) :
+
+                                                    <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                        Click to sign in to MetaMask to link your account.
+                                                </AddressButton>
+                                            }
+                                        </Box>
+                                        <br />
+                                        <Divider />
+                                        <br />
+                                        <Typography variant="h6" color="textPrimary">
+                                            Events Registered
+                                        </Typography>
+                                        <br />
+                                        <Box fontSize="16" fontWeight="500" lineHeight={2}>
+                                            Upcoming
+                                        </Box>
+                                        <Box fontSize="12" fontWeight="normal" lineHeight={3}>
+                                            {
+                                                user._id ||
+
+                                                <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                    Click to sign in to MetaMask to link your account.
+                                                </AddressButton>
+                                            }
+                                        </Box>
+                                        <Divider variant="middle" />
+                                        <Box fontSize="16" fontWeight="500" lineHeight={2}>
+                                            Attended
+                                        </Box>
+                                        <Box fontSize="12" fontWeight="normal" lineHeight={3}>
+                                            {
+                                                user._id ? ensDomain : "Please sign in to MetaMask"
+                                            }
+                                        </Box>
+                                        <br />
+                                        <Divider />
+                                        <br />
                                     </Typography>
                                 </DialogContent>
                             </Dialog>

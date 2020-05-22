@@ -111,24 +111,14 @@ export default class EtherService {
     this.ethereum.removeAllListeners('accountsChanged');
   }
 
-  // public async findENSDomain(address: string): string {
-  //   let ensDomain = "";
-  //   await this.provider.lookupAddress(address).then(function (address: string) {
-  //     ensDomain = address;
-  //   })
-  //   return ensDomain;
-  // }
   public findENSDomain(address: string, resolve: (domain: string) => void): void {
     this.provider.lookupAddress(address).then(domain => resolve(domain));
   }
 
-  public resolveName(domain: string): string {
-    let resolvedAddress = "";
-    this.provider.resolveName(domain).then(function (address) {
-      return (address);
-    });
-    return resolvedAddress;
+  public resolveName(domain: string, resolve: (address: string) => void): void {
+    this.provider.resolveName(domain).then(address => resolve(address));
   }
+
 
   public async requestConnection(): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {

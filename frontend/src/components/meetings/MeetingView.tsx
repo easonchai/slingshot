@@ -6,8 +6,22 @@ import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
-import { Button, CircularProgress, Container, Grid } from '@material-ui/core';
-import Header from '../Header'
+import { Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box } from '@material-ui/core';
+import Header from '../Header';
+import { styled } from '@material-ui/core/styles';
+
+const Center = styled(Box)({
+  display: 'flex',
+  height: '100%',
+  width: '100%',
+  position: 'fixed',
+  alignItems: 'center',
+  justifyContent: 'center',
+})
+
+const LoadingSpinner = styled(CircularProgress)({
+  color: '#FF8E53'
+})
 
 export interface IProps {
   id: String;
@@ -185,7 +199,38 @@ export class MeetingView extends React.Component<IProps, IState> {
     const { parent, child } = cachedMeeting.data;
 
     return (
-      <div>
+      <React.Fragment>
+        <CssBaseline />
+        {
+          this.props.loading.cachedMeeting && cachedMeeting
+            ? (
+              <Center display='flex'>
+                <LoadingSpinner size={80} />
+              </Center>) :
+            (
+              <Grid container>
+                <Grid item container xs={6}>
+                  <Grid item xs={1} />
+                  <Grid item xs={10}>
+                    <Typography variant="h3">
+                      {cachedMeeting.data.name}
+                    </Typography>
+                    <Typography component="div">
+                      <Box fontSize="58" fontWeight="500">
+                        {cachedMeeting.data.name}
+                      </Box>
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1} />
+                </Grid>
+                <Grid item container xs={6}>
+
+                </Grid>
+              </Grid>
+            )
+        }
+
+        {/* <div>
         <Header />
         {
           this.props.loading.cachedMeeting && cachedMeeting
@@ -284,7 +329,8 @@ export class MeetingView extends React.Component<IProps, IState> {
               </div>
             )
         }
-      </div>
+      </div> */}
+      </React.Fragment>
     );
   }
 }
