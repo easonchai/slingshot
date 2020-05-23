@@ -21,7 +21,7 @@ const CustButton = styled(Button)({
 
 const DisplayCard = styled(Card)({
   maxWidth: 280,
-  minHeight: 360,
+  minHeight: 300,
   maxHeight: 400,
 })
 
@@ -118,31 +118,34 @@ export class MeetingPreview extends React.Component<IProps> {
             </Typography>
           </CardContent>
         </Link>
-        <CardActions disableSpacing>
-          {this.props.cachedMeeting._id === this.props.meeting._id
-            ?
-            this.props.loading.rsvpConfirmation ? <CircularProgress /> :
-              (<CustButton size="small" onClick={this.handleRSVP}
-                disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
-                style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
-                  { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
-                {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
-              </CustButton>)
+        {
+          (this.props.meeting.data.isEnded || this.props.meeting.data.isCancelled) ||
+          <CardActions disableSpacing>
+            {this.props.cachedMeeting._id === this.props.meeting._id
+              ?
+              this.props.loading.rsvpConfirmation ? <CircularProgress /> :
+                (<CustButton size="small" onClick={this.handleRSVP}
+                  disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
+                  style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                    { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+                  {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
+                </CustButton>)
 
-            : (
-              <CustButton size="small" onClick={this.handleRSVP}
-                disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
-                style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
-                  { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
-                {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
-              </CustButton>
-            )
-          }
+              : (
+                <CustButton size="small" onClick={this.handleRSVP}
+                  disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
+                  style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                    { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+                  {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
+                </CustButton>
+              )
+            }
 
-          < Stake >
-            {stake}
-          </Stake>
-        </CardActions>
+            < Stake >
+              {stake}
+            </Stake>
+          </CardActions>
+        }
       </DisplayCard >
 
     );

@@ -99,7 +99,9 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map((participantWallet) => {
                   return (
                     <span key={participantWallet}>
-                      {participantWallet} <br />
+                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
+                        {participantWallet}
+                      </Typography><br />
                     </span>
                   );
                 })
@@ -136,16 +138,16 @@ export class UsersList extends React.Component<IProps, IState> {
                           {
                             this.props.loading.rsvpConfirmation &&
                             participantWallet === this.props.userWallet &&
-                            <LoadingSpinner size={16} style={{ marginTop: 5, marginRight: 5 }} />
+                            <LoadingSpinner size={16} style={{ marginTop: 10, marginRight: 5 }} />
                           }
                         </Grid>
                         <Grid item>
-                          <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
+                          <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', marginTop: 10, marginRight: 5 }}>
                             {participantWallet}
                           </Typography>
                         </Grid>
                         <Grid item>
-                          {
+                          {(this.props.cachedMeeting.data.isCancelled || this.props.cachedMeeting.data.isEnded) ||
                             this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
                             !this.props.cachedMeeting.attend.includes(participantWallet) &&
                             !this.props.loading.rsvpConfirmation &&
@@ -168,7 +170,9 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map((participantWallet) => {
                   return (
                     <span key={participantWallet}>
-                      {participantWallet} <br />
+                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
+                        {participantWallet}
+                      </Typography><br />
                     </span>
                   );
                 })
@@ -181,7 +185,10 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map((participantWallet) => {
                   return (
                     <span key={participantWallet}>
-                      {participantWallet} <br />
+                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
+                        {participantWallet}
+                      </Typography>
+                      <br />
                     </span>
                   );
                 })

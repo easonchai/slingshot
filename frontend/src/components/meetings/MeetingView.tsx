@@ -48,7 +48,7 @@ const HomeButton = styled(Button)({
 })
 
 const CustomChip = styled(Chip)({
-  background: '#ff9800',
+  background: '#fcba03',
   color: 'white',
 })
 
@@ -246,15 +246,48 @@ export class MeetingView extends React.Component<IProps, IState> {
     return this.getStateTooltipText() || 'This will start the upload right away and replace previous file.';
   }
 
+
+
   render() {
     const { cachedMeeting } = this.props;
     const { parent, child } = cachedMeeting.data;
-    const imageUrl = 'https://siasky.net/' + cachedMeeting.data.images[0] || 'https://siasky.net/nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ';
-    console.log(imageUrl)
+    const imageUrl = cachedMeeting.data.images[0] ? 'https://siasky.net/' + cachedMeeting.data.images[0] : 'https://siasky.net/nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ';
     const started = cachedMeeting.data.isStarted
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
     const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
+
+    const isRSVPButtonDisabled = () => {
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id);
+    }
+
+    const isCancelRSVPButtonDisabled = () => {
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled;
+    }
+
+    const isUserPartOfMeeting = () => {
+      return this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id);
+    }
+
+    const isWithdrawButtonVisible = () => {
+      return ((cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled) && !this.props.user.withdraw.includes(cachedMeeting._id));
+    }
+
+    const isUserAnOrganiser = () => {
+      return (cachedMeeting.data.organizerAddress === this.props.user._id);
+    }
+
+    const isStartButtonDisabled = () => {
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0;
+    }
+
+    const isEndButtonDisabled = () => {
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted;
+    }
+
+    const isCancelButtonDisabled = () => {
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled;
+    }
 
     return (
       <React.Fragment>
@@ -315,6 +348,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                   </Grid>
                   <Grid item xs={1} />
                 </Grid>
+                {/**RIGHT SIDE */}
                 <Grid item container xs={6}>
                   <Grid item xs={10}>
                     <Typography component="div"><br />
@@ -324,71 +358,76 @@ export class MeetingView extends React.Component<IProps, IState> {
                           label={status}
                           color="primary"
                           style={status === "Active" ? { opacity: 20 } :
-                            status === "Started" ? { background: "green" } :
-                              status === "Ended" ? { background: "orange" } : { background: "red" }}
+                            status === "Started" ? { background: "#4cae4f" } :
+                              status === "Ended" ? { background: "#ff9900" } : { background: "#f44034" }}
                         />}
                       </Box><br />
                       {/* User actions */}
-                      <Grid item container style={{ padding: 10, marginLeft: 15 }}>
-                        <Grid item xs={3}>
-                          <Tooltip title={this.getUploadButtonTooltipText()}>
-                            <CustButton
-                              size="small" onClick={this.handleRSVP}
-                              disabled={this.props.user.rsvp.includes(cachedMeeting._id)}
-                              style={this.props.user.rsvp.includes(cachedMeeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
-                                { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
-                              {this.props.user.rsvp.includes(cachedMeeting._id) ? "RSVP'd" : "RSVP"}
-                            </CustButton>
-                          </Tooltip>
-                        </Grid>
-                        {this.props.user.rsvp.includes(cachedMeeting._id)
-                          ? (<React.Fragment>
+                      {this.props.loading.meetingDeployment ||
+                        <React.Fragment>
+                          <Grid item container style={{ padding: 10, marginLeft: 15 }}>
                             <Grid item xs={3}>
-                              <CustButton size="small" onClick={this.handleCancelRSVP}>
-                                Cancel
-                            </CustButton>
+                              <Tooltip title={this.getUploadButtonTooltipText()}>
+                                <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
+                                  {this.props.user.rsvp.includes(cachedMeeting._id) ? "RSVP'd" : "RSVP"}
+                                </CustButton>
+                              </Tooltip>
                             </Grid>
-                            {cachedMeeting.data.isEnded ?
-                              (<Grid item xs={3}>
-                                <CustButton size="small" onClick={this.handleWithdraw}>
-                                  Withdraw
+                            {isUserPartOfMeeting() ?
+                              (<React.Fragment>
+                                <Grid item xs={3}>
+                                  <CustButton disabled={isCancelRSVPButtonDisabled()} size="small" onClick={this.handleCancelRSVP}>
+                                    Cancel
                                   </CustButton>
-                              </Grid>)
-                              : <div />
-                            }
-                          </React.Fragment>)
-                          : (<div></div>)}
-                      </Grid><br />
-                      {/** Organizer Actions */}
-                      <Paper style={{ padding: 10 }}>
-                        <Grid container>
-                          <Grid item xs={12}>
-                            <Typography style={{ fontWeight: "lighter", fontSize: 16, marginTop: 10, marginLeft: 10 }}>
-                              Hey organizer!
-                          </Typography>
-                            <Typography style={{ fontWeight: "lighter", fontSize: 16, padding: 10 }}>
-                              Check out what you can do!
-                          </Typography>
-                          </Grid>
-                          <Grid item xs={3} style={{ padding: 10 }}>
-                            <CustButton onClick={this.handleStart}>Start Event</CustButton>
-                          </Grid>
-                          <Grid item xs={3} style={{ padding: 10 }}>
-                            <CustButton onClick={this.handleEnd}>End Event</CustButton>
-                          </Grid>
-                          <Grid item xs={3} style={{ padding: 10 }}>
-                            <CustButton onClick={this.handleCancelEvent}>Cancel Event</CustButton>
-                          </Grid>
-                          <Grid item xs={3} style={{ padding: 10 }}>
-                            <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
-                              <CustButton>New Event</CustButton>
-                            </Link>
-                          </Grid>
-                        </Grid>
-                      </Paper><br />
-                      <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
-                        Participants Registered: {cachedMeeting.rsvp.length}/{cachedMeeting.data.maxParticipants}
-                      </Box><br />
+                                </Grid>
+                                {isWithdrawButtonVisible() ?
+                                  (<Grid item xs={3}>
+                                    <CustButton size="small" onClick={cachedMeeting.data.isEnded ? this.handleWithdraw : this.handleGetChange}>
+                                      Withdraw
+                                  </CustButton>
+                                  </Grid>)
+                                  : <div />
+                                }
+                              </React.Fragment>)
+                              : (<div></div>)}
+                          </Grid><br />
+                          {/** Organizer Actions */}
+                          {!isUserAnOrganiser() ||
+                            <React.Fragment>
+                              <Paper style={{ padding: 10 }}>
+                                <Grid container>
+                                  <Grid item xs={12}>
+                                    <Typography style={{ fontWeight: "lighter", fontSize: 16, marginTop: 10, marginLeft: 10 }}>
+                                      Hey organizer!
+                                </Typography>
+                                    <Typography style={{ fontWeight: "lighter", fontSize: 16, padding: 10 }}>
+                                      Check out what you can do!
+                                </Typography>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <CustButton disabled={isStartButtonDisabled()}
+                                      onClick={this.handleStart}>Start Event</CustButton>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <CustButton disabled={isEndButtonDisabled()}
+                                      onClick={this.handleEnd}>End Event</CustButton>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <CustButton disabled={isCancelButtonDisabled()}
+                                      onClick={this.handleCancelEvent}>Cancel Event</CustButton>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
+                                      <CustButton>New Event</CustButton>
+                                    </Link>
+                                  </Grid>
+                                </Grid>
+                              </Paper><br />
+                            </React.Fragment>}
+                          <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
+                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length}/{cachedMeeting.data.maxParticipants}
+                          </Box><br />
+                        </React.Fragment>}
                     </Typography>
                     <UsersList />
                   </Grid>
@@ -399,15 +438,7 @@ export class MeetingView extends React.Component<IProps, IState> {
             )
         }
 
-        {/* <div>
-          <Header />
-          {
-            this.props.loading.cachedMeeting && cachedMeeting
-              ? (
-                <CircularProgress />
-              )
-              : (
-                <div>
+        {/* 
                   <div>Name: {cachedMeeting.data.name}</div>
                   <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
                   <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
@@ -419,77 +450,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                   <div>Location: {cachedMeeting.data.location}</div>
                   <div>Description: {cachedMeeting.data.description}</div>
                   <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
-
-                  
-
                   <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
-
-                  <Container maxWidth={false}>
-                    <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
-                      <Grid container spacing={2}>
-                        {
-                          // TODO: organize buttons per role (organizer / participant) and per state (active / finished meeting).
-                        }
-
-                        <Grid item xs={12}>
-                          <Link to='/'>
-                            <Button>
-                              <HomeIcon fontSize="large" color="primary" />
-                            </Button>
-                          </Link>
-                          <Button disabled={false} onClick={this.handleRSVP} variant="outlined" color="primary">
-                            RSVP
-                          </Button>
-                          <Button disabled={false} onClick={this.handleCancelRSVP} variant="outlined" color="primary">
-                            CANCEL RSVP
-                          </Button>
-                          <Button disabled={false} onClick={this.handleGetChange} variant="outlined" color="primary">
-                            GET CHANGE
-                          </Button>
-                          <Button disabled={false} onClick={this.handleWithdraw} variant="outlined" color="primary">
-                            WITHDRAW PAYOUT
-                          </Button>
-                        </Grid>
-
-
-                        <Grid item xs={12}>
-                          <Button disabled={false} onClick={this.handleCancelEvent} variant="outlined" color="primary">
-                            CANCEL EVENT
-                          </Button>
-                          <Button disabled={false} onClick={this.handleStart} variant="outlined" color="primary">
-                            START EVENT
-                          </Button>
-                          <Button disabled={false} onClick={this.handleEnd} variant="outlined" color="primary">
-                            END EVENT
-                          </Button>
-                          <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
-                            <Button disabled={false} variant="outlined" color="primary">
-                              NEW MEETING
-                          </Button>
-                          </Link>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                          <Link style={{ textDecoration: 'none' }} to={'/meeting/' + parent}>
-                            <Button disabled={parent === ''} variant="outlined" color="primary">
-                              PREVIOUS MEETING
-                          </Button>
-                          </Link>
-                          <Link style={{ textDecoration: 'none' }} to={'/meeting/' + child}>
-                            <Button disabled={child === ''} variant="outlined" color="primary">
-                              NEXT MEETING
-                          </Button>
-                          </Link>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-
-                    <UsersList />
-                  </Container>
-                </div>
-              )
-          }
-        </div> */}
+                  */}
 
       </React.Fragment>
     );

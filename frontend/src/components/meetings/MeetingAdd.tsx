@@ -53,8 +53,16 @@ const MyButton = styled(Button)({
 	width: 140,
 });
 
-const Test = styled(Grid)({
-	border: '2px solid black',
+const CardImage = styled(CardMedia)({
+	paddingTop: '56.25%',
+})
+
+const SponsorMessage = styled(Typography)({
+	fontSize: 16,
+	fontWeight: 'bolder',
+	padding: 10,
+	color: '#58b662',
+	borderRadius: 3
 })
 
 interface IProps {
@@ -547,19 +555,24 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						<Container maxWidth="md">
 							<Grid item container xs={12} alignItems="flex-end" justify="center">
 								<Typography variant="h6" align="center" color="textSecondary" paragraph>
-									Upload media files while you fill out the details of your event below
+									First, let's upload a catchy picture/video to showcase your event!
 								</Typography>
 							</Grid>
 							<Grid item container xs={12} alignItems="flex-end" justify="center">
-								<Typography variant="subtitle1" align="center" color="textSecondary" paragraph>
-									The media will be hosted on
-									<a
-										style={{ textDecoration: 'none' }}
-										href={'https://www.siasky.net/'}
-										rel="noopener noreferrer"
-										target="_blank"
-									> Sia Skynet</a>.
-								</Typography>
+								<Grid item container xs={12} alignItems="center" justify="center">
+									<img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" height={64} width={64} style={{ marginTop: 5, alignItems: 'center', justifyContent: 'center' }} />
+								</Grid>
+								<Grid item>
+									<SponsorMessage variant="subtitle1" align="center" paragraph>
+										Media is proudly hosted on
+										<a
+											style={{ textDecoration: 'none', color: '#3c9e47' }}
+											href={'https://www.siasky.net/'}
+											rel="noopener noreferrer"
+											target="_blank"
+										> Sia Skynet</a>!
+								</SponsorMessage>
+								</Grid>
 							</Grid>
 
 							{/* Image / Video upload Section */}
@@ -614,16 +627,17 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 							</Grid>
 
 							{/* Image / Video preview Section */}
-							<Grid container spacing={3} >
-								<Grid item xs={6}>
+							<Grid container spacing={3} style={{ marginBottom: 20 }}>
+								<Grid item xs={5}>
 									{
 										this.state.form.images.length > 0 &&
-										<img
-											src={imageUrlpreview}
-											alt='event image preview'
-											width="256"
-											height="256"
-										/>
+										<Container>
+											<Typography style={{ fontWeight: 'lighter', fontSize: 14 }}>Image Preview: </Typography>
+											<CardImage
+												image={imageUrlpreview}
+												title='event image preview'
+											/>
+										</Container>
 									}
 
 									{
@@ -631,7 +645,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										<LinearProgress variant="determinate" value={this.state.loadingImagePct} color="secondary" />
 									}
 								</Grid>
-								<Grid item xs={6}>
+								<Grid item xs={2} />
+								<Grid item xs={5}>
 									{
 										this.state.form.videos.length > 0 &&
 										<video controls width="256" height="144">
@@ -649,7 +664,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 
 							{/* Main Section */}
 							<Typography variant="h6" align="center" color="textSecondary" paragraph>
-								Please fill in the important details
+								Next, fill in the important details!
               				</Typography>
 							<form onSubmit={this.handleSubmit} className="add-meeting-form">
 								<Grid container spacing={3} >
