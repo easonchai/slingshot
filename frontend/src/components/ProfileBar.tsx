@@ -56,6 +56,11 @@ const Domain = styled(Typography)({
     color: 'white',
 })
 
+const QuickSignIn = styled(Button)({
+    background: 'none',
+    color: 'white'
+})
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
     ref: React.Ref<unknown>,
@@ -202,9 +207,14 @@ export default function ProfileBar() {
                     <Grid container>
                         <Grid item xs={8} />
                         <Grid container item xs={3} alignItems="center" justify="flex-end">
-                            <Domain variant="h6">
-                                {user.data?.ensDomain}
-                            </Domain>
+                            {user.data?.ensDomain
+                                ? (<Domain variant="h6">
+                                    {user.data?.ensDomain}
+                                </Domain>)
+                                : (<QuickSignIn onClick={signIn}>
+                                    Sign In
+                                </QuickSignIn>)
+                            }
                         </Grid>
                         <Grid item xs={1}>
                             <IconButton
@@ -243,9 +253,13 @@ export default function ProfileBar() {
                                         </Box>
                                         <Box fontSize="12" fontWeight="normal" fontStyle="italic" lineHeight={3}>
                                             {
-                                                user.data?.ensDomain
-                                                    ? user.data?.ensDomain + " // " + user._id
-                                                    : "Couldn't find ENS domain for your account."
+                                                user._id
+                                                    ? (user.data?.ensDomain
+                                                        ? user.data?.ensDomain + " // " + user._id
+                                                        : "Couldn't find ENS domain for your account.")
+                                                    : (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                        Click to sign in to MetaMask to link your account.
+                                                    </AddressButton>)
                                             }
                                         </Box>
                                         <br />
@@ -259,13 +273,14 @@ export default function ProfileBar() {
                                             Upcoming
                                         </Box>
                                         <Box fontSize="12" fontWeight="normal" lineHeight={3}>
-                                            {
+                                            Supposed to be events here
+                                            {/* {
                                                 user._id ||
 
                                                 <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
                                                     Click to sign in to MetaMask to link your account.
                                                 </AddressButton>
-                                            }
+                                            } */}
                                         </Box>
                                         <Divider variant="middle" />
                                         <Box fontSize="16" fontWeight="500" lineHeight={2}>

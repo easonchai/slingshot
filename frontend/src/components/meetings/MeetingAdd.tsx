@@ -26,7 +26,7 @@ import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from 
 import { styled } from '@material-ui/core/styles';
 import Header from '../Header'
 import { upload } from 'skynet-js';
-
+import Footer from '../Footer'
 import IconButton from '@material-ui/core/IconButton';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Videocam from '@material-ui/icons/Videocam';
@@ -814,11 +814,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					</Middle>
 
 					{/* Footer Section */}
-					<Container>
-						<Typography variant="subtitle1" align="center" color="textSecondary" component="p">
-							Slingshot 2020
-            			</Typography>
-					</Container>
+					<Footer />
 				</Grid>
 			</React.Fragment >
 

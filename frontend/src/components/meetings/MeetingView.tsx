@@ -6,9 +6,11 @@ import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
-import { Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box } from '@material-ui/core';
+import { Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper } from '@material-ui/core';
 import Header from '../Header';
 import { styled } from '@material-ui/core/styles';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import Footer from '../Footer'
 
 const Center = styled(Box)({
   display: 'flex',
@@ -21,6 +23,33 @@ const Center = styled(Box)({
 
 const LoadingSpinner = styled(CircularProgress)({
   color: '#FF8E53'
+})
+
+const CardImage = styled(CardMedia)({
+  paddingTop: '56.25%',
+})
+
+const CustButton = styled(Button)({
+  background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+  border: 0,
+  borderRadius: 3,
+  boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+  color: 'white',
+  minHeight: 38,
+  maxHeight: 46,
+  padding: '0 30px',
+});
+
+const HomeButton = styled(Button)({
+  background: 'none',
+  color: '#FF8E53',
+  size: 10,
+  marginBottom: 10,
+})
+
+const CustomChip = styled(Chip)({
+  background: '#ff9800',
+  color: 'white',
 })
 
 export interface IProps {
@@ -194,14 +223,44 @@ export class MeetingView extends React.Component<IProps, IState> {
       });
   }
 
+  isUserLoggedOut = () => {
+    return this.props.user._id === '';
+  }
+
+  getStateTooltipText = () => {
+    if (!this.props.user.rsvp.includes(this.props.cachedMeeting._id))
+      return `Stake required: ${this.props.cachedMeeting.data.stake} ETH`;
+
+    // if (this.state.loadingVideo)
+    //   return 'Please wait until the video has been uploaded.';
+
+    if (this.isUserLoggedOut())
+      return 'Please login to MetaMask first.';
+  }
+
+  getRSVPButtonTooltipText = () => {
+    return this.getStateTooltipText() || 'You have already registered for this event';
+  }
+
+  getUploadButtonTooltipText = () => {
+    return this.getStateTooltipText() || 'This will start the upload right away and replace previous file.';
+  }
+
   render() {
     const { cachedMeeting } = this.props;
     const { parent, child } = cachedMeeting.data;
+    const imageUrl = 'https://siasky.net/' + cachedMeeting.data.images[0] || 'https://siasky.net/nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ';
+    console.log(imageUrl)
+    const started = cachedMeeting.data.isStarted
+    const cancelled = cachedMeeting.data.isCancelled
+    const ended = cachedMeeting.data.isEnded
+    const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
 
     return (
       <React.Fragment>
         <CssBaseline />
-        {/* {
+        <Header />
+        {
           this.props.loading.cachedMeeting && cachedMeeting
             ? (
               <Center display='flex'>
@@ -209,28 +268,138 @@ export class MeetingView extends React.Component<IProps, IState> {
               </Center>) :
             (
               <Grid container>
+                <Grid item xs={12}><br /></Grid>
                 <Grid item container xs={6}>
                   <Grid item xs={1} />
                   <Grid item xs={10}>
+                    <Link to='/' style={{ textDecoration: "none" }}>
+                      <HomeButton startIcon={<ArrowBackIcon />}>
+                        Back to home
+                    </HomeButton>
+                    </Link>
                     <Typography variant="h3">
                       {cachedMeeting.data.name}
                     </Typography>
+                    {
+                      this.props.loading.meetingDeployment
+                        ? (<span><LoadingSpinner size={16} /> <Typography style={{ fontWeight: "lighter", fontSize: 12, fontStyle: 'italic' }}>Please wait while the contract is being deployed</Typography></span>)
+                        : (<div />)
+                    }
+                    <Typography component="div"> <br />
+                      <Box fontSize="body2.fontSize">Event Starts: </Box>
+                      <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                        {(new Date(cachedMeeting.data.startDateTime * 1000)).toString()}
+                      </Box><br />
+                      <Box fontSize="body2.fontSize">Event Ends: </Box>
+                      <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                        {(new Date(cachedMeeting.data.endDateTime * 1000)).toString()}
+                      </Box><br />
+                    </Typography>
+                    <CardImage
+                      image={imageUrl}
+                      title={cachedMeeting.data.name}
+                    /><br />
                     <Typography component="div">
-                      <Box fontSize="58" fontWeight="500">
-                        {cachedMeeting.data.name}
+                      <Box fontSize="body2.fontSize">Location:</Box>
+                      <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                        {cachedMeeting.data.location}
+                      </Box>
+                      <br />
+                      <Box fontSize={24} fontWeight="medium">
+                        Description:
+                      </Box><br />
+                      <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                        {cachedMeeting.data.description}
                       </Box>
                     </Typography>
                   </Grid>
                   <Grid item xs={1} />
                 </Grid>
                 <Grid item container xs={6}>
-
+                  <Grid item xs={10}>
+                    <Typography component="div"><br />
+                      <Box fontSize={18} fontWeight="medium">
+                        Status: {<CustomChip
+                          size="small"
+                          label={status}
+                          color="primary"
+                          style={status === "Active" ? { opacity: 20 } :
+                            status === "Started" ? { background: "green" } :
+                              status === "Ended" ? { background: "orange" } : { background: "red" }}
+                        />}
+                      </Box><br />
+                      {/* User actions */}
+                      <Grid item container style={{ padding: 10, marginLeft: 15 }}>
+                        <Grid item xs={3}>
+                          <Tooltip title={this.getUploadButtonTooltipText()}>
+                            <CustButton
+                              size="small" onClick={this.handleRSVP}
+                              disabled={this.props.user.rsvp.includes(cachedMeeting._id)}
+                              style={this.props.user.rsvp.includes(cachedMeeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                                { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+                              {this.props.user.rsvp.includes(cachedMeeting._id) ? "RSVP'd" : "RSVP"}
+                            </CustButton>
+                          </Tooltip>
+                        </Grid>
+                        {this.props.user.rsvp.includes(cachedMeeting._id)
+                          ? (<React.Fragment>
+                            <Grid item xs={3}>
+                              <CustButton size="small" onClick={this.handleCancelRSVP}>
+                                Cancel
+                            </CustButton>
+                            </Grid>
+                            {cachedMeeting.data.isEnded ?
+                              (<Grid item xs={3}>
+                                <CustButton size="small" onClick={this.handleWithdraw}>
+                                  Withdraw
+                                  </CustButton>
+                              </Grid>)
+                              : <div />
+                            }
+                          </React.Fragment>)
+                          : (<div></div>)}
+                      </Grid><br />
+                      {/** Organizer Actions */}
+                      <Paper style={{ padding: 10 }}>
+                        <Grid container>
+                          <Grid item xs={12}>
+                            <Typography style={{ fontWeight: "lighter", fontSize: 16, marginTop: 10, marginLeft: 10 }}>
+                              Hey organizer!
+                          </Typography>
+                            <Typography style={{ fontWeight: "lighter", fontSize: 16, padding: 10 }}>
+                              Check out what you can do!
+                          </Typography>
+                          </Grid>
+                          <Grid item xs={3} style={{ padding: 10 }}>
+                            <CustButton onClick={this.handleStart}>Start Event</CustButton>
+                          </Grid>
+                          <Grid item xs={3} style={{ padding: 10 }}>
+                            <CustButton onClick={this.handleEnd}>End Event</CustButton>
+                          </Grid>
+                          <Grid item xs={3} style={{ padding: 10 }}>
+                            <CustButton onClick={this.handleCancelEvent}>Cancel Event</CustButton>
+                          </Grid>
+                          <Grid item xs={3} style={{ padding: 10 }}>
+                            <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
+                              <CustButton>New Event</CustButton>
+                            </Link>
+                          </Grid>
+                        </Grid>
+                      </Paper><br />
+                      <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
+                        Participants Registered: {cachedMeeting.rsvp.length}/{cachedMeeting.data.maxParticipants}
+                      </Box><br />
+                    </Typography>
+                    <UsersList />
+                  </Grid>
+                  <Grid item xs={1} />
                 </Grid>
+                <Footer />
               </Grid>
             )
-        } */}
+        }
 
-        <div>
+        {/* <div>
           <Header />
           {
             this.props.loading.cachedMeeting && cachedMeeting
@@ -251,16 +420,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                   <div>Description: {cachedMeeting.data.description}</div>
                   <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
 
-                  {
-                    this.props.loading.meetingDeployment
-                      ? (
-                        <div>Meeting tx: { cachedMeeting._id} <CircularProgress /></div>
-                      )
-                      : (
-                        // display contract address
-                        <div>Meeting contract: { cachedMeeting._id}</div>
-                      )
-                  }
+                  
 
                   <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
 
@@ -329,7 +489,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                 </div>
               )
           }
-        </div>
+        </div> */}
+
       </React.Fragment>
     );
   }

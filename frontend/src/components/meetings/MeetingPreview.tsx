@@ -75,8 +75,8 @@ export class MeetingPreview extends React.Component<IProps> {
   render() {
     const url = '/meeting/' + this.props.meeting._id;
     const title = this.props.meeting.data.name
-    const split = (new Date(this.props.meeting.data.startDateTime * 1000)).toString().split(":")
-    const date = split[0] + " [" + split[1] + ":" + split[2].split(/\s/)[0] + "]"
+    const split = (new Date(this.props.meeting.data.startDateTime * 1000)).toString().split(" ")
+    const date = `${split[0]} ${split[1]} ${split[2]} ${split[3]} [${split[4]}]`
     const stake = 'Stake Required: ' + this.props.meeting.data.stake + ' ETH';
 
     const imageUrl = 'https://siasky.net/' +
@@ -104,16 +104,8 @@ export class MeetingPreview extends React.Component<IProps> {
           subheader={date}
           subheaderTypographyProps={{ variant: 'caption' }}
         />
-        {
-          this.props.meeting.data.videos.length > 0 &&
-          <video controls height="144" width="256">
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        }
         <Link style={{ textDecoration: 'none' }} to={url}>
           {
-            this.props.meeting.data.images.length > 0 &&
             <CardImage
               image={imageUrl}
               title={this.props.meeting.data.name}
