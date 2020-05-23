@@ -686,6 +686,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											<video
 												src={videoUrlpreview}
 												title='event video preview'
+												height='144'
+												width='256'
 											/>
 										</Container>
 									}
