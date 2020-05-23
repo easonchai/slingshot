@@ -21,7 +21,7 @@ export default function Reviews() {
         <React.Fragment>
             <Middle item container spacing={2}>
                 <Container maxWidth="md">
-                    Reviews ({reviewCount})
+                    Comments ({reviewCount})
                 </Container>
 
                 {

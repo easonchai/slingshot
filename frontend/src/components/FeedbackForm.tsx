@@ -20,6 +20,23 @@ import { Hero, CardImage, Middle, MyButton, SponsorMessage } from './meetings/Me
 import { actions as notificationActions, Notification } from '../store/notifications/actions';
 import { actions as userActions } from '../store/users/actions';
 import { Feedback, Meeting } from '../store/meetings/actions';
+import { styled } from '@material-ui/core/styles';
+
+const UploadButton = styled(Input)({
+    display: 'none',
+})
+
+const UploadText = styled(Typography)({
+    color: '#454545',
+    fontWeight: 'bolder',
+    fontSize: 14,
+})
+
+const UploadGrid = styled(Grid)({
+    border: '1px solid #a8a8a8',
+    borderRadius: 5,
+    padding: 10
+})
 
 export default function FeedbackForm() {
     const dispatch = useDispatch();
@@ -176,10 +193,10 @@ export default function FeedbackForm() {
                 {/* Top Section */}
                 <Hero maxWidth={false}>
                     <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-                        Reviews
+                        Comments
                     </Typography>
                     <Typography variant="h5" align="center" color="textSecondary" paragraph>
-                        We would like to hear your feedback
+                        You speak, we listen!
                     </Typography>
                 </Hero>
 
@@ -188,7 +205,7 @@ export default function FeedbackForm() {
                     <Container maxWidth="md">
                         <Grid item container xs={12} alignItems="flex-end" justify="center">
                             <Typography variant="h6" align="center" color="textSecondary" paragraph>
-                                First, let's upload your participation picture/video!
+                                Got a photo/video to show off? Upload it here!
                             </Typography>
                         </Grid>
                         <Grid item container xs={12} alignItems="flex-end" justify="center">
@@ -211,66 +228,90 @@ export default function FeedbackForm() {
                         {/* Image / Video upload Section */}
                         {/* TODO: refactor with MeetingAdd */}
                         <Grid container spacing={3} >
-                            <Tooltip title={getUploadButtonTooltipText()}>
-                                <Grid item xs={6}>
-                                    <Input
-                                        disabled={isUploadImageButtonDisabled()}
-                                        inputProps={
-                                            {
-                                                accept: "image/*"
-                                            }
-                                        }
-                                        id="icon-button-photo"
-                                        onChange={handleCaptureImage}
-                                        type="file"
-                                    />
-                                    <label htmlFor="icon-button-photo">
-                                        <IconButton color="primary" component="span">
-                                            <PhotoCamera />
-                                        </IconButton>
-                                    </label>
+                            <Grid item container xs={6} alignItems="center" justify="center">
+                                <Grid item xs={3} />
+                                <UploadGrid item xs={6}>
+                                    <Tooltip title={getUploadButtonTooltipText()}>
+                                        <Container>
+                                            <UploadText variant="body2" align="center" color="textSecondary" paragraph>
+                                                Upload an image
+												</UploadText>
+                                            <UploadButton
+                                                disabled={isUploadImageButtonDisabled()}
+                                                inputProps={
+                                                    {
+                                                        accept: "image/*"
+                                                    }
+                                                }
+                                                id="icon-button-photo"
+                                                onChange={handleCaptureImage}
+                                                type="file"
+                                            />
+                                            <label htmlFor="icon-button-photo">
+                                                <IconButton color="secondary" style={{ marginLeft: 45 }} component="span">
+                                                    <PhotoCamera fontSize="large" />
+                                                </IconButton>
+                                            </label>
+
+                                        </Container>
+                                    </Tooltip>
+                                </UploadGrid>
+                                <Grid item xs={3} />
+                                <Grid item xs={12}>
                                     {
                                         loadingImage && <CircularProgress color="secondary" />
                                     }
                                 </Grid>
-                            </Tooltip>
-                            <Tooltip title={getUploadButtonTooltipText()}>
-                                <Grid item xs={6}>
-                                    <Input
-                                        disabled={isUploadVideoButtonDisabled()}
-                                        inputProps={
-                                            {
-                                                accept: "video/*",
-                                                capture: "camcorder"
-                                            }
-                                        }
-                                        id="icon-button-video"
-                                        onChange={handleCaptureVideo}
-                                        type="file"
-                                    />
-                                    <label htmlFor="icon-button-video">
-                                        <IconButton color="primary" component="span">
-                                            <Videocam />
-                                        </IconButton>
-                                    </label>
+                            </Grid>
+                            <Grid item container xs={6}>
+                                <Grid item xs={3} />
+                                <UploadGrid item xs={6}>
+                                    <Tooltip title={getUploadButtonTooltipText()}>
+                                        <Container>
+                                            <UploadText variant="body2" align="center" color="textSecondary" paragraph>
+                                                Upload a video
+												</UploadText>
+                                            <UploadButton
+                                                disabled={isUploadVideoButtonDisabled()}
+                                                inputProps={
+                                                    {
+                                                        accept: "video/*",
+                                                        capture: "camcorder"
+                                                    }
+                                                }
+                                                id="icon-button-video"
+                                                onChange={handleCaptureVideo}
+                                                type="file"
+                                            />
+                                            <label htmlFor="icon-button-video">
+                                                <IconButton color="secondary" component="span" style={{ marginLeft: 45 }}>
+                                                    <Videocam fontSize="large" />
+                                                </IconButton>
+                                            </label>
+                                        </Container>
+                                    </Tooltip>
+                                </UploadGrid>
+                                <Grid item xs={3} />
+                                <Grid item xs={12}>
                                     {
                                         loadingVideo && <CircularProgress color="secondary" />
                                     }
                                 </Grid>
-                            </Tooltip>
+                            </Grid>
                         </Grid>
 
                         {/* Image / Video preview Section */}
-                        <Grid container spacing={3} >
-                            <Grid item xs={6}>
+                        <Grid container spacing={3} style={{ marginBottom: 20 }}>
+                            <Grid item xs={5}>
                                 {
                                     uploadedImages[0] !== '' &&
-                                    <img
-                                        src={'https://siasky.net/' + uploadedImages[0]}
-                                        alt='event image preview'
-                                        width="256"
-                                        height="256"
-                                    />
+                                    <Container>
+                                        <Typography style={{ fontWeight: 'lighter', fontSize: 14 }}>Image Preview: </Typography>
+                                        <CardImage
+                                            image={'https://siasky.net/' + uploadedImages[0]}
+                                            title='event image preview'
+                                        />
+                                    </Container>
                                 }
 
                                 {
@@ -278,13 +319,17 @@ export default function FeedbackForm() {
                                     <LinearProgress variant="determinate" value={loadingImagePct} color="secondary" />
                                 }
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={2} />
+                            <Grid item xs={5}>
                                 {
                                     uploadedVideos[0] !== '' &&
-                                    <video controls width="256" height="144">
-                                        <source src={'https://siasky.net/' + uploadedVideos[0]} type="video/mp4" />
+                                    <Container>
+                                        <Typography style={{ fontWeight: 'lighter', fontSize: 14 }}>Video Preview: </Typography>
+                                        <video controls width="318" height="179">
+                                            <source src={'https://siasky.net/' + uploadedVideos[0]} type="video/mp4" />
 											Your browser does not support the video tag.
 										</video>
+                                    </Container>
                                 }
 
                                 {
@@ -317,7 +362,7 @@ export default function FeedbackForm() {
                                     <TextField
                                         fullWidth={true}
                                         id="comment"
-                                        label="Feedback"
+                                        label="Comments"
                                         multiline
                                         rows={6}
                                         variant="outlined"

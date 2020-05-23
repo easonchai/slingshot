@@ -231,19 +231,21 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (!this.props.user.rsvp.includes(this.props.cachedMeeting._id))
       return `Stake required: ${this.props.cachedMeeting.data.stake} ETH`;
 
-    // if (this.state.loadingVideo)
-    //   return 'Please wait until the video has been uploaded.';
-
     if (this.isUserLoggedOut())
       return 'Please login to MetaMask first.';
+  }
+
+  getOrganizerTooltipText = () => {
+    if (this.props.cachedMeeting.rsvp.length >= 1)
+      return 'Ready to start?';
   }
 
   getRSVPButtonTooltipText = () => {
     return this.getStateTooltipText() || 'You have already registered for this event';
   }
 
-  getUploadButtonTooltipText = () => {
-    return this.getStateTooltipText() || 'This will start the upload right away and replace previous file.';
+  getStartEventButtonTooltipText = () => {
+    return this.getOrganizerTooltipText() || `You can't start an event with no participants!`;
   }
 
 
@@ -278,7 +280,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isStartButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) >= new Date(cachedMeeting.data.startDateTime);
+      return !cachedMeeting.data.isEnded || !cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) >= new Date(cachedMeeting.data.startDateTime);
     }
 
     const isEndButtonDisabled = () => {
@@ -367,10 +369,12 @@ export class MeetingView extends React.Component<IProps, IState> {
                         <React.Fragment>
                           <Grid item container style={{ padding: 10, marginLeft: 15 }}>
                             <Grid item xs={3}>
-                              <Tooltip title={this.getUploadButtonTooltipText()}>
-                                <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
-                                  {this.props.user.rsvp.includes(cachedMeeting._id) ? "RSVP'd" : "RSVP"}
-                                </CustButton>
+                              <Tooltip title={this.getRSVPButtonTooltipText()}>
+                                <span>
+                                  <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
+                                    {this.props.user.rsvp.includes(cachedMeeting._id) ? "RSVP'd" : "RSVP"}
+                                  </CustButton>
+                                </span>
                               </Tooltip>
                             </Grid>
                             {isUserPartOfMeeting() ?
@@ -405,8 +409,12 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 </Typography>
                                   </Grid>
                                   <Grid item xs={3} style={{ padding: 10 }}>
-                                    <CustButton disabled={isStartButtonDisabled()}
-                                      onClick={this.handleStart}>Start Event</CustButton>
+                                    <Tooltip title={this.getStartEventButtonTooltipText()}>
+                                      <span>
+                                        <CustButton disabled={isStartButtonDisabled()}
+                                          onClick={this.handleStart}>Start Event</CustButton>
+                                      </span>
+                                    </Tooltip>
                                   </Grid>
                                   <Grid item xs={3} style={{ padding: 10 }}>
                                     <CustButton disabled={isEndButtonDisabled()}
@@ -436,7 +444,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                 </Grid>
 
                 {/** Feedback Form + Reviews */}
-                <Grid item container xs={12}>
+                <Grid item container xs={12} style={{ marginTop: 20 }}>
                   <FeedbackForm />
                   <Reviews />
                 </Grid>

@@ -594,7 +594,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
 													Upload an image
 												</UploadText>
-												<Input
+												<UploadButton
 													disabled={this.isUploadImageButtonDisabled()}
 													inputProps={
 														{
@@ -606,7 +606,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 													type="file"
 												/>
 												<label htmlFor="icon-button-photo">
-													<IconButton color="secondary" style={{ marginLeft: 45 }}>
+													<IconButton color="secondary" style={{ marginLeft: 45 }} component="span">
 														<PhotoCamera fontSize="large" />
 													</IconButton>
 												</label>
@@ -683,12 +683,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										this.state.form.videos.length > 0 &&
 										<Container>
 											<Typography style={{ fontWeight: 'lighter', fontSize: 14 }}>Video Preview: </Typography>
-											<video
-												src={videoUrlpreview}
-												title='event video preview'
-												height='144'
-												width='256'
-											/>
+											<video controls width="318" height="179">
+												<source src={videoUrlpreview} type="video/mp4" />
+												Your browser does not support the video tag.
+											</video>
 										</Container>
 									}
 
