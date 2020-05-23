@@ -1,9 +1,11 @@
 import axios from 'axios';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { IAppState } from '../store/index';
 import EtherService from '../services/EtherService';
-import { actions as userActions, ModelType, User } from '../store/users/actions';
+import { actions as userActions, User } from '../store/users/actions';
+import { actions as meetingActions } from '../store/meetings/actions';
 import { actions as notificationActions, Notification } from '../store/notifications/actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -78,6 +80,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function ProfileBar() {
+    const location = useLocation();
     const [open, setOpen] = React.useState(false);
     const dispatch = useDispatch();
     const etherService = EtherService.getInstance();
@@ -92,6 +95,15 @@ export default function ProfileBar() {
         setOpen(false);
     };
 
+    const updateOrganizerAddress = (user: User) => {
+        // TODO: store path names in constants
+        if (location.pathname === '/meeting/create/first') {
+            // In case the user switches account while creating a new event,
+            // we want to update the cached organizer address as well.
+            dispatch(meetingActions.UpdateOrganiserEthereumAddress(user));
+        }
+    }
+
     const accChangeCallback = (accounts: string[]) => {
         const address = accounts[0];
 
@@ -101,6 +113,7 @@ export default function ProfileBar() {
                 .get('/api/user/id/' + address)
                 .then(res => res.data as User)
                 .then(user => {
+                    updateOrganizerAddress(user);
                     dispatch(userActions.UpdateUserEthereumAddress(user));
 
                     // Lookup user's ENS domain and save in the redux store after account changed.
@@ -109,8 +122,9 @@ export default function ProfileBar() {
         } else {
             // reset the user in redux store when user logs out from MM
             const user: User = { ...userDefaultState.user };
+
+            updateOrganizerAddress(user);
             dispatch(userActions.UpdateUserEthereumAddress(user));
-            dispatch(userActions.UpdateUserENSDomain(""));  // is actually redundant since the previous dispatch call already resets ENS
         }
     }
 
@@ -129,7 +143,18 @@ export default function ProfileBar() {
     }
 
     const signIn = () => {
-        etherService.requestConnection();
+        if (!etherService.isEthereumNodeAvailable()) {
+            const notification: Notification = {
+                message: 'Please install MetaMask extension first.',
+                variant: 'filled',
+                severity: 'error',
+                display: true
+            };
+
+            dispatch(notificationActions.AddNotification(notification));
+        } else {
+            etherService.requestConnection();
+        }
     }
 
     const resolveDomain = (domain: string) => {
@@ -204,25 +229,41 @@ export default function ProfileBar() {
 
     // componentDidMount alternative
     React.useEffect(() => {
-        const selectedAddress = etherService.getUserAddress();
+        if (!etherService.isEthereumNodeAvailable()) {
+            const notification: Notification = {
+                message: 'Please install MetaMask extension to host / join events.',
+                variant: 'filled',
+                severity: 'warning',
+                display: true
+            };
 
-        if (selectedAddress && selectedAddress !== user._id) {
-            /**
-             * Edge case that requires manual dispatch call.
-             *
-             * Sometimes window.ethereum.selectAddress is already
-             * pre-filled before we start listening for account changes.
-             * So we manually invoke the callback function to update userEthAddress.
-             */
+            dispatch(notificationActions.AddNotification(notification));
+        } else {
+            const selectedAddress = etherService.getUserAddress();
 
-            accChangeCallback([selectedAddress]);
-            chainChangeCallback(etherService.getNetwork());
+            if (selectedAddress && selectedAddress !== user._id) {
+                /**
+                 * Edge case that requires manual dispatch call.
+                 *
+                 * Sometimes window.ethereum.selectAddress is already
+                 * pre-filled before we start listening for account changes.
+                 * So we manually invoke the callback function to update userEthAddress.
+                 */
+
+                accChangeCallback([selectedAddress]);
+                chainChangeCallback(etherService.getNetwork());
+            }
+
+            etherService.addAllListeners(chainChangeCallback, accChangeCallback);
         }
 
-        etherService.addAllListeners(chainChangeCallback, accChangeCallback);
 
         // componentWillUnmount alternative
-        return () => etherService.removeAllListeners();
+        return () => {
+            if (etherService.isEthereumNodeAvailable()) {
+                etherService.removeAllListeners();
+            }
+        };
     }, []);
 
     return (
@@ -286,7 +327,7 @@ export default function ProfileBar() {
                                                 <Box fontSize={16} fontWeight="500" lineHeight={2}>
                                                     Address
                                                 </Box>
-                                                <Link href={user._id ? "https://etherscan.io/address/" + user._id : "#"} style={{ textDecoration: 'none' }} target="_blank">
+                                                <Link href={user._id ? "https://rinkeby.etherscan.io/address/" + user._id : "#"} style={{ textDecoration: 'none' }} target="_blank">
                                                     <Tooltip title={user._id ? "Click to view on Etherscan" : "Sign In"} aria-label="visit etherscan" placement="bottom">
                                                         <Paper style={{ marginBottom: 20 }} elevation={3}>
                                                             <Container>

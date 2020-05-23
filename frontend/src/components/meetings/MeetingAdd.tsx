@@ -183,28 +183,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.etherService = EtherService.getInstance();
 	}
 
-	accChangeCallback = (accounts: string[]) => {
-		const address = accounts[0];
-
-		if (address) {
-			axios
-				.get('/api/user/id/' + address)
-				.then(res => res.data as User)
-				.then(user => this.props.dispatchUpdateOrganiserEthereumAddress(user));
-		} else {
-			const user: User = { ...userDefaultState.user };
-			this.props.dispatchUpdateOrganiserEthereumAddress(user);
-		}
-	}
-
-	componentDidMount() {
-		this.etherService.addAccountListener(this.accChangeCallback);
-	}
-
-	componentWillUnmount() {
-		this.etherService.removeAllListeners();
-	}
-
 	callbackDeployedFirstMeeting = (confirmation: any) => {
 		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
 

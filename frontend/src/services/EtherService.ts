@@ -81,7 +81,7 @@ export default class EtherService {
     return EtherService.instance;
   }
 
-  private isEthereumNodeAvailable(): boolean {
+  public isEthereumNodeAvailable(): boolean {
     return typeof this.ethereum !== 'undefined';
   }
 
@@ -118,7 +118,6 @@ export default class EtherService {
   public resolveName(domain: string, resolve: (address: string) => void): void {
     this.provider.resolveName(domain).then(address => resolve(address));
   }
-
 
   public async requestConnection(): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
@@ -174,31 +173,31 @@ export default class EtherService {
     });
   }
 
-  // public async startMeeting(...): Promise<string> {...}
-  // public async endMeeting(...): Promise<string> {...}
-  // ...
-
   public async rsvp(
     meetingAddress: string,
     stakeAmount: number,
     eventCallback: (event: any) => void
   ): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
-      const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
+      if (this.isEthereumNodeAvailable()) {
+        const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
-      contract
-        .once("RSVPEvent", (addr, event) => eventCallback(event))
-        .once("error", console.error);
+        // Notify frontend about successful RSVP (TX mined)
+        contract
+          .once("RSVPEvent", (addr, event) => eventCallback(event))
+          .once("error", console.error);
 
-      // Send TX
-      contract
-        .rsvp({ value: ethers.utils.parseEther(String(stakeAmount)) })
-        .then(
-          (success: any) => resolve(success),
-          (reason: any) => reject(reason)
-        )
-        .catch((error: any) => reject(error.reason));
+        // Send TX
+        contract
+          .rsvp({ value: ethers.utils.parseEther(String(stakeAmount)) })
+          .then(
+            (success: any) => resolve(success),
+            (reason: any) => reject(reason)
+          )
+          .catch((error: any) => reject(error.reason));
+      } else {
+        reject('Please install MetaMask to interact with Ethereum blockchain.');
+      }
     });
   }
   public async getChange(
@@ -208,7 +207,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("GetChange", (event) => eventCallback(event))
         .once("error", console.error);
@@ -230,7 +228,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("EventCancelled", (event) => eventCallback(event))
         .once("error", console.error);
@@ -252,7 +249,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("GuyCancelled", (participant, event) => eventCallback(event))
         .once("error", console.error);
@@ -275,7 +271,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("MarkAttendance", (participant, event) => eventCallback(event))
         .once("error", console.error);
@@ -297,7 +292,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("StartEvent", (addr, event) => eventCallback(event))
         .once("error", console.error);
@@ -319,7 +313,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("EndEvent", (addr, attendance, event) => eventCallback(event))
         .once("error", console.error);
@@ -341,7 +334,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("WithdrawEvent", (addr, event) => eventCallback(event))
         .once("error", console.error);
@@ -367,7 +359,6 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
 
-      // Notify frontend about successful RSVP (TX mined)
       contract
         .once("NextMeeting", (_startDate, _endDate, _minStake, _registrationLimit, _meeting, event) => eventCallback(event))
         .once("error", console.error);

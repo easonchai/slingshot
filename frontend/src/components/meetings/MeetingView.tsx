@@ -124,10 +124,12 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleRSVP: ' + reason);
+        this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
+        console.error(reason);
       })
       .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleRSVP: ' + err);
+        this.props.dispatchAddErrorNotification('Failed to RSVP.');
+        console.error(err);
       });
   }
 

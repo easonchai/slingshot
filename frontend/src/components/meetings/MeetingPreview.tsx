@@ -65,10 +65,12 @@ export class MeetingPreview extends React.Component<IProps> {
       .then((res: any) => {
         this.props.dispatchUpdateRSVP(this.props.meeting._id, this.props.user._id);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleRSVP: ' + reason);
+        this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
+        console.error(reason);
       })
       .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleRSVP: ' + err);
+        this.props.dispatchAddErrorNotification('Failed to RSVP: ' + err);
+        console.error(err);
       });
   }
 
