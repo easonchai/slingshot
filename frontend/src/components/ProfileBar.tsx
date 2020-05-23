@@ -173,27 +173,41 @@ export default function ProfileBar() {
     }
 
     /**
-    * We can make use of redux store by directly working with:
-    *      user.rsvp
-    *      user.attend
-    *      user.withdraw
-    * to find all the meetings the user registered for.
-    *
-    * Once the user switches to another account,
-    * the listener will update the user in redux store.
-    */
+     * Filter out meetings a user RSVP'd to,
+     * make sure they haven't been cancelled nor ended.
+     * Sort by start datetime, with most recent one coming up first.
+     *
+     * We can make use of redux store by directly working with:
+     *      user.rsvp
+     *      user.attend
+     *      user.withdraw
+     * to find all the meetings the user registered for.
+     *
+     * Once the user switches to another account,
+     * the listener will update the user in redux store.
+     */
     const getUpcoming = () => {
-        let result = user.rsvp.reduce((state: Meeting[], meeting) => {
-            let found = meetings.find(allMeeting => {
-                return allMeeting._id === meeting
+        // Filter out active upcoming meetings.
+        let result = user.rsvp.reduce((result: Meeting[], userMeeting) => {
+            let found = meetings.find(globalMeeting => {
+                return globalMeeting._id === userMeeting
             })
+
             if (found !== undefined) {
                 if (!found.data.isEnded && !found.data.isStarted && !found.data.isCancelled) {
-                    state.push(found);
+                    result.push(found);
                 }
             }
-            return state;
+
+            return result;
         }, [])
+
+        // Lets sort the result array by event's start date (most recent one first)
+        // instead of displaying them in the order of RSVP sequence.
+        result = result.sort((m1, m2) => {
+            return m1.data.startDateTime - m2.data.startDateTime;
+        })
+
         return result;
     }
 
