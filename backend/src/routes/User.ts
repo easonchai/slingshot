@@ -51,4 +51,27 @@ router.post('/create', async (req: Request, res: Response, next: NextFunction) =
         .catch(err => next(err));
 });
 
+
+/**
+ * Update User (typically when ENS domain changes).
+ * 
+ * @params  user     Value of the model.
+ * 
+ * @returns User
+ */
+router.put('/update', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['_id'], type: ModelType.USER },
+            req.body,
+            { new: true, upsert: true, safe: true }
+        )
+        .then(user => {
+            res
+                .status(OK)
+                .json(user);
+        })
+        .catch(err => next(err));
+});
+
 export default router;

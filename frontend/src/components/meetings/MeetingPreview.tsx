@@ -93,8 +93,6 @@ export class MeetingPreview extends React.Component<IProps> {
           : 'AABFq923X6YAKtadoqauChu8aWnn5PWg7AtokrCvFBaMrw'
       )
 
-    console.log(imageUrl, videoUrl);
-
     return (
       <DisplayCard raised={true} className="meeting-preview">
         <CardHeader

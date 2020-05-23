@@ -65,12 +65,10 @@ const Transition = React.forwardRef(function Transition(
 
 export default function ProfileBar() {
     const [open, setOpen] = React.useState(false);
-    const user = useSelector((state: IAppState) => state.userReducer.user);
     const dispatch = useDispatch();
     const etherService = EtherService.getInstance();
+    const user = useSelector((state: IAppState) => state.userReducer.user);
     const meetings = useSelector((state: IAppState) => state.meetingsReducer.meetings);
-    const [registeredEvents, setRegistered] = React.useState(['']);
-    const [attendedEvents, setAttended] = React.useState(['']);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -84,17 +82,18 @@ export default function ProfileBar() {
         const address = accounts[0];
 
         if (address) {
+            // Retrieve the user's details from DB and update redux store after a user switched account
             axios
                 .get('/api/user/id/' + address)
                 .then(res => res.data as User)
                 .then(user => {
-                    dispatch(userActions.UpdateUserEthereumAddress(user))
-                    getRegistered(user.rsvp)
+                    dispatch(userActions.UpdateUserEthereumAddress(user));
+
+                    // Lookup user's ENS domain and save in the redux store after account changed.
+                    etherService.findENSDomain(address, resolveDomain);
                 });
-
-            etherService.findENSDomain(address, resolveDomain);
-
         } else {
+            // reset the user in redux store when user logs out from MM
             const user: User = {
                 _id: '',
                 type: ModelType.USER,
@@ -108,7 +107,7 @@ export default function ProfileBar() {
             };
 
             dispatch(userActions.UpdateUserEthereumAddress(user));
-            dispatch(userActions.UpdateUserENSDomain(" "));
+            dispatch(userActions.UpdateUserENSDomain(""));  // is actually redundant since the previous dispatch call already resets ENS
         }
     }
 
@@ -131,11 +130,33 @@ export default function ProfileBar() {
     }
 
     const resolveDomain = (domain: string) => {
-        dispatch(userActions.UpdateUserENSDomain(domain));
+        // in case the ENS domain doesn't match the one in redux store,
+        // we want to update both the redux store and save it in the DB
+        if (domain !== user.data.ensDomain) {
+            dispatch(userActions.UpdateUserENSDomain(domain));
+
+            axios
+                .put('/api/user/update/', user)
+                .then(res => res.data as User)
+                .then(user => {
+                    // entry point to notify that ENS domain synched with database
+                });
+        }
     }
 
-    const getRegistered = (rsvpArr: readonly string[]) => {
-        console.log(rsvpArr)
+    /**
+    * We can make use of redux store by directly working with:
+    *      user.rsvp
+    *      user.attend
+    *      user.withdraw
+    * to find all the meetings the user registered for.
+    *
+    * Once the user switches to another account,
+    * the listener will update the user in redux store.
+    */
+    const getRegistered = () => {
+        console.log(user.rsvp);
+
         //Get the array
         // console.log(user.rsvp)
         // //Find
@@ -149,7 +170,6 @@ export default function ProfileBar() {
         //     }
         // }
         //
-
     }
 
     // componentDidMount alternative
@@ -223,11 +243,9 @@ export default function ProfileBar() {
                                         </Box>
                                         <Box fontSize="12" fontWeight="normal" fontStyle="italic" lineHeight={3}>
                                             {
-                                                user.data?.ensDomain ? (user.data?.ensDomain + " // " + user._id) :
-
-                                                    (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
-                                                        Click to sign in to MetaMask to link your account.
-                                                    </AddressButton>)
+                                                user.data?.ensDomain
+                                                    ? user.data?.ensDomain + " // " + user._id
+                                                    : "Couldn't find ENS domain for your account."
                                             }
                                         </Box>
                                         <br />
