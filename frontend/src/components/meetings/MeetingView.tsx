@@ -237,19 +237,76 @@ export class MeetingView extends React.Component<IProps, IState> {
       return 'Please login to MetaMask first.';
   }
 
-  getOrganizerTooltipText = () => {
-    if (this.props.cachedMeeting.rsvp.length >= 1)
-      return 'Ready to start?';
-  }
-
   getRSVPButtonTooltipText = () => {
     return this.getStateTooltipText() || 'You have already registered for this event';
   }
 
   getStartEventButtonTooltipText = () => {
-    return this.getOrganizerTooltipText() || `You can't start an event with no participants!`;
+    if (this.props.cachedMeeting.data.isStarted)
+      return `The event was already started.`;
+
+    if (this.props.cachedMeeting.data.isEnded)
+      return `You can't start an ended event .`;
+
+    if (this.props.cachedMeeting.data.isCancelled)
+      return `You can't start a cancelled event.`;
+
+    if ((new Date()) < new Date(this.props.cachedMeeting.data.startDateTime * 1000))
+      return `You can't start an event before its official Start time.`;
+
+    if (new Date() > new Date(this.props.cachedMeeting.data.endDateTime * 1000))
+      return `You can't start an event after its official End time.`;
+
+    if (this.props.cachedMeeting.rsvp.length >= 1)
+      return 'Ready to start?';
+
+    return `You can't start an event with no participants!`;
   }
 
+  getEndEventButtonTooltipText = () => {
+    if (this.props.cachedMeeting.data.isEnded)
+      return `The event was already ended.`;
+
+    if (!this.props.cachedMeeting.data.isStarted)
+      return `You can't end an event that hasn't started yet.`;
+
+    if (this.props.cachedMeeting.data.isCancelled)
+      return `You can't end a cancelled event.`;
+
+    if (this.props.cachedMeeting.attend.length === 0)
+      return `You can't end an event without attendees.`;
+
+    if (this.props.cachedMeeting.rsvp.length > 0)
+      return `Ready to end? Don't forget to mark all attendees first!`;
+
+    return `Ready to end?`;
+  }
+
+  getCancelEventButtonTooltipText = () => {
+    if (this.props.cachedMeeting.data.isCancelled)
+      return `The event was already cancelled.`;
+
+    if (this.props.cachedMeeting.data.isEnded)
+      return `You can't cancel an ended event.`;
+
+    return `Good luck next time!`;
+  }
+
+  getCancelRsvpButtonTooltipText = () => {
+    if (this.props.cachedMeeting.data.isEnded)
+      return `Cannot cancel RSVP of the ended event.`;
+
+    if (this.props.cachedMeeting.data.isCancelled)
+      return `Cannot cancel RSVP of the cancelled event.`;
+
+    if (this.props.cachedMeeting.data.isStarted)
+      return `Cannot cancel RSVP of the started event.`;
+
+    if (this.props.user.cancel.includes(this.props.cachedMeeting._id))
+      return `You've already cancelled your RSVP.`;
+
+    return `Sorry to see you go!`;
+  }
 
 
   render() {
@@ -266,7 +323,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isCancelRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.cancel.includes(cachedMeeting._id);
+      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.cancel.includes(cachedMeeting._id);
     }
 
     const isUserPartOfMeeting = () => {
@@ -282,11 +339,11 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isStartButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime);
+      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime * 1000) || (new Date()) > new Date(cachedMeeting.data.endDateTime * 1000);
     }
 
     const isEndButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted;
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted || this.props.cachedMeeting.attend.length === 0;
     }
 
     const isCancelButtonDisabled = () => {
@@ -374,7 +431,13 @@ export class MeetingView extends React.Component<IProps, IState> {
                               <Tooltip title={this.getRSVPButtonTooltipText()}>
                                 <span>
                                   <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
-                                    {this.props.user.rsvp.includes(cachedMeeting._id) ? "RSVP'd" : "RSVP"}
+                                    {
+                                      this.props.user.rsvp.includes(cachedMeeting._id) ||
+                                        this.props.user.attend.includes(cachedMeeting._id) ||
+                                        this.props.user.withdraw.includes(cachedMeeting._id)
+                                        ? "RSVP'd"
+                                        : "RSVP"
+                                    }
                                   </CustButton>
                                 </span>
                               </Tooltip>
@@ -382,9 +445,16 @@ export class MeetingView extends React.Component<IProps, IState> {
                             {isUserPartOfMeeting() ?
                               (<React.Fragment>
                                 <Grid item xs={3}>
-                                  <CustButton disabled={isCancelRSVPButtonDisabled()} size="small" onClick={this.handleCancelRSVP}>
-                                    Cancel
-                                  </CustButton>
+                                  <Tooltip title={this.getCancelRsvpButtonTooltipText()}>
+                                    <span>
+                                      <CustButton
+                                        disabled={isCancelRSVPButtonDisabled()}
+                                        size="small"
+                                        onClick={this.handleCancelRSVP}>
+                                        Cancel
+                                      </CustButton>
+                                    </span>
+                                  </Tooltip>
                                 </Grid>
                                 {isWithdrawButtonVisible() ?
                                   (<Grid item xs={3}>
@@ -419,12 +489,20 @@ export class MeetingView extends React.Component<IProps, IState> {
                                     </Tooltip>
                                   </Grid>
                                   <Grid item xs={3} style={{ padding: 10 }}>
-                                    <CustButton disabled={isEndButtonDisabled()}
-                                      onClick={this.handleEnd}>End Event</CustButton>
+                                    <Tooltip title={this.getEndEventButtonTooltipText()}>
+                                      <span>
+                                        <CustButton disabled={isEndButtonDisabled()}
+                                          onClick={this.handleEnd}>End Event</CustButton>
+                                      </span>
+                                    </Tooltip>
                                   </Grid>
                                   <Grid item xs={3} style={{ padding: 10 }}>
-                                    <CustButton disabled={isCancelButtonDisabled()}
-                                      onClick={this.handleCancelEvent}>Cancel Event</CustButton>
+                                    <Tooltip title={this.getCancelEventButtonTooltipText()}>
+                                      <span>
+                                        <CustButton disabled={isCancelButtonDisabled()}
+                                          onClick={this.handleCancelEvent}>Cancel Event</CustButton>
+                                      </span>
+                                    </Tooltip>
                                   </Grid>
                                   <Grid item xs={3} style={{ padding: 10 }}>
                                     <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>

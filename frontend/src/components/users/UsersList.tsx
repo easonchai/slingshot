@@ -3,7 +3,7 @@ import { Meeting } from '../../store/meetings/actions';
 import { Loading } from '../../store/loading/actions';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
-import { AppBar, Button, Grid, Tab, Tabs, Typography, CircularProgress } from '@material-ui/core';
+import { AppBar, Button, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 const AttendanceButton = styled(Button)({
@@ -74,6 +74,30 @@ export class UsersList extends React.Component<IProps, IState> {
   handleTabSwitch = (event: React.ChangeEvent<{}>, newValue: string) => {
     this.setState({ tabIndex: newValue });
   };
+
+  getMarkAttendanceButtonTooltipText = (participantWallet: string) => {
+    if (this.props.loading.rsvpConfirmation)
+      return `Please hold on until the RSVP transaction confirms.`;
+
+    if (this.props.cachedMeeting.attend.includes(participantWallet))
+      return `Already marked as attendee.`;
+
+    if (!this.props.cachedMeeting.data.isStarted)
+      return `You can't mark attendees before the start of the event.`;
+
+    if (this.props.cachedMeeting.data.isEnded)
+      return `You can't mark attendees after the end of the event.`;
+
+    return '';
+  }
+
+  isMarkAttendanceButtonDisabled = (participantWallet: string) => {
+    return this.props.loading.rsvpConfirmation
+      || this.props.cachedMeeting.attend.includes(participantWallet)
+      || !this.props.cachedMeeting.data.isStarted
+      || this.props.cachedMeeting.data.isEnded
+  }
+
 
   render() {
     return (
@@ -146,16 +170,22 @@ export class UsersList extends React.Component<IProps, IState> {
                             {participantWallet}
                           </Typography>
                         </Grid>
-                        <Grid item>
-                          {(this.props.cachedMeeting.data.isCancelled || this.props.cachedMeeting.data.isEnded) ||
-                            this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                            !this.props.cachedMeeting.attend.includes(participantWallet) &&
-                            !this.props.loading.rsvpConfirmation &&
-                            <AttendanceButton disabled={!this.props.cachedMeeting.data.isStarted} onClick={this.handleAttendance} value={participantWallet} type="submit">
-                              MARK ATTENDANCE
-                            </AttendanceButton>
-                          }
-                        </Grid>
+                        {
+                          this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
+                          <Grid item>
+                            <Tooltip title={this.getMarkAttendanceButtonTooltipText(participantWallet)}>
+                              <span>
+                                <AttendanceButton
+                                  disabled={this.isMarkAttendanceButtonDisabled(participantWallet)}
+                                  onClick={this.handleAttendance}
+                                  value={participantWallet}
+                                  type="submit">
+                                  MARK ATTENDANCE
+                                  </AttendanceButton>
+                              </span>
+                            </Tooltip>
+                          </Grid>
+                        }
                       </Grid>
                       <br />
                     </span>
