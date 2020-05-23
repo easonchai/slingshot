@@ -151,7 +151,7 @@ export class UsersList extends React.Component<IProps, IState> {
                             this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
                             !this.props.cachedMeeting.attend.includes(participantWallet) &&
                             !this.props.loading.rsvpConfirmation &&
-                            <AttendanceButton disabled={false} onClick={this.handleAttendance} value={participantWallet} type="submit">
+                            <AttendanceButton disabled={!this.props.cachedMeeting.data.isStarted} onClick={this.handleAttendance} value={participantWallet} type="submit">
                               MARK ATTENDANCE
                             </AttendanceButton>
                           }

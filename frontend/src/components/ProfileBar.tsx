@@ -17,10 +17,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { styled } from '@material-ui/core/styles';
-import { Grid, Typography, Button, Box, Divider } from '@material-ui/core';
+import { Grid, Typography, Button, Box, Divider, Container, Paper, Link, Tooltip } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
 import CloseIcon from '@material-ui/icons/Close';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import Blockies from 'react-blockies'
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import { Meeting } from '../store/meetings/actions';
 
 const TopBar = styled(AppBar)({
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -59,6 +62,11 @@ const Domain = styled(Typography)({
 const QuickSignIn = styled(Button)({
     background: 'none',
     color: 'white'
+})
+
+const BlockAvatar = styled(Blockies)({
+    height: "200%",
+    width: "200%"
 })
 
 const Transition = React.forwardRef(function Transition(
@@ -159,22 +167,19 @@ export default function ProfileBar() {
     * Once the user switches to another account,
     * the listener will update the user in redux store.
     */
-    const getRegistered = () => {
-        console.log(user.rsvp);
-
-        //Get the array
-        // console.log(user.rsvp)
-        // //Find
-        // let registered = [];
-        // let userRSVP = user.rsvp;
-        // userRSVP.sort();
-        // meetings.sort();
-        // for (var i = 0; i < userRSVP.length; i += 1) {
-        //     if (meetings.indexOf(userRSVP[i]) > -1) {
-        //         registered.push(userRSVP[i]);
-        //     }
-        // }
-        //
+    const getUpcoming = () => {
+        let result = user.rsvp.reduce((state: string[], meeting) => {
+            let found = meetings.find(allMeeting => {
+                return allMeeting._id === meeting
+            })
+            if (found !== undefined) {
+                if (!found.data.isEnded && !found.data.isStarted && !found.data.isCancelled) {
+                    state.push(found._id);
+                }
+            }
+            return state;
+        }, [])
+        return result;
     }
 
     // componentDidMount alternative
@@ -207,7 +212,7 @@ export default function ProfileBar() {
                     <Grid container>
                         <Grid item xs={8} />
                         <Grid container item xs={3} alignItems="center" justify="flex-end">
-                            {user.data?.ensDomain
+                            {user._id
                                 ? (<Domain variant="h6">
                                     {user.data?.ensDomain}
                                 </Domain>)
@@ -243,59 +248,134 @@ export default function ProfileBar() {
                                 </StyledDialogTitle>
                                 <DialogContent dividers>
 
-                                    <Typography component="div">
-                                        <Typography variant="h6" color="textPrimary">
-                                            Account Details
-                                        </Typography>
-                                        <br />
-                                        <Box fontSize="16" fontWeight="500" lineHeight={2}>
-                                            Address
-                                        </Box>
-                                        <Box fontSize="12" fontWeight="normal" fontStyle="italic" lineHeight={3}>
-                                            {
-                                                user._id
-                                                    ? (user.data?.ensDomain
-                                                        ? user.data?.ensDomain + " // " + user._id
-                                                        : "Couldn't find ENS domain for your account.")
-                                                    : (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
-                                                        Click to sign in to MetaMask to link your account.
-                                                    </AddressButton>)
-                                            }
-                                        </Box>
-                                        <br />
-                                        <Divider />
-                                        <br />
-                                        <Typography variant="h6" color="textPrimary">
-                                            Events Registered
-                                        </Typography>
-                                        <br />
-                                        <Box fontSize="16" fontWeight="500" lineHeight={2}>
-                                            Upcoming
-                                        </Box>
-                                        <Box fontSize="12" fontWeight="normal" lineHeight={3}>
-                                            Supposed to be events here
-                                            {/* {
-                                                user._id ||
-
-                                                <AddressButton endIcon={<SignInIcon />} onClick={signIn}>
-                                                    Click to sign in to MetaMask to link your account.
-                                                </AddressButton>
-                                            } */}
-                                        </Box>
-                                        <Divider variant="middle" />
-                                        <Box fontSize="16" fontWeight="500" lineHeight={2}>
-                                            Attended
-                                        </Box>
-                                        <br />
-                                        <Divider />
-                                        <br />
-                                    </Typography>
+                                    <Grid container>
+                                        <Grid item xs={5}>
+                                            <Typography component="div">
+                                                <Typography variant="h6" color="textPrimary">
+                                                    Account Details
+                                                </Typography>
+                                                <br />
+                                                <Box fontSize={16} fontWeight="500" lineHeight={2}>
+                                                    Address
+                                                </Box>
+                                                <Link href={user._id ? "https://etherscan.io/address/" + user._id : "#"} style={{ textDecoration: 'none' }} target="_blank">
+                                                    <Tooltip title={user._id ? "Click to view on Etherscan" : "Sign In"} aria-label="visit etherscan" placement="bottom">
+                                                        <Paper style={{ marginBottom: 20 }}>
+                                                            <Container>
+                                                                <Grid container>
+                                                                    <Grid item style={{ marginTop: 8, padding: 10 }}>
+                                                                        <Blockies
+                                                                            seed={user._id}
+                                                                        />
+                                                                    </Grid>
+                                                                    <Grid item>
+                                                                        <Box fontSize={20} fontWeight="500" lineHeight={3} style={{ marginTop: 5, marginLeft: 10 }}>
+                                                                            {user._id || (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                                                Click to sign in to MetaMask to link your account.
+                                                                            </AddressButton>)}
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Container>
+                                                        </Paper>
+                                                    </Tooltip>
+                                                </Link>
+                                                <Box fontSize={16} fontWeight="500" lineHeight={2}>
+                                                    ENS Domain
+                                                </Box>
+                                                <Link href={user.data?.ensDomain ? "https://app.ens.domains/name/" + user.data?.ensDomain : "https://ens.domains/"} style={{ textDecoration: 'none' }} target="_blank">
+                                                    <Tooltip title={user.data?.ensDomain ? "Click to view on ENS" : ""} aria-label="visit ENS" placement="bottom">
+                                                        <Paper>
+                                                            <Container>
+                                                                <Grid container>
+                                                                    <Grid item style={{ marginTop: 8, padding: 10 }}>
+                                                                        <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ"
+                                                                            height={32} width={32}></img>
+                                                                    </Grid>
+                                                                    <Grid item>
+                                                                        <Box fontSize={20} fontWeight="500" lineHeight={3} style={{ marginTop: 5, marginLeft: 10 }}>
+                                                                            {user.data?.ensDomain ||
+                                                                                <AddressButton endIcon={<ArrowForwardIcon />}>
+                                                                                    No ENS Domain found. Click here to get one now
+                                                                            </AddressButton>}
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Container>
+                                                        </Paper>
+                                                    </Tooltip>
+                                                </Link>
+                                                <br />
+                                                <Container>
+                                                    <Box fontSize={24} fontWeight="fontWeightLight" lineHeight={3}>
+                                                        Powered by
+                                                    </Box>
+                                                    <img src="https://www.siasky.net/EABxJkl542vXYjkUM2EZyJXKjcGJRzU7jDSGLtcfUoD9zw"
+                                                        height={108} width={108} style={{ marginLeft: 7 }}></img>
+                                                </Container>
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={1} />
+                                        <Grid item xs={4}>
+                                            <Container>
+                                                <Typography component="div">
+                                                    <Typography variant="h6" color="textPrimary">
+                                                        Events Registered
+                                                    </Typography>
+                                                    <br />
+                                                    <Box fontSize={16} fontWeight="500" lineHeight={2}>
+                                                        Upcoming
+                                                    </Box>
+                                                    {
+                                                        getUpcoming().map((meeting) => {
+                                                            return (
+                                                                <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
+                                                                    <Paper style={{ marginBottom: 10 }}>
+                                                                        <Container>
+                                                                            <Typography component="div">
+                                                                                <Box fontSize={14} fontWeight="normal" lineHeight={3}>
+                                                                                    {meeting}
+                                                                                </Box>
+                                                                            </Typography>
+                                                                        </Container>
+                                                                    </Paper>
+                                                                </Link>
+                                                            )
+                                                        })
+                                                    }
+                                                    <br />
+                                                    <Divider />
+                                                    <br />
+                                                    <Box fontSize={16} fontWeight="500" lineHeight={2}>
+                                                        Attended
+                                                    </Box>
+                                                    {
+                                                        user.attend.map((meeting) => {
+                                                            return (
+                                                                <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
+                                                                    <Paper style={{ marginBottom: 10 }}>
+                                                                        <Container>
+                                                                            <Typography component="div">
+                                                                                <Box fontSize={14} fontWeight="normal" lineHeight={3}>
+                                                                                    {meeting}
+                                                                                </Box>
+                                                                            </Typography>
+                                                                        </Container>
+                                                                    </Paper>
+                                                                </Link>
+                                                            )
+                                                        })
+                                                    }
+                                                </Typography>
+                                            </Container>
+                                        </Grid>
+                                    </Grid>
                                 </DialogContent>
                             </Dialog>
                         </Grid>
                     </Grid>
                 </Toolbar>
             </TopBar>
-        </React.Fragment>
+        </React.Fragment >
     );
 }

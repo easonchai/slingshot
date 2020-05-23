@@ -278,7 +278,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isStartButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0;
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) >= new Date(cachedMeeting.data.startDateTime);
     }
 
     const isEndButtonDisabled = () => {

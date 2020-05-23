@@ -464,6 +464,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 	}
 
 	handleCaptureImage = (event: any) => {
+		console.log("Clicked")
 		if (event.target.accept.includes('image')) {
 			if (event.target.files.length === 0) {
 				this.setState({
@@ -598,7 +599,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									<UploadGrid item xs={6}>
 										<Tooltip title={this.getUploadButtonTooltipText()}>
 											<Container>
-
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
 													Upload an image
 												</UploadText>

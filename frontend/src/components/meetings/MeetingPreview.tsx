@@ -123,7 +123,7 @@ export class MeetingPreview extends React.Component<IProps> {
           <CardActions disableSpacing>
             {this.props.cachedMeeting._id === this.props.meeting._id
               ?
-              this.props.loading.rsvpConfirmation ? <CircularProgress /> :
+              this.props.loading.rsvpConfirmation ? <CircularProgress color="secondary" /> :
                 (<CustButton size="small" onClick={this.handleRSVP}
                   disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
                   style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
