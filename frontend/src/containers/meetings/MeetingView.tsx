@@ -6,7 +6,6 @@ import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
 import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
-import { actions as userActions, User, ModelType } from '../../store/users/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
 
 const mapStateToProps = (state: IAppState, props: any) => {
@@ -30,27 +29,6 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
           dispatch(meetingActions.ReadCachedMeeting(meeting));
           dispatch(loadingActions.UpdateCachedMeetingLoading(false));
         });
-    },
-
-    /**
-     * TODO: refactor duplicate function.
-     * See containers/MeetingAdd.tsx
-     */
-    dispatchUpdateUserEthereumAddress: (userAddress: string) => {
-      // TODO: retrieve full user data from backend
-      const payload: User = {
-        _id: userAddress,
-        type: ModelType.USER,
-        data: {
-          ensDomain: ''
-        },
-        cancel: [],
-        rsvp: [],
-        attend: [],
-        withdraw: []
-      };
-
-      dispatch(userActions.UpdateUserEthereumAddress(payload));
     },
 
     dispatchUpdateRSVP: (meetingAddress: string, userAddress: string) => {

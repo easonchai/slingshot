@@ -9,6 +9,14 @@ export const ModelType = {
   PENDING: 'pending'
 };
 
+export interface Feedback {
+  ethAddress: string;
+  comment: string;
+  stars: number;
+  images: ReadonlyArray<string>;
+  videos: ReadonlyArray<string>;
+};
+
 export interface Meeting {
   _id: string;
   type: string;
@@ -39,8 +47,11 @@ export interface Meeting {
     parent: string;  // prev meeting
     child: string;  // next meeting
 
+    // Media provided by owner once event is created
     images: ReadonlyArray<string>;
     videos: ReadonlyArray<string>;
+
+    feedback: ReadonlyArray<Feedback>;
   },
 
   // list of user wallets (ethereum address) linked to this meeting per status

@@ -1,5 +1,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
+import { Feedback } from '../meetings/actions';
 
 // TODO refactor duplicate
 export const ModelType = {
@@ -9,17 +10,18 @@ export const ModelType = {
 };
 
 export interface User {
-  _id: string,
-  type: string,
+  _id: string;
+  type: string;
   data: {
-    ensDomain: string
+    ensDomain: string,
+    feedback: ReadonlyArray<Feedback>,
   };
 
   // list of meeting wallets (smart contract address) linked to this user profile per status
-  cancel: ReadonlyArray<string>,
-  rsvp: ReadonlyArray<string>,
-  attend: ReadonlyArray<string>,
-  withdraw: ReadonlyArray<string>
+  cancel: ReadonlyArray<string>;
+  rsvp: ReadonlyArray<string>;
+  attend: ReadonlyArray<string>;
+  withdraw: ReadonlyArray<string>;
 }
 
 const actionCreator = actionCreatorFactory();

@@ -30,15 +30,16 @@ import Footer from '../Footer'
 import IconButton from '@material-ui/core/IconButton';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Videocam from '@material-ui/icons/Videocam';
+import { initState as userDefaultState } from '../../store/users/reducers';
 
-const Hero = styled(Container)({
+export const Hero = styled(Container)({
 	margin: 0,
 	background: 'white',
 	padding: '30px 80px',
 	height: '200px',
 })
 
-const Middle = styled(Grid)({
+export const Middle = styled(Grid)({
 	padding: '60px 20px'
 })
 
@@ -191,18 +192,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				.then(res => res.data as User)
 				.then(user => this.props.dispatchUpdateOrganiserEthereumAddress(user));
 		} else {
-			const user: User = {
-				_id: '',
-				type: ModelType.USER,
-				data: {
-					ensDomain: ''
-				},
-				cancel: [],
-				rsvp: [],
-				attend: [],
-				withdraw: []
-			};
-
+			const user: User = { ...userDefaultState.user };
 			this.props.dispatchUpdateOrganiserEthereumAddress(user);
 		}
 	}
@@ -251,6 +241,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					child: '',
 					images: this.state.form.images,
 					videos: this.state.form.videos,
+					feedback: []
 				},
 				cancel: [],
 				rsvp: [],
@@ -326,6 +317,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						// TODO replace files if needed
 						images: this.state.form.images,
 						videos: this.state.form.videos,
+						feedback: []
 					},
 					cancel: [],
 					rsvp: [],

@@ -40,7 +40,9 @@ export const initState: IState = {
       child: '',  // next meeting
 
       images: [],
-      videos: []
+      videos: [],
+
+      feedback: [],
     },
 
     // list of user wallets (ethereum address) linked to this meeting per status

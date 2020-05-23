@@ -24,6 +24,7 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import Blockies from 'react-blockies'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import { Meeting } from '../store/meetings/actions';
+import { initState as userDefaultState } from '../store/users/reducers';
 
 const TopBar = styled(AppBar)({
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -107,18 +108,7 @@ export default function ProfileBar() {
                 });
         } else {
             // reset the user in redux store when user logs out from MM
-            const user: User = {
-                _id: '',
-                type: ModelType.USER,
-                data: {
-                    ensDomain: ''
-                },
-                cancel: [],
-                rsvp: [],
-                attend: [],
-                withdraw: []
-            };
-
+            const user: User = { ...userDefaultState.user };
             dispatch(userActions.UpdateUserEthereumAddress(user));
             dispatch(userActions.UpdateUserENSDomain(""));  // is actually redundant since the previous dispatch call already resets ENS
         }

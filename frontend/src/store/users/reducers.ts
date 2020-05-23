@@ -3,12 +3,13 @@ import { isType } from 'typescript-fsa';
 import { actions as userActions, ModelType, User } from './actions';
 import { actions as meetingActions } from '../meetings/actions';
 
-const initState: IState = {
+export const initState: IState = {
   user: {
     _id: '',
     type: ModelType.USER,
     data: {
-      ensDomain: ''
+      ensDomain: '',
+      feedback: [],
     },
     cancel: [],
     rsvp: [],

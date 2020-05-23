@@ -8,6 +8,7 @@ import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
 import { Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper } from '@material-ui/core';
 import Header from '../Header';
+import FeedbackForm from '../FeedbackForm';
 import { styled } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import Footer from '../Footer'
@@ -59,8 +60,6 @@ export interface IProps {
   loading: Loading;
 
   dispatchGetCachedMeetingById(id: String): void;
-
-  dispatchUpdateUserEthereumAddress(userAddress: String): void;
 
   dispatchUpdateRSVP(meetingAddress: String, userAddress: String): Array<User>;
   dispatchUpdateRsvpCancellation(meetingAddress: String, userAddress: String): void;
