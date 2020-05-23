@@ -115,6 +115,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			const user: User = {
 				_id: '',
 				type: ModelType.USER,
+				data: {
+					ensDomain: ''
+				},
 				cancel: [],
 				rsvp: [],
 				attend: [],

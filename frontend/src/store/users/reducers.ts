@@ -7,6 +7,9 @@ const initState: IState = {
   user: {
     _id: '',
     type: ModelType.USER,
+    data: {
+      ensDomain: ''
+    },
     cancel: [],
     rsvp: [],
     attend: [],
@@ -56,6 +59,19 @@ export const reducer = (state: IState = initState, action: Action): IState => {
         ...state.user,
         rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
         attend: [...state.user.attend, action.payload.meetingAddress]
+      }
+    };
+  }
+
+  if (isType(action, userActions.UpdateUserENSDomain)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        data: {
+          ...state.user.data,
+          ensDomain: action.payload,
+        }
       }
     };
   }
