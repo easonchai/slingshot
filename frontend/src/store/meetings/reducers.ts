@@ -7,7 +7,7 @@ export interface IState {
   cachedMeeting: Meeting;
 }
 
-const initState: IState = {
+export const initState: IState = {
   meetings: [],
   cachedMeeting: {
     _id: '',
@@ -38,6 +38,9 @@ const initState: IState = {
 
       parent: '',  // prev meeting
       child: '',  // next meeting
+
+      images: [],
+      videos: []
     },
 
     // list of user wallets (ethereum address) linked to this meeting per status

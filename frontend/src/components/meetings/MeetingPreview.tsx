@@ -79,6 +79,22 @@ export class MeetingPreview extends React.Component<IProps> {
     const date = split[0] + " [" + split[1] + ":" + split[2].split(/\s/)[0] + "]"
     const stake = 'Stake Required: ' + this.props.meeting.data.stake + ' ETH';
 
+    const imageUrl = 'https://siasky.net/' +
+      (
+        this.props.meeting.data.images.length
+          ? this.props.meeting.data.images[0]
+          : 'nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ'
+      )
+
+    const videoUrl = 'https://siasky.net/' +
+      (
+        this.props.meeting.data.videos.length
+          ? this.props.meeting.data.videos[0]
+          : 'AABFq923X6YAKtadoqauChu8aWnn5PWg7AtokrCvFBaMrw'
+      )
+
+    console.log(imageUrl, videoUrl);
+
     return (
       <DisplayCard raised={true} className="meeting-preview">
         <CardHeader
@@ -90,11 +106,22 @@ export class MeetingPreview extends React.Component<IProps> {
           subheader={date}
           subheaderTypographyProps={{ variant: 'caption' }}
         />
+        {
+          this.props.meeting.data.videos.length > 0 &&
+          <video controls height="144" width="256">
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        }
         <Link style={{ textDecoration: 'none' }} to={url}>
-          <CardImage
-            image="https://siasky.net/nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ"
-            title={this.props.meeting.data.name}
-          />
+          {
+            this.props.meeting.data.images.length > 0 &&
+            <CardImage
+              image={imageUrl}
+              title={this.props.meeting.data.name}
+            />
+          }
+
           <CardContent>
             <Typography variant="body2" color="textSecondary" component="p">
               Max participants: {this.props.meeting.data.maxParticipants}

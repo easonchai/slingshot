@@ -10,8 +10,8 @@ export const ModelType = {
 };
 
 export interface Meeting {
-  _id: string,
-  type: string,
+  _id: string;
+  type: string;
 
   data: {
     // BACKEND
@@ -36,8 +36,11 @@ export interface Meeting {
     deployerContractAddress: string;
     organizerAddress: string;
 
-    parent: string,  // prev meeting
-    child: string,  // next meeting
+    parent: string;  // prev meeting
+    child: string;  // next meeting
+
+    images: ReadonlyArray<string>;
+    videos: ReadonlyArray<string>;
   },
 
   // list of user wallets (ethereum address) linked to this meeting per status

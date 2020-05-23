@@ -3,14 +3,33 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
 import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
+import { initState } from '../../store/meetings/reducers';
 import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
-import { Button, Container, Grid, TextareaAutosize, TextField, Tooltip, CssBaseline, Typography, InputAdornment } from '@material-ui/core';
+import {
+	Button,
+	Container,
+	Grid,
+	TextareaAutosize,
+	TextField,
+	Tooltip,
+	CssBaseline,
+	Typography,
+	InputAdornment,
+	Input,
+	CircularProgress,
+	CardMedia,
+	LinearProgress
+} from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { styled } from '@material-ui/core/styles';
 import Header from '../Header'
-import skynet from '@nebulous/skynet';
+import { upload } from 'skynet-js';
+
+import IconButton from '@material-ui/core/IconButton';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import Videocam from '@material-ui/icons/Videocam';
 
 const Hero = styled(Container)({
 	margin: 0,
@@ -44,10 +63,14 @@ interface IProps {
 	user: User;
 	cachedMeeting: Meeting;
 
+	dispatchUpdateCachedMeeting(meeting: Meeting): void;
+
 	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateOrganiserEthereumAddress(organizer: User): void;
+
 	dispatchAddErrorNotification(message: String): void;
+	dispatchAddSuccessNotification(message: string): void;
 
 	dispatchCreateNextMeeting(history: History, meting: Meeting): void;
 }
@@ -61,8 +84,14 @@ interface IState {
 		startDate: any,
 		startTime: any,
 		endDate: any,
-		endTime: any
-	}
+		endTime: any,
+		images: Array<any>,
+		videos: Array<any>
+	};
+	loadingImage: boolean;
+	loadingVideo: boolean;
+	loadingImagePct: number;
+	loadingVideoPct: number;
 }
 
 export class MeetingAdd extends React.Component<IProps, IState> {
@@ -88,9 +117,35 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				startDate: new Date(startTime),
 				startTime: new Date(startTime),
 				endDate: new Date(endTime),
-				endTime: new Date(endTime)
-			}
+				endTime: new Date(endTime),
+				images: [],
+				videos: [],
+			},
+			loadingImage: false,
+			loadingVideo: false,
+			loadingImagePct: 0,
+			loadingVideoPct: 0,
 		};
+
+		if (this.props.parent === 'first') {
+			const meeting = { ...initState.cachedMeeting };
+			this.props.dispatchUpdateCachedMeeting(meeting);
+		} else {
+			axios
+				.get('/api/meeting/id/' + this.props.parent)
+				.then(res => res.data as Meeting)
+				.then(meeting => {
+					this.props.dispatchUpdateCachedMeeting(meeting);
+
+					this.setState({
+						form: {
+							...this.state.form,
+							images: [...this.props.cachedMeeting.data.images],
+							videos: [...this.props.cachedMeeting.data.videos],
+						}
+					});
+				});
+		}
 
 		/**
 		 * HTML input element attributes for type=number used to decorate stake amount field.
@@ -128,12 +183,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		}
 	}
 
-	componentWillUnmount() {
-		this.etherService.removeAllListeners();
-	}
-
 	componentDidMount() {
 		this.etherService.addAccountListener(this.accChangeCallback);
+	}
+
+	componentWillUnmount() {
+		this.etherService.removeAllListeners();
 	}
 
 	callbackDeployedFirstMeeting = (confirmation: any) => {
@@ -148,6 +203,38 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
+	createFirstMeeting = (hash: string, event: any, startDateTime: number, endDateTime: number) => {
+		this.props.dispatchCreateFirstMeeting(this.props.history,
+			{
+				_id: hash,
+				type: ModelType.PENDING,
+				data: {
+					name: event.target.meetingName.value,
+					location: event.target.location.value,
+					description: event.target.description.value,
+					startDateTime: startDateTime,
+					endDateTime: endDateTime,
+					stake: parseFloat(event.target.stake.value),
+					maxParticipants: parseInt(event.target.maxParticipants.value),
+					prevStake: 0,
+					payout: 0,
+					isCancelled: false,
+					isStarted: false,
+					isEnded: false,
+					deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+					organizerAddress: this.props.user._id,
+					parent: '',
+					child: '',
+					images: this.state.form.images,
+					videos: this.state.form.videos,
+				},
+				cancel: [],
+				rsvp: [],
+				attend: [],
+				withdraw: []
+			});
+	}
+
 	handleFirstMeeting = (event: any, startDateTime: number, endDateTime: number) => {
 		/**
 		 * TODO: verify that the user is still connected to MetaMask.
@@ -160,34 +247,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			event.target.maxParticipants.value,
 			this.callbackDeployedFirstMeeting
 		)
-			.then((res: any) => {
-				this.props.dispatchCreateFirstMeeting(this.props.history,
-					{
-						_id: res.hash,
-						type: ModelType.PENDING,
-						data: {
-							name: event.target.meetingName.value,
-							location: event.target.location.value,
-							description: event.target.description.value,
-							startDateTime: startDateTime,
-							endDateTime: endDateTime,
-							stake: parseFloat(event.target.stake.value),
-							maxParticipants: parseInt(event.target.maxParticipants.value),
-							prevStake: 0,
-							payout: 0,
-							isCancelled: false,
-							isStarted: false,
-							isEnded: false,
-							deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
-							organizerAddress: this.props.user._id,
-							parent: '',
-							child: '',
-						},
-						cancel: [],
-						rsvp: [],
-						attend: [],
-						withdraw: []
-					});
+			.then((ethersResponse: any) => {
+				this.createFirstMeeting(ethersResponse.hash, event, startDateTime, endDateTime);
 			}, (reason: any) => {
 				this.props.dispatchAddErrorNotification("There was an error creating this meeting: " + reason);
 			})
@@ -218,7 +279,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			this.callbackDeployedNextMeeting
 		)
 			.then((res: any) => {
-				console.log("success next meeting ", res);
 				this.props.dispatchCreateNextMeeting(this.props.history, {
 					_id: res.hash,
 					type: ModelType.PENDING,
@@ -239,6 +299,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						organizerAddress: this.props.user._id,
 						parent: this.props.parent,
 						child: '',
+						// TODO replace files if needed
+						images: this.state.form.images,
+						videos: this.state.form.videos,
 					},
 					cancel: [],
 					rsvp: [],
@@ -309,13 +372,160 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				...this.state.form,
 				startTime: datetime,
 				endDate: newEndDate,
-				endTime: newEndDateTime
+				endTime: newEndDateTime,
+
 			}
 		});
 	}
 
+	onImageUploadProgress = (progress: any, { loaded, total }: any) => {
+		this.setState({
+			loadingImagePct: progress * 100
+		});
+	};
+
+	onVideoUploadProgress = (progress: any, { loaded, total }: any) => {
+		this.setState({
+			loadingVideoPct: progress * 100
+		});
+	};
+
+	uploadFile = (fileInput: any, isImage: boolean) => {
+		if (isImage) {
+			this.setState({
+				loadingImage: true
+			});
+		} else {
+			this.setState({
+				loadingVideo: true
+			});
+		}
+
+		const siaUrl = 'https://siasky.net/';
+		const progressCallback = isImage ? this.onImageUploadProgress : this.onVideoUploadProgress;
+		upload(siaUrl, fileInput, { onUploadProgress: progressCallback })
+			.then((siaResponse: any) => {
+				const skyLink = siaResponse.skylink;
+
+				if (isImage) {
+					this.setState({
+						form: {
+							...this.state.form,
+							images: [skyLink]
+						},
+						loadingImage: false
+					});
+
+					this.props.dispatchAddSuccessNotification(
+						'The image is successfully hosted on: '
+						+ siaUrl
+						+ skyLink
+					);
+				} else {
+					this.setState({
+						form: {
+							...this.state.form,
+							videos: [skyLink]
+						},
+						loadingVideo: false
+					});
+
+					this.props.dispatchAddSuccessNotification(
+						'The video is successfully hosted on: '
+						+ siaUrl
+						+ skyLink
+					);
+				}
+			});
+	}
+
+	handleCaptureImage = (event: any) => {
+		if (event.target.accept.includes('image')) {
+			if (event.target.files.length === 0) {
+				this.setState({
+					form: {
+						...this.state.form,
+						images: []
+					},
+					loadingImage: false
+				});
+			} else {
+				// TODO multiple files
+				const file = event.target.files[0];
+				this.uploadFile(file, true);
+			}
+		}
+	}
+
+	handleCaptureVideo = (event: any) => {
+		if (event.target.accept.includes('video')) {
+			if (event.target.files.length === 0) {
+				this.setState({
+					form: {
+						...this.state.form,
+						videos: []
+					},
+					loadingVideo: false
+				});
+			} else {
+				// TODO multiple files
+				const file = event.target.files[0];
+				this.uploadFile(file, false);
+			}
+		}
+	}
+
+	isUserLoggedOut = () => {
+		return this.props.user._id === '';
+	}
+
+	getStateTooltipText = () => {
+		if (this.state.loadingImage)
+			return 'Please wait until the image has been uploaded.';
+
+		if (this.state.loadingVideo)
+			return 'Please wait until the video has been uploaded.';
+
+		if (this.isUserLoggedOut())
+			return 'Please login to MetaMask first.';
+	}
+
+	getFormButtonTooltipText = () => {
+		return this.getStateTooltipText() || 'This will require smart contract interaction.';
+	}
+
+	getUploadButtonTooltipText = () => {
+		return this.getStateTooltipText() || 'This will start the upload right away and replace previous file.';
+	}
+
+	isFormButtonDisabled = () => {
+		return this.state.loadingImage || this.state.loadingVideo || this.isUserLoggedOut();
+	}
+
+	isUploadImageButtonDisabled = () => {
+		return this.state.loadingImage || this.isUserLoggedOut();
+	}
+
+	isUploadVideoButtonDisabled = () => {
+		return this.state.loadingVideo || this.isUserLoggedOut();
+	}
+
 	render() {
 		const { cachedMeeting } = this.props;
+
+		const imageUrlpreview = 'https://siasky.net/' +
+			(
+				this.state.form.images.length
+					? this.state.form.images[0]
+					: ''
+			)
+
+		const videoUrlpreview = 'https://siasky.net/' +
+			(
+				this.state.form.videos.length
+					? this.state.form.videos[0]
+					: ''
+			)
 
 		return (
 			<React.Fragment>
@@ -326,17 +536,120 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					<Hero maxWidth={false}>
 						<Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
 							Host a Meeting
-            		</Typography>
+    	        		</Typography>
 						<Typography variant="h5" align="center" color="textSecondary" paragraph>
 							Ready for your next event?
-            		</Typography>
+	            		</Typography>
 					</Hero>
 
 					{/* Card Section */}
 					<Middle item container spacing={2}>
 						<Container maxWidth="md">
+							<Grid item container xs={12} alignItems="flex-end" justify="center">
+								<Typography variant="h6" align="center" color="textSecondary" paragraph>
+									Upload media files while you fill out the details of your event below
+								</Typography>
+							</Grid>
+							<Grid item container xs={12} alignItems="flex-end" justify="center">
+								<Typography variant="subtitle1" align="center" color="textSecondary" paragraph>
+									The media will be hosted on
+									<a
+										style={{ textDecoration: 'none' }}
+										href={'https://www.siasky.net/'}
+										rel="noopener noreferrer"
+										target="_blank"
+									> Sia Skynet</a>.
+								</Typography>
+							</Grid>
+
+							{/* Image / Video upload Section */}
+							<Grid container spacing={3} >
+								<Tooltip title={this.getUploadButtonTooltipText()}>
+									<Grid item xs={6}>
+										<Input
+											disabled={this.isUploadImageButtonDisabled()}
+											inputProps={
+												{
+													accept: "image/*"
+												}
+											}
+											id="icon-button-photo"
+											onChange={this.handleCaptureImage}
+											type="file"
+										/>
+										<label htmlFor="icon-button-photo">
+											<IconButton color="primary" component="span">
+												<PhotoCamera />
+											</IconButton>
+										</label>
+										{
+											this.state.loadingImage && <CircularProgress color="secondary" />
+										}
+									</Grid>
+								</Tooltip>
+								<Tooltip title={this.getUploadButtonTooltipText()}>
+									<Grid item xs={6}>
+										<Input
+											disabled={this.isUploadVideoButtonDisabled()}
+											inputProps={
+												{
+													accept: "video/*",
+													capture: "camcorder"
+												}
+											}
+											id="icon-button-video"
+											onChange={this.handleCaptureVideo}
+											type="file"
+										/>
+										<label htmlFor="icon-button-video">
+											<IconButton color="primary" component="span">
+												<Videocam />
+											</IconButton>
+										</label>
+										{
+											this.state.loadingVideo && <CircularProgress color="secondary" />
+										}
+									</Grid>
+								</Tooltip>
+							</Grid>
+
+							{/* Image / Video preview Section */}
+							<Grid container spacing={3} >
+								<Grid item xs={6}>
+									{
+										this.state.form.images.length > 0 &&
+										<img
+											src={imageUrlpreview}
+											alt='event image preview'
+											width="256"
+											height="256"
+										/>
+									}
+
+									{
+										this.state.loadingImage &&
+										<LinearProgress variant="determinate" value={this.state.loadingImagePct} color="secondary" />
+									}
+								</Grid>
+								<Grid item xs={6}>
+									{
+										this.state.form.videos.length > 0 &&
+										<video controls width="256" height="144">
+											<source src={videoUrlpreview} type="video/mp4" />
+											Your browser does not support the video tag.
+										</video>
+									}
+
+									{
+										this.state.loadingVideo &&
+										<LinearProgress variant="determinate" value={this.state.loadingVideoPct} color="secondary" />
+									}
+								</Grid>
+							</Grid>
+
+							{/* Main Section */}
 							<Typography variant="h6" align="center" color="textSecondary" paragraph>
-								First, fill in the important details
+								Please fill in the important details
               				</Typography>
 							<form onSubmit={this.handleSubmit} className="add-meeting-form">
 								<Grid container spacing={3} >
@@ -473,6 +786,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											defaultValue={cachedMeeting.data.description}
 										/>
 									</Grid>
+
 									<Grid item container xs={12}>
 										<Grid item xs={4} />
 										<Grid item xs={2} alignItems="center" justify="center">
@@ -481,10 +795,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											</Link>
 										</Grid>
 										<Grid item xs={2} alignItems="center" justify="center">
-											<Tooltip title={this.props.user._id === '' ? 'Please authorize MetaMask first.' : 'This will require smart contract interaction.'}>
+											<Tooltip title={this.getFormButtonTooltipText()}>
 												<span>
-													<MyButton disabled={this.props.user._id === ''} type="submit"
-														style={this.props.user._id === '' ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+													<MyButton disabled={this.isFormButtonDisabled()} type="submit"
+														style={this.isFormButtonDisabled() ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
 															{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}
 													>
 														CREATE MEETING
@@ -499,6 +813,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						</Container>
 					</Middle>
 
+					{/* Footer Section */}
 					<Container>
 						<Typography variant="subtitle1" align="center" color="textSecondary" component="p">
 							Slingshot 2020

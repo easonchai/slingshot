@@ -20,6 +20,10 @@ const mapStateToProps = (state: IAppState, props: any) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
+    dispatchUpdateCachedMeeting: (meeting: Meeting) => {
+      dispatch(meetingActions.ReadCachedMeeting(meeting));
+    },
+
     dispatchCreateFirstMeeting: (history: History, payload: Meeting) => {
       dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
 
@@ -56,6 +60,17 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         message: message,
         variant: 'filled',
         severity: 'error',
+        display: true
+      };
+
+      dispatch(notificationActions.AddNotification(notification));
+    },
+
+    dispatchAddSuccessNotification: (message: string) => {
+      const notification: Notification = {
+        message: message,
+        variant: 'filled',
+        severity: 'info',
         display: true
       };
 
