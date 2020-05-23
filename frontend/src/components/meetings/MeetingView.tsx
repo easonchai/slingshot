@@ -262,15 +262,15 @@ export class MeetingView extends React.Component<IProps, IState> {
     const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
 
     const isRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id);
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
     }
 
     const isCancelRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled;
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.cancel.includes(cachedMeeting._id);
     }
 
     const isUserPartOfMeeting = () => {
-      return this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id);
+      return this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
     }
 
     const isWithdrawButtonVisible = () => {
@@ -282,7 +282,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isStartButtonDisabled = () => {
-      return !cachedMeeting.data.isEnded || !cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) >= new Date(cachedMeeting.data.startDateTime);
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime);
     }
 
     const isEndButtonDisabled = () => {
