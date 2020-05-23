@@ -65,6 +65,22 @@ const SponsorMessage = styled(Typography)({
 	borderRadius: 3
 })
 
+const UploadButton = styled(Input)({
+	display: 'none',
+})
+
+const UploadText = styled(Typography)({
+	color: '#454545',
+	fontWeight: 'bolder',
+	fontSize: 14,
+})
+
+const UploadGrid = styled(Grid)({
+	border: '1px solid #a8a8a8',
+	borderRadius: 5,
+	padding: 10
+})
+
 interface IProps {
 	history: History;
 	parent: string;
@@ -554,13 +570,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					<Middle item container spacing={2}>
 						<Container maxWidth="md">
 							<Grid item container xs={12} alignItems="flex-end" justify="center">
-								<Typography variant="h6" align="center" color="textSecondary" paragraph>
-									First, let's upload a catchy picture/video to showcase your event!
-								</Typography>
-							</Grid>
-							<Grid item container xs={12} alignItems="flex-end" justify="center">
 								<Grid item container xs={12} alignItems="center" justify="center">
-									<img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" height={64} width={64} style={{ marginTop: 5, alignItems: 'center', justifyContent: 'center' }} />
+									<img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" height={64} width={64} style={{ alignItems: 'center', justifyContent: 'center' }} />
 								</Grid>
 								<Grid item>
 									<SponsorMessage variant="subtitle1" align="center" paragraph>
@@ -571,59 +582,88 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											rel="noopener noreferrer"
 											target="_blank"
 										> Sia Skynet</a>!
-								</SponsorMessage>
+									</SponsorMessage>
+								</Grid>
+								<Grid item container xs={12} alignItems="flex-end" justify="center">
+									<Typography variant="h6" align="center" color="textSecondary" paragraph style={{ marginBottom: 10 }}>
+										First, let's upload a catchy picture/video to showcase your event!
+									</Typography>
 								</Grid>
 							</Grid>
 
 							{/* Image / Video upload Section */}
 							<Grid container spacing={3} >
-								<Tooltip title={this.getUploadButtonTooltipText()}>
-									<Grid item xs={6}>
-										<Input
-											disabled={this.isUploadImageButtonDisabled()}
-											inputProps={
-												{
-													accept: "image/*"
-												}
-											}
-											id="icon-button-photo"
-											onChange={this.handleCaptureImage}
-											type="file"
-										/>
-										<label htmlFor="icon-button-photo">
-											<IconButton color="primary" component="span">
-												<PhotoCamera />
-											</IconButton>
-										</label>
+								<Grid item container xs={6} alignItems="center" justify="center">
+									<Grid item xs={3} />
+									<UploadGrid item xs={6}>
+										<Tooltip title={this.getUploadButtonTooltipText()}>
+											<Container>
+
+												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
+													Upload an image
+												</UploadText>
+												<UploadButton
+													disabled={this.isUploadImageButtonDisabled()}
+													inputProps={
+														{
+															accept: "image/*"
+														}
+													}
+													id="icon-button-photo"
+													onChange={this.handleCaptureImage}
+													type="file"
+												/>
+												<label htmlFor="icon-button-photo">
+													<IconButton color="secondary" style={{ marginLeft: 45 }}>
+														<PhotoCamera fontSize="large" />
+													</IconButton>
+												</label>
+
+											</Container>
+										</Tooltip>
+									</UploadGrid>
+									<Grid item xs={3} />
+									<Grid item xs={12}>
 										{
 											this.state.loadingImage && <CircularProgress color="secondary" />
 										}
 									</Grid>
-								</Tooltip>
-								<Tooltip title={this.getUploadButtonTooltipText()}>
-									<Grid item xs={6}>
-										<Input
-											disabled={this.isUploadVideoButtonDisabled()}
-											inputProps={
-												{
-													accept: "video/*",
-													capture: "camcorder"
-												}
-											}
-											id="icon-button-video"
-											onChange={this.handleCaptureVideo}
-											type="file"
-										/>
-										<label htmlFor="icon-button-video">
-											<IconButton color="primary" component="span">
-												<Videocam />
-											</IconButton>
-										</label>
+								</Grid>
+								<Grid item container xs={6}>
+									<Grid item xs={3} />
+									<UploadGrid item xs={6}>
+										<Tooltip title={this.getUploadButtonTooltipText()}>
+											<Container>
+												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
+													Upload a video
+												</UploadText>
+												<UploadButton
+													disabled={this.isUploadVideoButtonDisabled()}
+													inputProps={
+														{
+															accept: "video/*",
+															capture: "camcorder"
+														}
+													}
+													id="icon-button-video"
+													onChange={this.handleCaptureVideo}
+													type="file"
+												/>
+												<label htmlFor="icon-button-video">
+													<IconButton color="secondary" component="span" style={{ marginLeft: 45 }}>
+														<Videocam fontSize="large" />
+													</IconButton>
+												</label>
+											</Container>
+										</Tooltip>
+									</UploadGrid>
+									<Grid item xs={3} />
+									<Grid item xs={12}>
 										{
 											this.state.loadingVideo && <CircularProgress color="secondary" />
 										}
 									</Grid>
-								</Tooltip>
+								</Grid>
 							</Grid>
 
 							{/* Image / Video preview Section */}
@@ -649,10 +689,13 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 								<Grid item xs={5}>
 									{
 										this.state.form.videos.length > 0 &&
-										<video controls width="256" height="144">
-											<source src={videoUrlpreview} type="video/mp4" />
-											Your browser does not support the video tag.
-										</video>
+										<Container>
+											<Typography style={{ fontWeight: 'lighter', fontSize: 14 }}>Video Preview: </Typography>
+											<CardImage
+												src={videoUrlpreview}
+												title='event video preview'
+											/>
+										</Container>
 									}
 
 									{
