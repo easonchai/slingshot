@@ -17,7 +17,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { styled } from '@material-ui/core/styles';
-import { Grid, Typography, Button, Box, Divider, Container, Paper, Link, Tooltip } from '@material-ui/core';
+import { Grid, Typography, Button, Box, Divider, Container, Paper, Link, Tooltip, CardMedia } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
 import CloseIcon from '@material-ui/icons/Close';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -182,6 +182,21 @@ export default function ProfileBar() {
         return result;
     }
 
+    const getCancelledMeetings = () => {
+        let result = user.rsvp.reduce((state: string[], meeting) => {
+            let found = meetings.find(allMeeting => {
+                return allMeeting._id === meeting
+            })
+            if (found !== undefined) {
+                if (found.data.isCancelled) {
+                    state.push(found._id);
+                }
+            }
+            return state;
+        }, [])
+        return result;
+    }
+
     // componentDidMount alternative
     React.useEffect(() => {
         const selectedAddress = etherService.getUserAddress();
@@ -210,7 +225,15 @@ export default function ProfileBar() {
             <TopBar position="static">
                 <Toolbar>
                     <Grid container>
-                        <Grid item xs={8} />
+                        <Grid item xs={3} container>
+                            <CardMedia style={{ alignItems: 'center', justifyContent: 'center', height: 48, width: 48, color: 'white' }}
+                                image="https://www.siasky.net/KACEhRdglW80DQ_rxo-tGken1lzV8kfh5sY4G0W_b3kMEA"
+                            />
+                            <Typography component="h1" variant="h2" align="center" style={{ color: 'white', fontSize: 24, marginTop: 8, marginLeft: 6 }}>
+                                Slingshot
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={5} />
                         <Grid container item xs={3} alignItems="center" justify="flex-end">
                             {user._id
                                 ? (<Domain variant="h6">
@@ -351,6 +374,29 @@ export default function ProfileBar() {
                                                     </Box>
                                                     {
                                                         user.attend.map((meeting) => {
+                                                            return (
+                                                                <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
+                                                                    <Paper style={{ marginBottom: 10 }}>
+                                                                        <Container>
+                                                                            <Typography component="div">
+                                                                                <Box fontSize={14} fontWeight="normal" lineHeight={3}>
+                                                                                    {meeting}
+                                                                                </Box>
+                                                                            </Typography>
+                                                                        </Container>
+                                                                    </Paper>
+                                                                </Link>
+                                                            )
+                                                        })
+                                                    }
+                                                    <br />
+                                                    <Divider />
+                                                    <br />
+                                                    <Box fontSize={16} fontWeight="500" lineHeight={2}>
+                                                        Cancelled by Organizer
+                                                    </Box>
+                                                    {
+                                                        getCancelledMeetings().map((meeting) => {
                                                             return (
                                                                 <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
                                                                     <Paper style={{ marginBottom: 10 }}>

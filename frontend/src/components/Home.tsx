@@ -1,7 +1,7 @@
 import React from 'react';
 import { MeetingList } from '../containers/meetings/MeetingList';
 import {
-  Theme, Grid, Button, Container, Typography, Box, CssBaseline
+  Theme, Grid, Button, Container, Typography, Box, CssBaseline, CardMedia
 } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
@@ -21,12 +21,20 @@ const MyButton = styled(Button)({
 const Hero = styled(Container)({
   margin: 0,
   background: 'white',
-  padding: '30px 80px',
-  height: '300px',
+  padding: '20px 80px',
+  height: '400px',
 })
 
 const Middle = styled(Grid)({
   padding: '60px 20px'
+})
+
+const Logo = styled(CardMedia)({
+  paddingTop: 12,
+  height: 128,
+  width: 128,
+  alignItems: 'center',
+  justifyContent: 'center'
 })
 
 interface IProps {
@@ -60,6 +68,12 @@ export class Home extends React.Component<IProps> {
         <Grid container>
           {/* Top Section */}
           <Hero maxWidth={false}>
+            <Grid item container xs={12} alignItems="center" justify="center">
+              <Logo
+                image="https://www.siasky.net/MABaGGBZCaCA4y5D8P7MUhfWbRRAZwzjr7va4pwVf1V_VQ"
+              />
+            </Grid>
+
             <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
               Slingshot
             </Typography>

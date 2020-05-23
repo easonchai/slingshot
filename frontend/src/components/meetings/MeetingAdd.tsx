@@ -602,7 +602,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
 													Upload an image
 												</UploadText>
-												<UploadButton
+												<Input
 													disabled={this.isUploadImageButtonDisabled()}
 													inputProps={
 														{
@@ -691,7 +691,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										this.state.form.videos.length > 0 &&
 										<Container>
 											<Typography style={{ fontWeight: 'lighter', fontSize: 14 }}>Video Preview: </Typography>
-											<CardImage
+											<video
 												src={videoUrlpreview}
 												title='event video preview'
 											/>
