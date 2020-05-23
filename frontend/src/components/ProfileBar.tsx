@@ -168,13 +168,13 @@ export default function ProfileBar() {
     * the listener will update the user in redux store.
     */
     const getUpcoming = () => {
-        let result = user.rsvp.reduce((state: string[], meeting) => {
+        let result = user.rsvp.reduce((state: Meeting[], meeting) => {
             let found = meetings.find(allMeeting => {
                 return allMeeting._id === meeting
             })
             if (found !== undefined) {
                 if (!found.data.isEnded && !found.data.isStarted && !found.data.isCancelled) {
-                    state.push(found._id);
+                    state.push(found);
                 }
             }
             return state;
@@ -183,13 +183,28 @@ export default function ProfileBar() {
     }
 
     const getCancelledMeetings = () => {
-        let result = user.rsvp.reduce((state: string[], meeting) => {
+        let result = user.rsvp.reduce((state: Meeting[], meeting) => {
             let found = meetings.find(allMeeting => {
                 return allMeeting._id === meeting
             })
             if (found !== undefined) {
                 if (found.data.isCancelled) {
-                    state.push(found._id);
+                    state.push(found);
+                }
+            }
+            return state;
+        }, [])
+        return result;
+    }
+
+    const getAttended = () => {
+        let result = user.attend.reduce((state: Meeting[], meeting) => {
+            let found = meetings.find(allMeeting => {
+                return allMeeting._id === meeting
+            })
+            if (found !== undefined) {
+                if (found.data.isEnded) {
+                    state.push(found);
                 }
             }
             return state;
@@ -283,7 +298,7 @@ export default function ProfileBar() {
                                                 </Box>
                                                 <Link href={user._id ? "https://etherscan.io/address/" + user._id : "#"} style={{ textDecoration: 'none' }} target="_blank">
                                                     <Tooltip title={user._id ? "Click to view on Etherscan" : "Sign In"} aria-label="visit etherscan" placement="bottom">
-                                                        <Paper style={{ marginBottom: 20 }}>
+                                                        <Paper style={{ marginBottom: 20 }} elevation={3}>
                                                             <Container>
                                                                 <Grid container>
                                                                     <Grid item style={{ marginTop: 8, padding: 10 }}>
@@ -308,7 +323,7 @@ export default function ProfileBar() {
                                                 </Box>
                                                 <Link href={user.data?.ensDomain ? "https://app.ens.domains/name/" + user.data?.ensDomain : "https://ens.domains/"} style={{ textDecoration: 'none' }} target="_blank">
                                                     <Tooltip title={user.data?.ensDomain ? "Click to view on ENS" : ""} aria-label="visit ENS" placement="bottom">
-                                                        <Paper>
+                                                        <Paper elevation={3}>
                                                             <Container>
                                                                 <Grid container>
                                                                     <Grid item style={{ marginTop: 8, padding: 10 }}>
@@ -352,12 +367,12 @@ export default function ProfileBar() {
                                                     {
                                                         getUpcoming().map((meeting) => {
                                                             return (
-                                                                <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
-                                                                    <Paper style={{ marginBottom: 10 }}>
+                                                                <Link href={"/meeting/" + meeting._id} style={{ textDecoration: 'none' }}>
+                                                                    <Paper style={{ marginBottom: 10 }} elevation={3}>
                                                                         <Container>
                                                                             <Typography component="div">
                                                                                 <Box fontSize={14} fontWeight="normal" lineHeight={3}>
-                                                                                    {meeting}
+                                                                                    {meeting.data.name}
                                                                                 </Box>
                                                                             </Typography>
                                                                         </Container>
@@ -373,14 +388,14 @@ export default function ProfileBar() {
                                                         Attended
                                                     </Box>
                                                     {
-                                                        user.attend.map((meeting) => {
+                                                        getAttended().map((meeting) => {
                                                             return (
-                                                                <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
-                                                                    <Paper style={{ marginBottom: 10 }}>
+                                                                <Link href={"/meeting/" + meeting._id} style={{ textDecoration: 'none' }}>
+                                                                    <Paper style={{ marginBottom: 10 }} elevation={3}>
                                                                         <Container>
                                                                             <Typography component="div">
                                                                                 <Box fontSize={14} fontWeight="normal" lineHeight={3}>
-                                                                                    {meeting}
+                                                                                    {meeting.data.name}
                                                                                 </Box>
                                                                             </Typography>
                                                                         </Container>
@@ -399,11 +414,11 @@ export default function ProfileBar() {
                                                         getCancelledMeetings().map((meeting) => {
                                                             return (
                                                                 <Link href={"/meeting/" + meeting} style={{ textDecoration: 'none' }}>
-                                                                    <Paper style={{ marginBottom: 10 }}>
+                                                                    <Paper style={{ marginBottom: 10 }} elevation={3}>
                                                                         <Container>
                                                                             <Typography component="div">
                                                                                 <Box fontSize={14} fontWeight="normal" lineHeight={3}>
-                                                                                    {meeting}
+                                                                                    {meeting.data.name}
                                                                                 </Box>
                                                                             </Typography>
                                                                         </Container>
