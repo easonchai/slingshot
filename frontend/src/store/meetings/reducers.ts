@@ -1,6 +1,7 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
 import { actions, Meeting, ModelType } from './actions';
+import { actions as userActions } from '../users/actions';
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
@@ -252,6 +253,19 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       meetings: updatedMeetings,
       cachedMeeting: action.payload
+    };
+  }
+
+  if (isType(action, userActions.CreateUserFeedback)) {
+    return {
+      ...state,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          feedback: [...state.cachedMeeting.data.feedback, action.payload]
+        }
+      }
     };
   }
 

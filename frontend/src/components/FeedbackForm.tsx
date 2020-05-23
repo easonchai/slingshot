@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { upload } from 'skynet-js';
@@ -8,13 +9,17 @@ import {
     IconButton,
     Input,
     LinearProgress,
+    TextField,
     Tooltip,
     Typography,
 } from '@material-ui/core';
+import Rating from '@material-ui/lab/Rating';
 import { PhotoCamera, Videocam } from '@material-ui/icons';
 import { IAppState } from '../store/index';
-import { Hero, Middle } from './meetings/MeetingAdd';
+import { Hero, CardImage, Middle, MyButton, SponsorMessage } from './meetings/MeetingAdd';
 import { actions as notificationActions, Notification } from '../store/notifications/actions';
+import { actions as userActions } from '../store/users/actions';
+import { Feedback, Meeting } from '../store/meetings/actions';
 
 export default function FeedbackForm() {
     const dispatch = useDispatch();
@@ -28,14 +33,8 @@ export default function FeedbackForm() {
     const [loadingVideoPct, setLoadingVideoPct] = React.useState(0);
     const [uploadedImages, setUploadedImages] = React.useState(['']);
     const [uploadedVideos, setUploadedVideos] = React.useState(['']);
-
-    // componentDidMount alternative
-    React.useEffect(() => {
-        console.log('mounting FeedbackForm');
-
-        // componentWillUnmount alternative
-        return () => console.log('unmounting FeedbackForm');
-    }, []);
+    const [starsRating, setStarsRating] = React.useState(5);
+    const [feedbackComment, setFeedbackComment] = React.useState('');
 
     const onImageUploadProgress = (progress: any, { loaded, total }: any) => {
         setLoadingImagePct(progress * 100);
@@ -130,7 +129,7 @@ export default function FeedbackForm() {
     }
 
     const getFormButtonTooltipText = () => {
-        return getStateTooltipText() || 'This will require smart contract interaction.';
+        return getStateTooltipText() || 'Your feedback will be saved off-chain.';
     }
 
     const getUploadButtonTooltipText = () => {
@@ -148,6 +147,28 @@ export default function FeedbackForm() {
     const isUploadVideoButtonDisabled = () => {
         return loadingVideo || isUserLoggedOut();
     }
+
+    const handleSubmit = (event: any) => {
+        event.preventDefault();
+        event.persist();
+
+        const feedback: Feedback = {
+            meetingAddress: cachedMeeting._id,
+            userAddress: user._id,
+            stars: starsRating,
+            comment: feedbackComment,
+            images: uploadedImages[0] === '' ? [] : uploadedImages,
+            videos: uploadedVideos[0] === '' ? [] : uploadedVideos
+        };
+        const payload = { feedback: feedback };
+
+        axios
+            .put('/api/meeting/feedback', payload)
+            .then(res => res.data as Meeting)
+            .then(meeting => {
+                dispatch(userActions.CreateUserFeedback(feedback));
+            });
+    };
 
     return (
         <React.Fragment>
@@ -167,19 +188,24 @@ export default function FeedbackForm() {
                     <Container maxWidth="md">
                         <Grid item container xs={12} alignItems="flex-end" justify="center">
                             <Typography variant="h6" align="center" color="textSecondary" paragraph>
-                                Upload media files while you fill out the details of the event below
-								</Typography>
+                                First, let's upload your participation picture/video!
+                            </Typography>
                         </Grid>
                         <Grid item container xs={12} alignItems="flex-end" justify="center">
-                            <Typography variant="subtitle1" align="center" color="textSecondary" paragraph>
-                                The media will be hosted on
-									<a
-                                    style={{ textDecoration: 'none' }}
-                                    href={'https://www.siasky.net/'}
-                                    rel="noopener noreferrer"
-                                    target="_blank"
-                                > Sia Skynet</a>.
-								</Typography>
+                            <Grid item container xs={12} alignItems="center" justify="center">
+                                <img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" height={64} width={64} style={{ marginTop: 5, alignItems: 'center', justifyContent: 'center' }} />
+                            </Grid>
+                            <Grid item>
+                                <SponsorMessage variant="subtitle1" align="center" paragraph>
+                                    Media is proudly hosted on
+										<a
+                                        style={{ textDecoration: 'none', color: '#3c9e47' }}
+                                        href={'https://www.siasky.net/'}
+                                        rel="noopener noreferrer"
+                                        target="_blank"
+                                    > Sia Skynet</a>!
+								</SponsorMessage>
+                            </Grid>
                         </Grid>
 
                         {/* Image / Video upload Section */}
@@ -238,7 +264,7 @@ export default function FeedbackForm() {
                         <Grid container spacing={3} >
                             <Grid item xs={6}>
                                 {
-                                    uploadedImages.length > 0 &&
+                                    uploadedImages[0] !== '' &&
                                     <img
                                         src={'https://siasky.net/' + uploadedImages[0]}
                                         alt='event image preview'
@@ -254,7 +280,7 @@ export default function FeedbackForm() {
                             </Grid>
                             <Grid item xs={6}>
                                 {
-                                    uploadedVideos.length > 0 &&
+                                    uploadedVideos[0] !== '' &&
                                     <video controls width="256" height="144">
                                         <source src={'https://siasky.net/' + uploadedVideos[0]} type="video/mp4" />
 											Your browser does not support the video tag.
@@ -267,6 +293,55 @@ export default function FeedbackForm() {
                                 }
                             </Grid>
                         </Grid>
+
+                        {/* Main Section */}
+                        <Typography variant="h6" align="center" color="textSecondary" paragraph>
+                            Next, share your experience!
+              				</Typography>
+                        <form onSubmit={handleSubmit} className="add-meeting-form">
+                            <Grid container spacing={3} >
+                                <Grid item xs={12}>
+                                    <Typography component="legend">Rating</Typography>
+                                    <Rating
+                                        name="starsRating"
+                                        value={starsRating}
+                                        onChange={(event, newValue) => {
+                                            if (newValue) {
+                                                setStarsRating(newValue);
+                                            }
+                                        }}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth={true}
+                                        id="comment"
+                                        label="Feedback"
+                                        multiline
+                                        rows={6}
+                                        variant="outlined"
+                                        value={feedbackComment}
+                                        onChange={(event: any) => setFeedbackComment(event.target.value)}
+                                    />
+                                </Grid>
+
+                                <Grid item container xs={12}>
+                                    <Grid item xs={2} alignItems="center" justify="center">
+                                        <Tooltip title={getFormButtonTooltipText()}>
+                                            <span>
+                                                <MyButton disabled={isFormButtonDisabled()} type="submit"
+                                                    style={isFormButtonDisabled() ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                                                        { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}
+                                                >
+                                                    SEND
+												</MyButton>
+                                            </span>
+                                        </Tooltip>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </form>
                     </Container>
                 </Middle>
 

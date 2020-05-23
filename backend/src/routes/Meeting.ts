@@ -2,7 +2,6 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Models } from '../models';
 import { ModelType } from '../models/Item';
-import { ModelOptions } from 'mongoose';
 
 const router = Router();
 
@@ -315,6 +314,41 @@ router.put('/attendance', async (req: Request, res: Response, next: NextFunction
                         $pull: { 'rsvp': req.body['meetingAddress'] }
                     },
                     { safe: true, upsert: true }
+                )
+                .then(user => {
+                    res
+                        .status(OK)
+                        .json(meeting);
+                })
+                .catch(err => next(err));
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Add participant's feedback to a specific meeting (and user's profile).
+ * 
+ * @params  Feedback     Value of the feedback (meetingAddress, userAddress, rating, comment, uploadedImages, uploadedVideos).
+ * 
+ * @returns Meeting
+ */
+router.put('/feedback', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body.feedback['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'data.feedback': req.body['feedback'] },
+            },
+            { safe: true }
+        )
+        .then(meeting => {
+            Models.Item
+                .updateOne(
+                    { _id: req.body.feedback['userAddress'], type: ModelType.USER },
+                    {
+                        $push: { 'data.feedback': req.body['feedback'] },
+                    },
+                    { safe: true }
                 )
                 .then(user => {
                     res

@@ -43,7 +43,7 @@ export const Middle = styled(Grid)({
 	padding: '60px 20px'
 })
 
-const MyButton = styled(Button)({
+export const MyButton = styled(Button)({
 	background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
 	border: 0,
 	borderRadius: 3,
@@ -54,11 +54,11 @@ const MyButton = styled(Button)({
 	width: 140,
 });
 
-const CardImage = styled(CardMedia)({
+export const CardImage = styled(CardMedia)({
 	paddingTop: '56.25%',
 })
 
-const SponsorMessage = styled(Typography)({
+export const SponsorMessage = styled(Typography)({
 	fontSize: 16,
 	fontWeight: 'bolder',
 	padding: 10,

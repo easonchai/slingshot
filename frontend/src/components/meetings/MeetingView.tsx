@@ -8,10 +8,11 @@ import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
 import { Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper } from '@material-ui/core';
 import Header from '../Header';
-import FeedbackForm from '../FeedbackForm';
 import { styled } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Footer from '../Footer'
+import FeedbackForm from '../FeedbackForm';
+import Reviews from '../Reviews';
+import Footer from '../Footer';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -428,9 +429,16 @@ export class MeetingView extends React.Component<IProps, IState> {
                           </Box><br />
                         </React.Fragment>}
                     </Typography>
+
                     <UsersList />
                   </Grid>
                   <Grid item xs={1} />
+                </Grid>
+
+                {/** Feedback Form + Reviews */}
+                <Grid item container xs={12}>
+                  <FeedbackForm />
+                  <Reviews />
                 </Grid>
                 <Footer />
               </Grid>

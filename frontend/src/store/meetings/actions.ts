@@ -10,7 +10,8 @@ export const ModelType = {
 };
 
 export interface Feedback {
-  ethAddress: string;
+  meetingAddress: string;
+  userAddress: string;
   comment: string;
   stars: number;
   images: ReadonlyArray<string>;
