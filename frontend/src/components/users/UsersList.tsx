@@ -3,7 +3,7 @@ import { Meeting } from '../../store/meetings/actions';
 import { Loading } from '../../store/loading/actions';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
-import { AppBar, Button, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress } from '@material-ui/core';
+import { AppBar, Button, Container, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 const AttendanceButton = styled(Button)({
@@ -50,7 +50,7 @@ export class UsersList extends React.Component<IProps, IState> {
      * Otherwise retrieve it from the known txHash (and persist in DB).
      */
 
-    this.state = { tabIndex: 'rsvp' };
+    this.state = { tabIndex: 'all' };
   }
 
   handleAttendance = (event: any) => {
@@ -106,12 +106,20 @@ export class UsersList extends React.Component<IProps, IState> {
 
 
   render() {
+    const participants = [
+      ...this.props.cachedMeeting.withdraw.map(p => { return { address: p, status: 'WITHDRAWN' }; }),
+      ...this.props.cachedMeeting.attend.map(p => { return { address: p, status: 'ATTENDED' }; }),
+      ...this.props.cachedMeeting.rsvp.map(p => { return { address: p, status: `RSVP'D` }; }),
+      ...this.props.cachedMeeting.cancel.map(p => { return { address: p, status: 'CANCELLED' }; })
+    ];
+
     return (
       <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
         <Grid container spacing={2}>
 
           <AppBar position="static" style={{ background: 'none', boxShadow: 'none', color: '#ff8140' }}>
             <Tabs value={this.state.tabIndex} onChange={this.handleTabSwitch} aria-label="simple tabs example">
+              <Tab label="ALL" value='all' />
               <Tab label="RSVP'D" value='rsvp' />
               <Tab label="CANCELLED" value='cancel' />
               <Tab label="ATTENDED" value='attend' />
@@ -123,20 +131,45 @@ export class UsersList extends React.Component<IProps, IState> {
             // TODO: render the view of individual tab content in a separate component.
           }
 
-          <TabPanel value={this.state.tabIndex} index={'cancel'}>
+          <TabPanel value={this.state.tabIndex} index={'all'}>
             {
-              this.props.cachedMeeting.cancel
-                .map((participantWallet) => {
+              participants
+                .map(p => {
                   return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography><br />
+                    <span key={p.address}>
+                      <Container maxWidth="md">
+                        <Grid container xs={12}>
+                          {
+                            this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
+                            <Grid item xs={4}>
+                              <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
+                                <span>
+                                  <AttendanceButton
+                                    disabled={this.isMarkAttendanceButtonDisabled(p.address)}
+                                    onClick={this.handleAttendance}
+                                    value={p.address}
+                                    type="submit">
+                                    MARK ATTENDANCE
+                                  </AttendanceButton>
+                                </span>
+                              </Tooltip>
+                            </Grid>
+                          }
+                          <Grid item xs={2}>
+                            {p.status}
+                          </Grid>
+                          <Grid item xs={6}>
+                            {p.address}
+                          </Grid>
+
+                        </Grid>
+                      </Container>
                     </span>
                   );
                 })
             }
           </TabPanel>
+
 
           <TabPanel value={this.state.tabIndex} index={'rsvp'}>
             {
@@ -200,6 +233,24 @@ export class UsersList extends React.Component<IProps, IState> {
             }
           </TabPanel>
 
+
+          <TabPanel value={this.state.tabIndex} index={'cancel'}>
+            {
+              this.props.cachedMeeting.cancel
+                .map((participantWallet) => {
+                  return (
+                    <span key={participantWallet}>
+                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
+                        {participantWallet}
+                      </Typography><br />
+                    </span>
+                  );
+                })
+            }
+          </TabPanel>
+
+
+
           <TabPanel value={this.state.tabIndex} index={'attend'}>
             {
               this.props.cachedMeeting.attend
@@ -214,6 +265,8 @@ export class UsersList extends React.Component<IProps, IState> {
                 })
             }
           </TabPanel>
+
+
 
           <TabPanel value={this.state.tabIndex} index={'withdraw'}>
             {
