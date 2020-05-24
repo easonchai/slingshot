@@ -1,7 +1,7 @@
 pragma solidity >= 0.6.2 < 0.7.0;
 
-import "./openzeppelin/Ownable.sol";
-import "./openzeppelin/SafeMath.sol";
+import "./Ownable.sol";
+import "./SafeMath.sol";
 import './DeployerInterface.sol';
 import './MeetingInterface.sol';
 
@@ -200,8 +200,9 @@ contract Meeting is Ownable {
         //Either manually withdraw or automatic send back
         require(addressToParticipant[msg.sender].attended, "Did not attend");
         require(payout != 0, 'no payout');
-        msg.sender.transfer(payout);
         addressToParticipant[msg.sender].attended = false;
+        prevStake = prevStake.sub(payout);
+        msg.sender.transfer(payout);
         emit WithdrawEvent(msg.sender, payout);
     }
 
@@ -230,7 +231,7 @@ contract Meeting is Ownable {
 
     function sendStake(uint _amnt) internal {
         if (_amnt != 0){ //Send current balance minus prevStake to new contract.
-            meeting.setPrevStake(_amnt);
+            meeting.setPrevStake{value:_amnt}(_amnt);
         }
         
         emit SendStake(_amnt);
