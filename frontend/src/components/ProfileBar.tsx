@@ -286,12 +286,14 @@ export default function ProfileBar() {
                 <Toolbar>
                     <Grid container>
                         <Grid item xs={3} container>
-                            <CardMedia style={{ alignItems: 'center', justifyContent: 'center', height: 48, width: 48, color: 'white' }}
-                                image="https://www.siasky.net/KACEhRdglW80DQ_rxo-tGken1lzV8kfh5sY4G0W_b3kMEA"
-                            />
-                            <Typography component="h1" variant="h2" align="center" style={{ color: 'white', fontSize: 24, marginTop: 8, marginLeft: 6 }}>
-                                Slingshot
-                            </Typography>
+                            <Link href="/" style={{ textDecoration: 'none' }}>
+                                <CardMedia style={{ alignItems: 'center', justifyContent: 'center', height: 48, width: 48, color: 'white' }}
+                                    image="https://www.siasky.net/KACEhRdglW80DQ_rxo-tGken1lzV8kfh5sY4G0W_b3kMEA"
+                                /></Link>
+                            <Link href="/" style={{ textDecoration: 'none' }}>
+                                <Typography component="h1" variant="h2" align="center" style={{ color: 'white', fontSize: 24, marginTop: 8, marginLeft: 6 }}>
+                                    Slingshot
+                            </Typography> </Link>
                         </Grid>
                         <Grid item xs={5} />
                         <Grid container item xs={3} alignItems="center" justify="flex-end">

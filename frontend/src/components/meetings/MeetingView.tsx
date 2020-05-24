@@ -116,21 +116,25 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleRSVP = (event: any) => {
-    this.etherService.rsvp(
-      this.props.cachedMeeting._id,
-      this.props.cachedMeeting.data.stake,
-      confirmation => this.props.dispatchUpdateRsvpConfirmationLoading(false)
-    )
-      .then((res: any) => {
-        this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
-      }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
-        console.error(reason);
-      })
-      .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('Failed to RSVP.');
-        console.error(err);
-      });
+    if (this.props.cachedMeeting._id.length > 44) {
+      this.props.dispatchAddErrorNotification('Failed to retrieve contract address! Please go back to home and create a new event!');
+    } else {
+      this.etherService.rsvp(
+        this.props.cachedMeeting._id,
+        this.props.cachedMeeting.data.stake,
+        confirmation => this.props.dispatchUpdateRsvpConfirmationLoading(false)
+      )
+        .then((res: any) => {
+          this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
+        }, (reason: any) => {
+          this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
+          console.error(reason);
+        })
+        .catch((err: any) => {
+          this.props.dispatchAddErrorNotification('Failed to RSVP.');
+          console.error(err);
+        });
+    }
   }
 
   handleGetChange = (event: any) => {
@@ -150,18 +154,22 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleCancelEvent = (event: any) => {
-    this.etherService.eventCancel(
-      this.props.cachedMeeting._id,
-      confirmation => this.props.dispatchUpdateHandleCancelMeetingConfirmationLoading(false)
-    )
-      .then((res: any) => {
-        this.props.dispatchUpdateHandleCancelMeeting(this.props.cachedMeeting._id);
-      }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
-      })
-      .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleCancelEvent: ' + err);
-      });
+    if (this.props.cachedMeeting._id.length > 44) {
+      this.props.dispatchAddErrorNotification('Failed to retrieve contract address! Please go back to home and create a new event!');
+    } else {
+      this.etherService.eventCancel(
+        this.props.cachedMeeting._id,
+        confirmation => this.props.dispatchUpdateHandleCancelMeetingConfirmationLoading(false)
+      )
+        .then((res: any) => {
+          this.props.dispatchUpdateHandleCancelMeeting(this.props.cachedMeeting._id);
+        }, (reason: any) => {
+          this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
+        })
+        .catch((err: any) => {
+          this.props.dispatchAddErrorNotification('handleCancelEvent: ' + err);
+        });
+    }
   }
 
   handleCancelRSVP = (event: any) => {
@@ -308,7 +316,6 @@ export class MeetingView extends React.Component<IProps, IState> {
     return `Sorry to see you go!`;
   }
 
-
   render() {
     const { cachedMeeting } = this.props;
     const { parent, child } = cachedMeeting.data;
@@ -317,6 +324,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
     const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
+    const prevMeeting = cachedMeeting.data.parent;
 
     const isRSVPButtonDisabled = () => {
       return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
@@ -348,6 +356,20 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     const isCancelButtonDisabled = () => {
       return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled;
+    }
+
+    const getPayoutPool = () => {
+      // let result = user.attend.reduce((state: Meeting[], meeting) => {
+      //   let found = meetings.find(allMeeting => {
+      //     return allMeeting._id === cachedMeeting._id
+      //   })
+      //   if (found !== undefined) {
+      //     state.push(found);
+      //   }
+      //   return state;
+      // }, [])
+      // return result;
+      return 1;
     }
 
     return (
@@ -467,6 +489,46 @@ export class MeetingView extends React.Component<IProps, IState> {
                               </React.Fragment>)
                               : (<div></div>)}
                           </Grid><br />
+                          {/** Payout Details*/}
+                          {status === "Ended" ?
+                            (<Grid container>
+                              <Grid item xs={6}>
+                                <Typography component="div"> <br />
+                                  <Box fontSize="body2.fontSize">Total Staked in Pool: </Box>
+                                  <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                                    {cachedMeeting.data.stake * cachedMeeting.rsvp.length}
+                                  </Box><br />
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography component="div"> <br />
+                                  <Box fontSize="body2.fontSize">Individual Payout: </Box>
+                                  <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                                    {(cachedMeeting.data.stake * cachedMeeting.rsvp.length) / cachedMeeting.attend.length}
+                                  </Box><br />
+                                </Typography>
+                              </Grid>
+                            </Grid>)
+                            :
+                            (<Grid container>
+                              <Grid item xs={6}>
+                                <Typography component="div"> <br />
+                                  <Box fontSize="body2.fontSize">Payout Pool: </Box>
+                                  <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                                    {getPayoutPool()}
+                                  </Box><br />
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography component="div"> <br />
+                                  <Box fontSize="body2.fontSize">Estimated Individual Payout: </Box>
+                                  <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                                    {cachedMeeting.rsvp.length === 0 ? "No participants registered yet" : (cachedMeeting.data.payout / cachedMeeting.rsvp.length).toFixed(3) + " ETH"}
+                                  </Box><br />
+                                </Typography>
+                              </Grid>
+                            </Grid>)}
+
                           {/** Organizer Actions */}
                           {!isUserAnOrganiser() ||
                             <React.Fragment>
@@ -485,6 +547,36 @@ export class MeetingView extends React.Component<IProps, IState> {
                                       <span>
                                         <CustButton disabled={isStartButtonDisabled()}
                                           onClick={this.handleStart}>Start Event</CustButton>
+                                      </span>
+                                    </Tooltip>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <Tooltip title={this.getEndEventButtonTooltipText()}>
+                                      <span>
+                                        <CustButton disabled={isEndButtonDisabled()}
+                                          onClick={this.handleEnd}>End Event</CustButton>
+                                      </span>
+                                    </Tooltip>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <Tooltip title={this.getCancelEventButtonTooltipText()}>
+                                      <span>
+                                        <CustButton disabled={isCancelButtonDisabled()}
+                                          onClick={this.handleCancelEvent}>Cancel Event</CustButton>
+                                      </span>
+                                    </Tooltip>
+                                  </Grid>
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
+                                      <CustButton>New Event</CustButton>
+                                    </Link>
+                                  </Grid>
+                                  {/** TO DO BUTTON (GOVERNANCE) */}
+                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                    <Tooltip title={this.getStartEventButtonTooltipText()}>
+                                      <span>
+                                        <CustButton disabled={isStartButtonDisabled()}
+                                          onClick={this.handleStart}>Pause Event</CustButton>
                                       </span>
                                     </Tooltip>
                                   </Grid>

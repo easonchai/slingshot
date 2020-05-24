@@ -214,7 +214,7 @@ export default function FeedbackForm() {
                             </Grid>
                             <Grid item>
                                 <SponsorMessage variant="subtitle1" align="center" paragraph>
-                                    Media is proudly hosted on
+                                    Media proudly hosted on
 										<a
                                         style={{ textDecoration: 'none', color: '#3c9e47' }}
                                         href={'https://www.siasky.net/'}
