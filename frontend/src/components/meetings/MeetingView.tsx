@@ -15,6 +15,7 @@ import Reviews from '../Reviews';
 import Footer from '../Footer';
 import Pagination from '@material-ui/lab/Pagination';
 import { MediaDisplay } from '../MediaDisplay';
+import { History } from 'history';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -58,6 +59,7 @@ const CustomChip = styled(Chip)({
 })
 
 export interface IProps {
+  history: History;
   id: String;
   user: User;
   cachedMeeting: Meeting;
@@ -133,6 +135,7 @@ export class MeetingView extends React.Component<IProps, IState> {
       )
         .then((res: any) => {
           this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
+          this.props.history.go(0);
         }, (reason: any) => {
           // Code 4001 reflects MetaMask's rejection by user.
           // Hence we don't display it as an error.
@@ -157,6 +160,7 @@ export class MeetingView extends React.Component<IProps, IState> {
         console.log("success get change ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchUpdateWithdraw(this.props.cachedMeeting._id, this.props.user._id);
+        this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleGetChange: ' + reason);
       })
@@ -197,6 +201,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     )
       .then((res: any) => {
         this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
+        this.props.history.go(0);
       }, (reason: any) => {
         // Code 4001 reflects MetaMask's rejection by user.
         // Hence we don't display it as an error.
@@ -262,6 +267,7 @@ export class MeetingView extends React.Component<IProps, IState> {
         console.log("success withdraw ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchUpdateWithdraw(this.props.cachedMeeting._id, this.props.user._id);
+        this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
       })
