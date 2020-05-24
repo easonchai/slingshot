@@ -58,7 +58,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   if (isType(action, actions.CreateFirstMeeting)) {
     return {
       ...state,
-      meetings: [action.payload, ...state.meetings],
+      meetings: [...state.meetings, action.payload],
       cachedMeeting: action.payload
     };
   }
@@ -122,14 +122,14 @@ export const reducer = (state: IState = initState, action: Action): IState => {
 
       return meeting;
     });
-    const updatedCachedMeeting = state.meetings.find(m => m._id === action.payload.meetingAddress) || state.meetings[0];
+
     return {
       ...state,
       meetings: updatedMeetings,
       cachedMeeting: {
-        ...updatedCachedMeeting,
-        cancel: updatedCachedMeeting.cancel.filter(user => user !== action.payload.userAddress),
-        rsvp: [...updatedCachedMeeting.rsvp, action.payload.userAddress]
+        ...state.cachedMeeting,
+        cancel: state.cachedMeeting.cancel.filter(user => user !== action.payload.userAddress),
+        rsvp: [...state.cachedMeeting.rsvp, action.payload.userAddress]
       },
     };
   }
@@ -152,7 +152,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        rsvp: state.cachedMeeting.rsvp.filter((userAddress) => userAddress !== action.payload.userAddress),
+        rsvp: state.cachedMeeting.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
         cancel: [...state.cachedMeeting.cancel, action.payload.userAddress]
       }
     };
@@ -172,42 +172,55 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   }
 
   if (isType(action, actions.UpdateStartMeeting)) {
-    return {
-      ...state,
-      cachedMeeting: {
-        ...state.cachedMeeting,
-        data: {
-          ...state.cachedMeeting.data,
-          isStarted: true
+    if (state.cachedMeeting._id === action.payload) {
+      return {
+        ...state,
+        cachedMeeting: {
+          ...state.cachedMeeting,
+          data: {
+            ...state.cachedMeeting.data,
+            isStarted: true
+          }
         }
-      }
-    };
+      };
+    }
+
+    return state;
   }
 
   if (isType(action, actions.UpdateEndMeeting)) {
-    return {
-      ...state,
-      cachedMeeting: {
-        ...state.cachedMeeting,
-        data: {
-          ...state.cachedMeeting.data,
-          isEnded: true
+    if (state.cachedMeeting._id === action.payload) {
+      return {
+        ...state,
+        cachedMeeting: {
+          ...state.cachedMeeting,
+          data: {
+            ...state.cachedMeeting.data,
+            isEnded: true
+          }
         }
-      }
-    };
+      };
+    }
+
+    return state;
+
   }
 
   if (isType(action, actions.UpdateCancelMeeting)) {
-    return {
-      ...state,
-      cachedMeeting: {
-        ...state.cachedMeeting,
-        data: {
-          ...state.cachedMeeting.data,
-          isCancelled: true
+    if (state.cachedMeeting._id === action.payload) {
+      return {
+        ...state,
+        cachedMeeting: {
+          ...state.cachedMeeting,
+          data: {
+            ...state.cachedMeeting.data,
+            isCancelled: true
+          }
         }
-      }
-    };
+      };
+    }
+
+    return state;
   }
 
   if (isType(action, actions.UpdateHandleAttendance)) {
