@@ -297,13 +297,23 @@ export default function ProfileBar() {
                         </Grid>
                         <Grid item xs={5} />
                         <Grid container item xs={3} alignItems="center" justify="flex-end">
-                            {user._id
-                                ? (<Domain variant="h6">
-                                    {user.data?.ensDomain}
-                                </Domain>)
-                                : (<QuickSignIn onClick={signIn}>
-                                    Sign In
-                                </QuickSignIn>)
+                            {
+                                user._id
+                                    ? (
+                                        <Domain variant="h6">
+                                            {user.data?.ensDomain}
+                                        </Domain>
+                                    )
+                                    :
+                                    (
+                                        etherService.isEthereumNodeAvailable()
+                                            ? (
+                                                <QuickSignIn onClick={signIn}>
+                                                    Sign In
+                                                </QuickSignIn>
+                                            )
+                                            : 'MetaMask is required'
+                                    )
                             }
                         </Grid>
                         <Grid item xs={1}>

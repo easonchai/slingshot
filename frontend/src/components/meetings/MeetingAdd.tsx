@@ -243,10 +243,16 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			.then((ethersResponse: any) => {
 				this.createFirstMeeting(ethersResponse.hash, event, startDateTime, endDateTime);
 			}, (reason: any) => {
-				this.props.dispatchAddErrorNotification("There was an error creating this meeting: " + reason);
+				// Code 4001 reflects MetaMask's rejection by user.
+				// Hence we don't display it as an error.
+				if (reason?.code !== 4001) {
+					this.props.dispatchAddErrorNotification("There was an error creating this event: " + reason);
+					console.error(reason);
+				}
 			})
 			.catch((err: any) => {
-				this.props.dispatchAddErrorNotification("There was an error creating this meeting: " + err);
+				this.props.dispatchAddErrorNotification("There was an error creating this event: " + err);
+				console.error(err);
 			});
 	}
 
@@ -303,10 +309,16 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					withdraw: []
 				});
 			}, (reason: any) => {
-				this.props.dispatchAddErrorNotification('handleNextMeeting: ' + reason);
+				// Code 4001 reflects MetaMask's rejection by user.
+				// Hence we don't display it as an error.
+				if (reason?.code !== 4001) {
+					this.props.dispatchAddErrorNotification("There was an error creating this event: " + reason);
+					console.error(reason);
+				}
 			})
 			.catch((err: any) => {
-				this.props.dispatchAddErrorNotification('handleNextMeeting: ' + err);
+				this.props.dispatchAddErrorNotification('There was an error creating this event: ' + err);
+				console.error(err);
 			});
 	}
 

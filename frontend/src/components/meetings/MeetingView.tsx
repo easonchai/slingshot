@@ -127,8 +127,12 @@ export class MeetingView extends React.Component<IProps, IState> {
         .then((res: any) => {
           this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
         }, (reason: any) => {
-          this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
-          console.error(reason);
+          // Code 4001 reflects MetaMask's rejection by user.
+          // Hence we don't display it as an error.
+          if (reason?.code !== 4001) {
+            this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
+            console.error(reason);
+          }
         })
         .catch((err: any) => {
           this.props.dispatchAddErrorNotification('Failed to RSVP.');
@@ -164,10 +168,16 @@ export class MeetingView extends React.Component<IProps, IState> {
         .then((res: any) => {
           this.props.dispatchUpdateHandleCancelMeeting(this.props.cachedMeeting._id);
         }, (reason: any) => {
-          this.props.dispatchAddErrorNotification('handleCancelEvent: ' + reason);
+          // Code 4001 reflects MetaMask's rejection by user.
+          // Hence we don't display it as an error.
+          if (reason?.code !== 4001) {
+            this.props.dispatchAddErrorNotification("There was an error cancelling this event: " + reason);
+            console.error(reason);
+          }
         })
         .catch((err: any) => {
-          this.props.dispatchAddErrorNotification('handleCancelEvent: ' + err);
+          this.props.dispatchAddErrorNotification('There was an error cancelling this event: ' + err);
+          console.error(err);
         });
     }
   }
@@ -180,10 +190,16 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + reason);
+        // Code 4001 reflects MetaMask's rejection by user.
+        // Hence we don't display it as an error.
+        if (reason?.code !== 4001) {
+          this.props.dispatchAddErrorNotification(`There was an error cancelling RSVP to this event: ` + reason);
+          console.error(reason);
+        }
       })
       .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleCancelRSVP: ' + err);
+        this.props.dispatchAddErrorNotification(`There was an error cancelling RSVP to this event: ` + err);
+        console.error(err);
       });
   }
 
@@ -195,10 +211,16 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         this.props.dispatchUpdateHandleStartMeeting(this.props.cachedMeeting._id);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleStart: ' + reason);
+        // Code 4001 reflects MetaMask's rejection by user.
+        // Hence we don't display it as an error.
+        if (reason?.code !== 4001) {
+          this.props.dispatchAddErrorNotification('There was an error starting this event: ' + reason);
+          console.error(reason);
+        }
       })
       .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleStart: ' + err);
+        this.props.dispatchAddErrorNotification('There was an error starting this event: ' + err);
+        console.error(err);
       });
   }
 
@@ -210,10 +232,16 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         this.props.dispatchUpdateHandleEndMeeting(this.props.cachedMeeting._id);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleEnd: ' + reason);
+        // Code 4001 reflects MetaMask's rejection by user.
+        // Hence we don't display it as an error.
+        if (reason?.code !== 4001) {
+          this.props.dispatchAddErrorNotification('There was an error ending this event: ' + reason);
+          console.error(reason);
+        }
       })
       .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleEnd: ' + err);
+        this.props.dispatchAddErrorNotification('There was an error ending this event: ' + err);
+        console.error(err);
       });
   }
 
@@ -297,6 +325,9 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (this.props.cachedMeeting.data.isEnded)
       return `You can't cancel an ended event.`;
 
+    if (this.props.cachedMeeting.data.isStarted)
+      return `You can't cancel a started event.`;
+
     return `Good luck next time!`;
   }
 
@@ -355,7 +386,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isCancelButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled;
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.data.isStarted;
     }
 
     const getPayoutPool = () => {
@@ -605,7 +636,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                               </Paper><br />
                             </React.Fragment>}
                           <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
-                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length}/{cachedMeeting.data.maxParticipants}
+                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length}/{cachedMeeting.data.maxParticipants}
                           </Box><br />
                         </React.Fragment>}
                     </Typography>
