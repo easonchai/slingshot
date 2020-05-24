@@ -397,6 +397,8 @@ export class MeetingView extends React.Component<IProps, IState> {
 
       // active events
       payoutPool = prevMeeting.data.stake * totalRegisteredPrev;
+      individualPayout = eligibleRegisteredNow ? payoutPool / eligibleRegisteredNow : 0.0;
+
       estimatedPayout = totalRegisteredNow ? payoutPool / totalRegisteredNow : 0.0;
     }
 
