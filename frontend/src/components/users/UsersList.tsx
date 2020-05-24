@@ -130,6 +130,10 @@ export class UsersList extends React.Component<IProps, IState> {
       || this.props.cachedMeeting.data.isEnded
   }
 
+  isUserOrganizer = () => {
+    return this.props.userWallet === this.props.cachedMeeting.data.organizerAddress;
+  }
+
   render() {
     const participants = this.state.participants;
 
@@ -163,7 +167,7 @@ export class UsersList extends React.Component<IProps, IState> {
                       <span key={p.address}>
                         <Grid container xs={12} style={{ marginBottom: 15 }}>
                           {
-                            this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
+                            this.isUserOrganizer() &&
                             <Grid item>
                               <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
                                 <span>
@@ -199,7 +203,7 @@ export class UsersList extends React.Component<IProps, IState> {
                                   {p.ens}
                                 </Box>
                                 :
-                                <Box fontSize={14} fontWeight="fontWeightLight">
+                                <Box fontSize={this.isUserOrganizer() ? 14 : 16} fontWeight="fontWeightLight">
                                   {p.address}
                                 </Box>
                               }
