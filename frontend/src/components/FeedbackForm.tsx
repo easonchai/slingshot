@@ -172,6 +172,7 @@ export default function FeedbackForm() {
         const feedback: Feedback = {
             meetingAddress: cachedMeeting._id,
             userAddress: user._id,
+            ensAddress: '',
             stars: starsRating,
             comment: feedbackComment,
             images: uploadedImages[0] === '' ? [] : uploadedImages,

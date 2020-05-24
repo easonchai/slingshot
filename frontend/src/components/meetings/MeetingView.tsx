@@ -406,7 +406,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isWithdrawButtonVisible = () => {
-      return ((cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled) && !this.props.user.withdraw.includes(cachedMeeting._id));
+      return ((cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled) && !this.props.user.withdraw.includes(cachedMeeting._id)) && cachedMeeting.data.parent;
     }
 
     const isUserAnOrganiser = () => {

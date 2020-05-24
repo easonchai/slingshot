@@ -3,7 +3,7 @@ import { Meeting } from '../../store/meetings/actions';
 import { Loading } from '../../store/loading/actions';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
-import { AppBar, Button, Container, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip } from '@material-ui/core';
+import { AppBar, Button, Container, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip, Box } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import BeenhereIcon from '@material-ui/icons/Beenhere';
@@ -64,7 +64,7 @@ export class UsersList extends React.Component<IProps, IState> {
     });
 
     this.props.cachedMeeting.attend.map(p => {
-      this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'ATTENDED' }] }))
+      this.etherService.findENSDomain(p, (domain: string) => { this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'ATTENDED' }] }) })
     });
 
     this.props.cachedMeeting.rsvp.map(p => {
@@ -181,8 +181,12 @@ export class UsersList extends React.Component<IProps, IState> {
                           />
 
                         </Grid>
-                        <Grid item xs={6} style={{ paddingLeft: 15, marginTop: 5 }}>
-                          {p.ens ? p.ens : p.address}
+                        <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
+                          <Typography component="div">
+                            <Box fontSize={16} fontWeight="fontWeightLight">
+                              {p.ens ? p.ens : p.address}
+                            </Box>
+                          </Typography>
                         </Grid>
 
                       </Grid>

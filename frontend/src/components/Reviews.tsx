@@ -12,15 +12,14 @@ import Rating from '@material-ui/lab/Rating';
 import { Feedback } from '../store/meetings/actions';
 import { CardImage, Middle } from './meetings/MeetingAdd';
 import Blockies from 'react-blockies';
+import EtherService from '../services/EtherService';
 
 export default function Reviews() {
     const dispatch = useDispatch();
-
+    const etherService = EtherService.getInstance();
     const user = useSelector((state: IAppState) => state.userReducer.user);
     const cachedMeeting = useSelector((state: IAppState) => state.meetingsReducer.cachedMeeting);
-
     const reviewCount = cachedMeeting.data.feedback.length;
-
 
 
     return (
@@ -32,6 +31,11 @@ export default function Reviews() {
 
                 {
                     cachedMeeting.data.feedback.map((review: Feedback) => {
+                        {
+                            etherService.findENSDomain(review.userAddress, (domain: string) => {
+                                review.ensAddress = domain;
+                            })
+                        }
                         return (
                             <Grid container>
                                 <Grid item xs={2} />
@@ -53,7 +57,7 @@ export default function Reviews() {
                                                     <Grid item>
                                                         <Typography component="div">
                                                             <Box fontSize="body2.fontSize" fontWeight="fontWeightLight" style={{ marginLeft: 8 }}>
-                                                                {review.userAddress}
+                                                                {review.ensAddress || review.userAddress}
                                                             </Box><br />
                                                         </Typography>
                                                     </Grid>
