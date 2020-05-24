@@ -299,11 +299,18 @@ export default function ProfileBar() {
                         <Grid container item xs={3} alignItems="center" justify="flex-end">
                             {
                                 user._id
-                                    ? (
+                                    ?
+                                    user.data?.ensDomain ?
                                         <Domain variant="h6">
                                             {user.data?.ensDomain}
-                                        </Domain>
-                                    )
+                                        </Domain> :
+                                        <Link href="https://app.ens.domains/" target="_blank" style={{ textDecoration: 'none' }}>
+                                            <QuickSignIn>
+                                                Get ENS now!
+                                            <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ"
+                                                    height={24} width={24} style={{ marginLeft: 7 }}></img>
+                                            </QuickSignIn>
+                                        </Link>
                                     :
                                     (
                                         etherService.isEthereumNodeAvailable()
