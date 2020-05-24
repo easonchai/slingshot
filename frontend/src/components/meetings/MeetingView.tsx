@@ -16,6 +16,7 @@ import Footer from '../Footer';
 import Pagination from '@material-ui/lab/Pagination';
 import { MediaDisplay } from '../MediaDisplay';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { History } from 'history';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -59,12 +60,14 @@ const CustomChip = styled(Chip)({
 })
 
 export interface IProps {
+  history: History;
   id: String;
   user: User;
   cachedMeeting: Meeting;
   meetings: Meeting[];
   loading: Loading;
 
+  dispatchGetAllMeetings(): void;
   dispatchGetCachedMeetingById(id: String): void;
 
   dispatchUpdateRSVP(meetingAddress: String, userAddress: String): Array<User>;
@@ -79,6 +82,7 @@ export interface IProps {
   dispatchUpdateHandleEndMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
+  dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -106,6 +110,7 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   componentDidMount() {
+    this.props.dispatchGetAllMeetings();
     this.props.dispatchGetCachedMeetingById(this.props.id);
   }
 
@@ -131,6 +136,7 @@ export class MeetingView extends React.Component<IProps, IState> {
       )
         .then((res: any) => {
           this.props.dispatchUpdateRSVP(this.props.cachedMeeting._id, this.props.user._id);
+          this.props.history.go(0);
         }, (reason: any) => {
           // Code 4001 reflects MetaMask's rejection by user.
           // Hence we don't display it as an error.
@@ -154,6 +160,8 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         console.log("success get change ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchUpdateWithdraw(this.props.cachedMeeting._id, this.props.user._id);
+        this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleGetChange: ' + reason);
       })
@@ -194,6 +202,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     )
       .then((res: any) => {
         this.props.dispatchUpdateRsvpCancellation(this.props.cachedMeeting._id, this.props.user._id);
+        this.props.history.go(0);
       }, (reason: any) => {
         // Code 4001 reflects MetaMask's rejection by user.
         // Hence we don't display it as an error.
@@ -258,6 +267,8 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         console.log("success withdraw ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchUpdateWithdraw(this.props.cachedMeeting._id, this.props.user._id);
+        this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
       })
@@ -361,12 +372,11 @@ export class MeetingView extends React.Component<IProps, IState> {
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
     const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
-    const prevMeetingAddress = cachedMeeting.data.parent;
 
+    const prevMeetingAddress = cachedMeeting.data.parent;
     const prevMeeting = this.props.meetings.find(m => {
       return m._id === prevMeetingAddress;
     });
-
 
     // active events
     let payoutPool = 0.0;
@@ -420,20 +430,6 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     const isCancelButtonDisabled = () => {
       return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.data.isStarted;
-    }
-
-    const getPayoutPool = () => {
-      // let result = user.attend.reduce((state: Meeting[], meeting) => {
-      //   let found = meetings.find(allMeeting => {
-      //     return allMeeting._id === cachedMeeting._id
-      //   })
-      //   if (found !== undefined) {
-      //     state.push(found);
-      //   }
-      //   return state;
-      // }, [])
-      // return result;
-      return 0.013;
     }
 
     return (
@@ -562,7 +558,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Total Staked in Pool: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {totalStaked}
+                                    {totalStaked.toFixed(4) + " ETH"}
                                   </Box><br />
                                 </Typography>
                               </Grid>
@@ -570,7 +566,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Individual Payout: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {individualPayout}
+                                    {individualPayout.toFixed(4) + " ETH"}
                                   </Box><br />
                                 </Typography>
                               </Grid>
@@ -581,7 +577,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Payout Pool: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {payoutPool}
+                                    {payoutPool.toFixed(4) + " ETH"}
                                   </Box><br />
                                 </Typography>
                               </Grid>
@@ -589,7 +585,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Estimated Individual Payout: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {(estimatedPayout).toFixed(3) + " ETH"}
+                                    {estimatedPayout.toFixed(4) + " ETH"}
                                   </Box><br />
                                 </Typography>
                               </Grid>

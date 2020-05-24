@@ -20,6 +20,13 @@ const mapStateToProps = (state: IAppState, props: any) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
+    dispatchGetAllMeetings: () => {
+      axios
+        .get('/api/meeting/all')
+        .then(res => res.data as Array<Meeting>)
+        .then(meetings => dispatch(meetingActions.ReadAllMeetings(meetings)))
+    },
+
     dispatchGetCachedMeetingById: (id: string) => {
       dispatch(loadingActions.UpdateCachedMeetingLoading(true));
 
