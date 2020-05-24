@@ -13,6 +13,8 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import FeedbackForm from '../FeedbackForm';
 import Reviews from '../Reviews';
 import Footer from '../Footer';
+import Pagination from '@material-ui/lab/Pagination';
+import { MediaDisplay } from '../MediaDisplay';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -352,6 +354,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     const { cachedMeeting } = this.props;
     const { parent, child } = cachedMeeting.data;
     const imageUrl = cachedMeeting.data.images[0] ? 'https://siasky.net/' + cachedMeeting.data.images[0] : 'https://siasky.net/nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ';
+    const videoUrl = 'https://siasky.net/' + cachedMeeting.data.videos[0];
     const started = cachedMeeting.data.isStarted
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
@@ -443,10 +446,11 @@ export class MeetingView extends React.Component<IProps, IState> {
                         {(new Date(cachedMeeting.data.endDateTime * 1000)).toString()}
                       </Box><br />
                     </Typography>
-                    <CardImage
-                      image={imageUrl}
-                      title={cachedMeeting.data.name}
-                    /><br />
+                    {cachedMeeting.data.videos.length > 0 ?
+                      <MediaDisplay imageUrl={imageUrl} videoUrl={videoUrl} /> :
+                      <MediaDisplay imageUrl={imageUrl} videoUrl={""} />
+                    }
+                    <br />
                     <Typography component="div">
                       <Box fontSize="body2.fontSize">Location:</Box>
                       <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
