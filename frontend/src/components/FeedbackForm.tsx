@@ -375,7 +375,7 @@ export default function FeedbackForm() {
                                     <Grid item xs={2} alignItems="center" justify="center">
                                         <Tooltip title={getFormButtonTooltipText()}>
                                             <span>
-                                                <MyButton disabled={isFormButtonDisabled()} type="submit"
+                                                <MyButton disabled={isFormButtonDisabled() || feedbackComment.length === 0} type="submit"
                                                     style={isFormButtonDisabled() ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
                                                         { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}
                                                 >

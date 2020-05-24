@@ -4,10 +4,14 @@ import { IAppState } from '../store/index';
 import {
     Container,
     Grid,
+    Paper,
+    Box,
+    Typography,
 } from '@material-ui/core';
 import Rating from '@material-ui/lab/Rating';
 import { Feedback } from '../store/meetings/actions';
 import { CardImage, Middle } from './meetings/MeetingAdd';
+import Blockies from 'react-blockies';
 
 export default function Reviews() {
     const dispatch = useDispatch();
@@ -27,34 +31,73 @@ export default function Reviews() {
                 {
                     cachedMeeting.data.feedback.map((review: Feedback) => {
                         return (
-                            <Container maxWidth="md">
-                                <Grid item container xs={12}>
-                                    <Grid item xs={6}>
-                                        <Rating
-                                            name="starsRating"
-                                            value={review.stars}
-                                            readOnly
-                                        />
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        {review.userAddress}
-                                    </Grid>
+                            <Grid container>
+                                <Grid item xs={2} />
+                                <Grid item xs={8}>
+                                    <Paper elevation={2} style={{ margin: 10, padding: 10 }}>
+                                        <Container maxWidth="md" style={{ marginBottom: 10 }}>
+                                            <Grid item container xs={12}>
+                                                <Grid item xs={6} container>
+                                                    <Grid item xs={12}>
+                                                        <Typography component="div">
+                                                            <Box fontSize="body2.fontSize" fontWeight="fontWeightBold" style={{ marginBottom: 5, paddingTop: 7 }}>
+                                                                From:
+                                                            </Box>
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Blockies seed={review.userAddress} scale={2} />
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Typography component="div">
+                                                            <Box fontSize="body2.fontSize" fontWeight="fontWeightLight" style={{ marginLeft: 8 }}>
+                                                                {review.userAddress}
+                                                            </Box><br />
+                                                        </Typography>
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item xs={4} />
+                                                <Grid item>
+                                                    <Rating
+                                                        name="starsRating"
+                                                        value={review.stars}
+                                                        readOnly
+                                                    />
+                                                </Grid>
 
-                                    <Grid item xs={12}>
-                                        {review.comment}
-                                    </Grid>
 
-                                    {
-                                        review.images.length > 0 &&
-                                        <Grid item xs={12}>
-                                            <CardImage
-                                                image={'https://siasky.net/' + review.images[0]}
-                                                title="user's picture of the event"
-                                            />
-                                        </Grid>
-                                    }
+                                                <Grid item xs={12}>
+                                                    <Typography component="div">
+                                                        <Box fontSize="body2.fontSize" fontWeight="fontWeightBold" style={{ marginBottom: 8 }}>
+                                                            Comment:
+                                                            </Box>
+                                                        <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
+                                                            {review.comment}
+                                                        </Box><br />
+                                                    </Typography>
+                                                </Grid>
+
+                                                {
+                                                    review.images.length > 0 &&
+                                                    <Grid item xs={12}>
+                                                        <Typography component="div">
+                                                            <Box fontSize="body2.fontSize" fontWeight="fontWeightBold" style={{ marginBottom: 8 }}>
+                                                                Attachments:
+                                                            </Box>
+                                                        </Typography>
+                                                        <CardImage
+                                                            style={{ width: 318, paddingTop: '26.17%' }}
+                                                            image={'https://siasky.net/' + review.images[0]}
+                                                            title={review.comment}
+                                                        />
+                                                    </Grid>
+                                                }
+                                            </Grid>
+                                        </Container>
+                                    </Paper>
                                 </Grid>
-                            </Container>
+                                <Grid item xs={2} />
+                            </Grid>
                         );
                     })
                 }

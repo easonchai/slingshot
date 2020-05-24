@@ -108,17 +108,27 @@ export class UsersList extends React.Component<IProps, IState> {
       || this.props.cachedMeeting.data.isEnded
   }
 
-  resolveDomain = (domain: string) => {
-    return domain;
-  }
-
   render() {
+
     const participants = [
-      ...this.props.cachedMeeting.withdraw.map(p => { return { address: p, status: 'WITHDRAWN' }; }),
-      ...this.props.cachedMeeting.attend.map(p => { return { address: p, status: 'ATTENDED' }; }),
-      ...this.props.cachedMeeting.rsvp.map(p => { return { address: p, status: `RSVP'D` }; }),
-      ...this.props.cachedMeeting.cancel.map(p => { return { address: p, status: 'CANCELLED' }; })
+      ...this.props.cachedMeeting.withdraw.map(p => {
+        console.log("ENS Domain Withdraw: " + p)
+        return { address: p, status: 'WITHDRAWN' };
+      }),
+      ...this.props.cachedMeeting.attend.map(p => {
+        console.log("ENS Domain ATTENDED: " + p)
+        return { address: p, status: 'ATTENDED' };
+      }),
+      ...this.props.cachedMeeting.rsvp.map(p => {
+        return { address: p, status: `RSVP'D` };
+      }),
+      ...this.props.cachedMeeting.cancel.map(p => {
+        console.log("ENS Domain CANCELLED: " + p)
+        return { address: p, status: 'CANCELLED' };
+      })
     ];
+
+
 
     return (
       <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
