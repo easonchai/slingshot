@@ -544,7 +544,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                               </Paper><br />
                             </React.Fragment>}
                           <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
-                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length}/{cachedMeeting.data.maxParticipants}
+                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length}/{cachedMeeting.data.maxParticipants}
                           </Box><br />
                         </React.Fragment>}
                     </Typography>
