@@ -13,6 +13,7 @@ const mapStateToProps = (state: IAppState, props: any) => {
     id: props.match.params.id,
     user: state.userReducer.user,
     cachedMeeting: state.meetingsReducer.cachedMeeting,
+    meetings: state.meetingsReducer.meetings,
     loading: state.loadingReducer.loading,
   };
 };

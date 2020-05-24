@@ -61,6 +61,7 @@ export interface IProps {
   id: String;
   user: User;
   cachedMeeting: Meeting;
+  meetings: Meeting[];
   loading: Loading;
 
   dispatchGetCachedMeetingById(id: String): void;
@@ -359,7 +360,34 @@ export class MeetingView extends React.Component<IProps, IState> {
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
     const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
-    const prevMeeting = cachedMeeting.data.parent;
+    const prevMeetingAddress = cachedMeeting.data.parent;
+
+    const prevMeeting = this.props.meetings.find(m => {
+      return m._id === prevMeetingAddress;
+    });
+
+
+    // active events
+    let payoutPool = 0.0;
+    let estimatedPayout = 0.0;
+
+    // ended events
+    let totalStaked = 0.0;
+    let individualPayout = 0.0;
+
+    const totalRegisteredNow = cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length;
+    const eligibleRegisteredNow = cachedMeeting.attend.length + cachedMeeting.withdraw.length;
+    // ended events
+    totalStaked = cachedMeeting.data.stake * totalRegisteredNow;
+    individualPayout = eligibleRegisteredNow ? totalStaked / eligibleRegisteredNow : 0.0;
+
+    if (prevMeeting) {
+      const totalRegisteredPrev = prevMeeting.rsvp.length + prevMeeting.attend.length + prevMeeting.withdraw.length;
+
+      // active events
+      payoutPool = prevMeeting.data.stake * totalRegisteredPrev;
+      estimatedPayout = totalRegisteredNow ? payoutPool / totalRegisteredNow : 0.0;
+    }
 
     const isRSVPButtonDisabled = () => {
       return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
@@ -533,7 +561,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Total Staked in Pool: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {cachedMeeting.data.stake * cachedMeeting.rsvp.length}
+                                    {totalStaked}
                                   </Box><br />
                                 </Typography>
                               </Grid>
@@ -541,7 +569,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Individual Payout: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {(cachedMeeting.data.stake * cachedMeeting.rsvp.length) / cachedMeeting.attend.length}
+                                    {individualPayout}
                                   </Box><br />
                                 </Typography>
                               </Grid>
@@ -552,7 +580,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Payout Pool: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {getPayoutPool()} ETH
+                                    {payoutPool}
                                   </Box><br />
                                 </Typography>
                               </Grid>
@@ -560,7 +588,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Estimated Individual Payout: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {cachedMeeting.rsvp.length === 0 ? "No participants registered yet" : (cachedMeeting.data.payout / cachedMeeting.rsvp.length).toFixed(3) + " ETH"}
+                                    {(estimatedPayout).toFixed(3) + " ETH"}
                                   </Box><br />
                                 </Typography>
                               </Grid>
