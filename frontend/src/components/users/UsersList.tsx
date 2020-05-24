@@ -39,6 +39,7 @@ interface IProps {
 
 interface IState {
   tabIndex: string;
+  participants: Array<any>;
 }
 
 export class UsersList extends React.Component<IProps, IState> {
@@ -54,7 +55,25 @@ export class UsersList extends React.Component<IProps, IState> {
      * Otherwise retrieve it from the known txHash (and persist in DB).
      */
 
-    this.state = { tabIndex: 'all' };
+    this.state = { tabIndex: 'all', participants: [] };
+  }
+
+  componentDidMount() {
+    this.props.cachedMeeting.withdraw.map(p => {
+      this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'WITHDRAWN' }] }))
+    });
+
+    this.props.cachedMeeting.attend.map(p => {
+      this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'ATTENDED' }] }))
+    });
+
+    this.props.cachedMeeting.rsvp.map(p => {
+      this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: `RSVP'D` }] }))
+    });
+
+    this.props.cachedMeeting.cancel.map(p => {
+      this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'CANCELLED' }] }))
+    });
   }
 
   handleAttendance = (event: any) => {
@@ -108,26 +127,8 @@ export class UsersList extends React.Component<IProps, IState> {
       || this.props.cachedMeeting.data.isEnded
   }
 
-  componentDidMount() {
-
-  }
-
   render() {
-    const participants = [
-      ...this.props.cachedMeeting.withdraw.map(p => {
-        return { address: p, status: 'WITHDRAWN' };
-      }),
-      ...this.props.cachedMeeting.attend.map(p => {
-        return { address: p, status: 'ATTENDED' };
-      }),
-      ...this.props.cachedMeeting.rsvp.map(p => {
-        return { address: p, status: `RSVP'D` };
-      }),
-      ...this.props.cachedMeeting.cancel.map(p => {
-        return { address: p, status: 'CANCELLED' };
-      })
-    ];
-
+    const participants = this.state.participants;
 
     return (
       <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={2}>
@@ -181,7 +182,7 @@ export class UsersList extends React.Component<IProps, IState> {
 
                         </Grid>
                         <Grid item xs={6} style={{ paddingLeft: 15, marginTop: 5 }}>
-                          {p.address}
+                          {p.ens ? p.ens : p.address}
                         </Grid>
 
                       </Grid>
