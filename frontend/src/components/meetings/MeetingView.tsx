@@ -419,7 +419,8 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id)
+        || cachedMeeting.rsvp.length === cachedMeeting.data.maxParticipants;
     }
 
     const isCancelRSVPButtonDisabled = () => {
@@ -462,6 +463,9 @@ export class MeetingView extends React.Component<IProps, IState> {
     const isCancelButtonDisabled = () => {
       return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.data.isStarted;
     }
+
+    console.log(cachedMeeting.rsvp.length)
+    console.log(cachedMeeting.data.maxParticipants)
 
     return (
       <React.Fragment>
