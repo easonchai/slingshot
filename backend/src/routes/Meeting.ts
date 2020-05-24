@@ -360,4 +360,48 @@ router.put('/feedback', async (req: Request, res: Response, next: NextFunction) 
         .catch(err => next(err));
 });
 
+/**
+ * Update rsvp, attend & withdraw lists both for provided meeting as well as the participant.
+ * 
+ * @params  meetingAddress  The meeting's address to look for.
+ * @params  userAddress     The user's address to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/withdraw', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'withdraw': req.body['userAddress'] },
+                $pull: {
+                    'rsvp': req.body['userAddress'],
+                    'attend': req.body['userAddress']
+                }
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            Models.Item
+                .updateOne(
+                    { _id: req.body['userAddress'], type: ModelType.USER },
+                    {
+                        $push: { 'withdraw': req.body['meetingAddress'] },
+                        $pull: {
+                            'rsvp': req.body['meetingAddress'],
+                            'attend': req.body['meetingAddress']
+                        }
+                    },
+                    { safe: true, upsert: true }
+                )
+                .then(user => {
+                    res
+                        .status(OK)
+                        .json(meeting);
+                })
+                .catch(err => next(err));
+        })
+        .catch(err => next(err));
+});
+
 export default router;

@@ -90,5 +90,17 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, meetingActions.UpdateUserWithdraw)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+        attend: state.user.attend.filter(meeting => meeting !== action.payload.meetingAddress),
+        withdraw: [...state.user.withdraw, action.payload.meetingAddress]
+      }
+    };
+  }
+
   return state;
 }

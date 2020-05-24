@@ -282,5 +282,31 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, actions.UpdateUserWithdraw)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          rsvp: meeting.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
+          attend: meeting.attend.filter(userAddress => userAddress !== action.payload.userAddress),
+          withdraw: [...meeting.withdraw, action.payload.userAddress]
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        rsvp: state.cachedMeeting.rsvp.filter(user => user !== action.payload.userAddress),
+        attend: state.cachedMeeting.attend.filter(user => user !== action.payload.userAddress),
+        withdraw: [...state.cachedMeeting.withdraw, action.payload.userAddress]
+      }
+    };
+  }
+
   return state;
 }

@@ -144,6 +144,19 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
 
     dispatchUpdateHandleCancelMeetingConfirmationLoading: (status: boolean) => {
       dispatch(loadingActions.UpdateCancelMeetingConfirmationLoading(status));
+    },
+
+    dispatchUpdateWithdraw: (meetingAddress: string, userAddress: string) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: userAddress
+      };
+
+      axios
+        .put('/api/meeting/withdraw', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateUserWithdraw(payload));
+        });
     }
   };
 };

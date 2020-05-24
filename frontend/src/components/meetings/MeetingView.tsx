@@ -268,12 +268,14 @@ export class MeetingView extends React.Component<IProps, IState> {
         console.log("success withdraw ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchUpdateWithdraw(this.props.cachedMeeting._id, this.props.user._id);
-        this.props.history.go(0);
+        //this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
+        console.log("withdraw: ", reason);
       })
       .catch((err: any) => {
         this.props.dispatchAddErrorNotification('handleWithdraw: ' + err);
+        console.log("withdraw: ", err);
       });
   }
 
@@ -363,6 +365,20 @@ export class MeetingView extends React.Component<IProps, IState> {
     return `Sorry to see you go!`;
   }
 
+  getWithdrawButtonTooltipText = () => {
+    if (this.props.user.withdraw.includes(this.props.cachedMeeting._id))
+      return `You have already withdrawn.`;
+
+    if (!this.props.cachedMeeting.data.isCancelled && !this.props.cachedMeeting.data.isEnded)
+      return `You can only withdraw from cancelled or ended events.`;
+
+    if (this.props.cachedMeeting.data.isEnded && !this.props.cachedMeeting.data.parent)
+      return `You cannot withdraw from the very first (ended) event in the series.`;
+
+    return `You've earned it!`;
+  }
+
+
   render() {
     const { cachedMeeting } = this.props;
     const { parent, child } = cachedMeeting.data;
@@ -414,8 +430,21 @@ export class MeetingView extends React.Component<IProps, IState> {
       return this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
     }
 
+    const isWithdrawButtonDisabled = () => {
+      if (this.props.user.withdraw.includes(cachedMeeting._id))
+        return true;
+
+      if (this.props.cachedMeeting.data.isCancelled)
+        return false;
+
+      if (this.props.cachedMeeting.data.isEnded && !this.props.cachedMeeting.data.parent)
+        return true;
+
+      return false;
+    }
+
     const isWithdrawButtonVisible = () => {
-      return ((cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled) && !this.props.user.withdraw.includes(cachedMeeting._id)) && cachedMeeting.data.parent;
+      return cachedMeeting.data.isCancelled || cachedMeeting.data.isEnded;
     }
 
     const isUserAnOrganiser = () => {
@@ -542,12 +571,16 @@ export class MeetingView extends React.Component<IProps, IState> {
                                   </Tooltip>
                                 </Grid>
                                 {isWithdrawButtonVisible() ?
-                                  (<Grid item xs={3}>
-                                    <CustButton disabled={cachedMeeting.withdraw.includes(this.props.user._id)}
-                                      size="small" onClick={cachedMeeting.data.isEnded ? this.handleWithdraw : this.handleGetChange}>
-                                      Withdraw
-                                  </CustButton>
-                                  </Grid>)
+                                  <Tooltip title={this.getWithdrawButtonTooltipText()}>
+                                    <span>
+                                      <Grid item xs={3}>
+                                        <CustButton disabled={isWithdrawButtonDisabled()}
+                                          size="small" onClick={cachedMeeting.data.isEnded ? this.handleWithdraw : this.handleGetChange}>
+                                          Withdraw
+                                        </CustButton>
+                                      </Grid>
+                                    </span>
+                                  </Tooltip>
                                   : <div />
                                 }
                               </React.Fragment>)
