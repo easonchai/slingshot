@@ -6,7 +6,7 @@ import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import HomeIcon from '@material-ui/icons/Home';
-import { Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider } from '@material-ui/core';
 import Header from '../Header';
 import { styled } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -15,6 +15,7 @@ import Reviews from '../Reviews';
 import Footer from '../Footer';
 import Pagination from '@material-ui/lab/Pagination';
 import { MediaDisplay } from '../MediaDisplay';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -602,10 +603,10 @@ export class MeetingView extends React.Component<IProps, IState> {
                                   <Grid item xs={12}>
                                     <Typography style={{ fontWeight: "lighter", fontSize: 16, marginTop: 10, marginLeft: 10 }}>
                                       Hey organizer!
-                                </Typography>
+                                    </Typography>
                                     <Typography style={{ fontWeight: "lighter", fontSize: 16, padding: 10 }}>
                                       Check out what you can do!
-                                </Typography>
+                                    </Typography>
                                   </Grid>
                                   <Grid item xs={3} style={{ padding: 10 }}>
                                     <Tooltip title={this.getStartEventButtonTooltipText()}>
@@ -636,39 +637,57 @@ export class MeetingView extends React.Component<IProps, IState> {
                                       <CustButton>New Event</CustButton>
                                     </Link>
                                   </Grid>
-                                  {/** TO DO BUTTON (GOVERNANCE) */}
-                                  <Grid item xs={3} style={{ padding: 10 }}>
-                                    <Tooltip title="Pause Event">
-                                      <span>
-                                        <CustButton
-                                          onClick={() => { console.log("Pause Event") }}>Pause Event</CustButton>
-                                      </span>
-                                    </Tooltip>
-                                  </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
-                                    <Tooltip title={"Event is not paused!"}>
-                                      <span>
-                                        <CustButton disabled={true}
-                                          onClick={() => { console.log("unpause Event") }}>Unpause Event</CustButton>
-                                      </span>
-                                    </Tooltip>
-                                  </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
-                                    <Tooltip title="Create a proposal">
-                                      <span>
-                                        <CustButton
-                                          onClick={() => { console.log("Create proposal") }}>Create Proposal</CustButton>
-                                      </span>
-                                    </Tooltip>
-                                  </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
-                                    <Tooltip title="View proposals">
-                                      <span>
-                                        <CustButton>View Proposals</CustButton>
-                                      </span>
-                                    </Tooltip>
+
+                                  <Grid item xs={12} style={{ marginTop: 10 }}>
+                                    <Divider />
+                                    <ExpansionPanel style={{ boxShadow: 'none' }}>
+                                      <ExpansionPanelSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1a-content"
+                                        id="panel1a-header"
+                                      >
+                                        <Typography style={{ fontWeight: "lighter", fontSize: 16, padding: 10 }}>
+                                          Governance Functions
+                                        </Typography>
+                                      </ExpansionPanelSummary>
+                                      <ExpansionPanelDetails>
+                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                          <Tooltip title="Pause Event">
+                                            <span>
+                                              <CustButton
+                                                onClick={() => { console.log("Pause Event") }}>Pause Event</CustButton>
+                                            </span>
+                                          </Tooltip>
+                                        </Grid>
+                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                          <Tooltip title={"Event is not paused!"}>
+                                            <span>
+                                              <CustButton disabled={true}
+                                                onClick={() => { console.log("unpause Event") }}>Unpause Event</CustButton>
+                                            </span>
+                                          </Tooltip>
+                                        </Grid>
+                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                          <Tooltip title="Create a proposal">
+                                            <span>
+                                              <CustButton
+                                                onClick={() => { console.log("Create proposal") }}>Create Proposal</CustButton>
+                                            </span>
+                                          </Tooltip>
+                                        </Grid>
+                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                          <Tooltip title="View proposals">
+                                            <span>
+                                              <CustButton>View Proposals</CustButton>
+                                            </span>
+                                          </Tooltip>
+                                        </Grid>
+                                      </ExpansionPanelDetails>
+                                    </ExpansionPanel>
                                   </Grid>
                                 </Grid>
+                                {/** TO DO BUTTON (GOVERNANCE) */}
+
                               </Paper><br />
                             </React.Fragment>}
                           <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">

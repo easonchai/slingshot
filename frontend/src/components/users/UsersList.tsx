@@ -146,53 +146,61 @@ export class UsersList extends React.Component<IProps, IState> {
 
           <TabPanel value={this.state.tabIndex} index={'all'}>
             {
-              participants
-                .map(p => {
-                  return (
-                    <span key={p.address}>
-                      <Grid container xs={12} style={{ marginBottom: 15 }}>
-                        {
-                          this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                          <Grid item>
-                            <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
-                              <span>
-                                <AttendanceButton
-                                  disabled={this.isMarkAttendanceButtonDisabled(p.address)}
-                                  onClick={this.handleAttendance}
-                                  value={p.address}
-                                  type="submit">
-                                  MARK ATTENDANCE
+              this.props.loading.rsvpCancellationConfirmation || this.props.loading.rsvpConfirmation ?
+                <Grid container>
+                  <Grid item>
+                    <LoadingSpinner size={16} style={{ marginTop: 5, marginRight: 5 }} />
+                  </Grid>
+                  <Typography style={{ fontWeight: "lighter", fontSize: 12, fontStyle: 'italic' }}>Please wait while the transaction is being mined</Typography>
+                </Grid>
+                :
+                participants
+                  .map(p => {
+                    return (
+                      <span key={p.address}>
+                        <Grid container xs={12} style={{ marginBottom: 15 }}>
+                          {
+                            this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
+                            <Grid item>
+                              <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
+                                <span>
+                                  <AttendanceButton
+                                    disabled={this.isMarkAttendanceButtonDisabled(p.address)}
+                                    onClick={this.handleAttendance}
+                                    value={p.address}
+                                    type="submit">
+                                    MARK ATTENDANCE
                                   </AttendanceButton>
-                              </span>
-                            </Tooltip>
+                                </span>
+                              </Tooltip>
+                            </Grid>
+                          }
+                          <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
+                            <Chip
+                              size="small"
+                              label={p.status}
+                              color="primary"
+                              style={p.status === "RSVP'D" ? { background: '#2094f3' } :
+                                p.status === "ATTENDED" ? { background: "#4cae4f" } :
+                                  p.status === "WITHDRAWN" ? { background: "#ff9900" } : { background: "#f44034" }}
+                              icon={p.status === "RSVP'D" ? <EventSeatIcon /> :
+                                p.status === "ATTENDED" ? <BeenhereIcon /> :
+                                  p.status === "WITHDRAWN" ? <CheckCircleIcon /> : <CancelIcon />}
+                            />
+
                           </Grid>
-                        }
-                        <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
-                          <Chip
-                            size="small"
-                            label={p.status}
-                            color="primary"
-                            style={p.status === "RSVP'D" ? { background: '#2094f3' } :
-                              p.status === "ATTENDED" ? { background: "#4cae4f" } :
-                                p.status === "WITHDRAWN" ? { background: "#ff9900" } : { background: "#f44034" }}
-                            icon={p.status === "RSVP'D" ? <EventSeatIcon /> :
-                              p.status === "ATTENDED" ? <BeenhereIcon /> :
-                                p.status === "WITHDRAWN" ? <CheckCircleIcon /> : <CancelIcon />}
-                          />
+                          <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
+                            <Typography component="div">
+                              <Box fontSize={16} fontWeight="fontWeightLight">
+                                {p.ens ? p.ens : p.address}
+                              </Box>
+                            </Typography>
+                          </Grid>
 
                         </Grid>
-                        <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
-                          <Typography component="div">
-                            <Box fontSize={16} fontWeight="fontWeightLight">
-                              {p.ens ? p.ens : p.address}
-                            </Box>
-                          </Typography>
-                        </Grid>
-
-                      </Grid>
-                    </span>
-                  );
-                })
+                      </span>
+                    );
+                  })
             }
           </TabPanel>
 
