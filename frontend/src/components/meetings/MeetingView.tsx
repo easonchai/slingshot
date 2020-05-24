@@ -374,7 +374,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isWithdrawButtonVisible = () => {
-      return ((cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled) && !this.props.user.withdraw.includes(cachedMeeting._id));
+      return ((cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled) && !this.props.user.withdraw.includes(cachedMeeting._id)) && cachedMeeting.data.parent;
     }
 
     const isUserAnOrganiser = () => {
@@ -404,7 +404,7 @@ export class MeetingView extends React.Component<IProps, IState> {
       //   return state;
       // }, [])
       // return result;
-      return 1;
+      return 0.013;
     }
 
     return (
@@ -552,7 +552,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <Typography component="div"> <br />
                                   <Box fontSize="body2.fontSize">Payout Pool: </Box>
                                   <Box fontSize="body2.fontSize" fontWeight="fontWeightLight">
-                                    {getPayoutPool()}
+                                    {getPayoutPool()} ETH
                                   </Box><br />
                                 </Typography>
                               </Grid>
