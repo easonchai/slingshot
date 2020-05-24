@@ -1,5 +1,5 @@
 import React from 'react';
-import { CardMedia, Grid } from '@material-ui/core';
+import { CardMedia, Grid, Container } from '@material-ui/core';
 import { CardImage } from './meetings/MeetingAdd';
 import { Pagination } from '@material-ui/lab';
 
@@ -41,16 +41,27 @@ export class MediaDisplay extends React.Component<IProps, IState> {
             <Grid>
                 {videoUrl ?
                     <React.Fragment>
-                        {this.state.page === 1 ?
-                            <CardImage
-                                image={imageUrl}
-                            /> :
-                            <video controls width="603" height="339">
-                                <source src={videoUrl} type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                        }
-                        <Pagination count={2} page={this.state.page} onChange={this.handleChange} style={{ marginTop: 5, marginLeft: 200 }} />
+                        <Grid container>
+                            {this.state.page === 1 ?
+                                <Grid item xs={12}>
+                                    <CardImage
+                                        image={imageUrl}
+                                    />
+                                </Grid> :
+                                <Grid item xs={12}>
+                                    <video controls width="603" height="339">
+                                        <source src={videoUrl} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </Grid>
+
+                            }
+                            <Grid item xs={12}>
+                                <Container style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                    <Pagination count={2} page={this.state.page} onChange={this.handleChange} style={{ marginTop: 5, marginLeft: 200 }} />
+                                </Container>
+                            </Grid>
+                        </Grid>
                     </React.Fragment>
                     :
                     <CardImage
