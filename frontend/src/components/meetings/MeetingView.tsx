@@ -516,7 +516,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 </Grid>
                                 {isWithdrawButtonVisible() ?
                                   (<Grid item xs={3}>
-                                    <CustButton size="small" onClick={cachedMeeting.data.isEnded ? this.handleWithdraw : this.handleGetChange}>
+                                    <CustButton disabled={cachedMeeting.withdraw.includes(this.props.user._id)}
+                                      size="small" onClick={cachedMeeting.data.isEnded ? this.handleWithdraw : this.handleGetChange}>
                                       Withdraw
                                   </CustButton>
                                   </Grid>)

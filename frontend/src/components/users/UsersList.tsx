@@ -108,26 +108,25 @@ export class UsersList extends React.Component<IProps, IState> {
       || this.props.cachedMeeting.data.isEnded
   }
 
-  render() {
+  componentDidMount() {
 
+  }
+
+  render() {
     const participants = [
       ...this.props.cachedMeeting.withdraw.map(p => {
-        console.log("ENS Domain Withdraw: " + p)
         return { address: p, status: 'WITHDRAWN' };
       }),
       ...this.props.cachedMeeting.attend.map(p => {
-        console.log("ENS Domain ATTENDED: " + p)
         return { address: p, status: 'ATTENDED' };
       }),
       ...this.props.cachedMeeting.rsvp.map(p => {
         return { address: p, status: `RSVP'D` };
       }),
       ...this.props.cachedMeeting.cancel.map(p => {
-        console.log("ENS Domain CANCELLED: " + p)
         return { address: p, status: 'CANCELLED' };
       })
     ];
-
 
 
     return (
@@ -150,7 +149,7 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map(p => {
                   return (
                     <span key={p.address}>
-                      <Grid container xs={12}>
+                      <Grid container xs={12} style={{ marginBottom: 15 }}>
                         {
                           this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
                           <Grid item>

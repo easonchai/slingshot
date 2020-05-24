@@ -37,6 +37,24 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
+    dispatchHandleWithdraw: (meetingAddress: string, participantAddress: string) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: participantAddress
+      };
+
+      axios
+        .put('/api/meeting/withdraw', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateUserWithdraw(payload));
+        });
+      // axios
+      //   .delete('/api/meeting/attend', payload)
+      //   .then(res => {
+      //     dispatch(meetingActions.UpdateUserWithdraw(payload));
+      //   });
+    },
+
     dispatchAddNotification: (notification: Notification) => {
       dispatch(notificationActions.AddNotification(notification));
     },
