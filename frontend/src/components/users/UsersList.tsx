@@ -9,6 +9,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import BeenhereIcon from '@material-ui/icons/Beenhere';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EventSeatIcon from '@material-ui/icons/EventSeat';
+import { History } from 'history';
 
 const AttendanceButton = styled(Button)({
   backgroundColor: '#FE6B8B',
@@ -27,6 +28,7 @@ const LoadingSpinner = styled(CircularProgress)({
 })
 
 interface IProps {
+  history: History;
   cachedMeeting: Meeting;
   userWallet: string;
   loading: Loading;
@@ -86,6 +88,7 @@ export class UsersList extends React.Component<IProps, IState> {
     )
       .then((res: any) => {
         this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
+        this.props.history.go(0);
       }, (reason: any) => {
         // Code 4001 reflects MetaMask's rejection by user.
         // Hence we don't display it as an error.

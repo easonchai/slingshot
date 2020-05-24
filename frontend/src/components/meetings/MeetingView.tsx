@@ -692,7 +692,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                         </React.Fragment>}
                     </Typography>
 
-                    <UsersList />
+                    <UsersList history={this.props.history} />
                   </Grid>
                   <Grid item xs={1} />
                 </Grid>
