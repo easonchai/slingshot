@@ -3,8 +3,12 @@ import { Meeting } from '../../store/meetings/actions';
 import { Loading } from '../../store/loading/actions';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
-import { AppBar, Button, Container, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress } from '@material-ui/core';
+import { AppBar, Button, Container, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import BeenhereIcon from '@material-ui/icons/Beenhere';
+import CancelIcon from '@material-ui/icons/Cancel';
+import EventSeatIcon from '@material-ui/icons/EventSeat';
 
 const AttendanceButton = styled(Button)({
   backgroundColor: '#FE6B8B',
@@ -104,6 +108,9 @@ export class UsersList extends React.Component<IProps, IState> {
       || this.props.cachedMeeting.data.isEnded
   }
 
+  resolveDomain = (domain: string) => {
+    return domain;
+  }
 
   render() {
     const participants = [
@@ -119,11 +126,7 @@ export class UsersList extends React.Component<IProps, IState> {
 
           <AppBar position="static" style={{ background: 'none', boxShadow: 'none', color: '#ff8140' }}>
             <Tabs value={this.state.tabIndex} onChange={this.handleTabSwitch} aria-label="simple tabs example">
-              <Tab label="ALL" value='all' />
-              <Tab label="RSVP'D" value='rsvp' />
-              <Tab label="CANCELLED" value='cancel' />
-              <Tab label="ATTENDED" value='attend' />
-              <Tab label="WITHDRAWN" value='withdraw' />
+              <Tab label="Participants" value='all' />
             </Tabs>
           </AppBar>
 
@@ -137,33 +140,42 @@ export class UsersList extends React.Component<IProps, IState> {
                 .map(p => {
                   return (
                     <span key={p.address}>
-                      <Container maxWidth="md">
-                        <Grid container xs={12}>
-                          {
-                            this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                            <Grid item xs={4}>
-                              <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
-                                <span>
-                                  <AttendanceButton
-                                    disabled={this.isMarkAttendanceButtonDisabled(p.address)}
-                                    onClick={this.handleAttendance}
-                                    value={p.address}
-                                    type="submit">
-                                    MARK ATTENDANCE
+                      <Grid container xs={12}>
+                        {
+                          this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
+                          <Grid item>
+                            <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
+                              <span>
+                                <AttendanceButton
+                                  disabled={this.isMarkAttendanceButtonDisabled(p.address)}
+                                  onClick={this.handleAttendance}
+                                  value={p.address}
+                                  type="submit">
+                                  MARK ATTENDANCE
                                   </AttendanceButton>
-                                </span>
-                              </Tooltip>
-                            </Grid>
-                          }
-                          <Grid item xs={2}>
-                            {p.status}
+                              </span>
+                            </Tooltip>
                           </Grid>
-                          <Grid item xs={6}>
-                            {p.address}
-                          </Grid>
+                        }
+                        <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
+                          <Chip
+                            size="small"
+                            label={p.status}
+                            color="primary"
+                            style={p.status === "RSVP'D" ? { background: '#2094f3' } :
+                              p.status === "ATTENDED" ? { background: "#4cae4f" } :
+                                p.status === "WITHDRAWN" ? { background: "#ff9900" } : { background: "#f44034" }}
+                            icon={p.status === "RSVP'D" ? <EventSeatIcon /> :
+                              p.status === "ATTENDED" ? <BeenhereIcon /> :
+                                p.status === "WITHDRAWN" ? <CheckCircleIcon /> : <CancelIcon />}
+                          />
 
                         </Grid>
-                      </Container>
+                        <Grid item xs={6} style={{ paddingLeft: 15, marginTop: 5 }}>
+                          {p.address}
+                        </Grid>
+
+                      </Grid>
                     </span>
                   );
                 })
