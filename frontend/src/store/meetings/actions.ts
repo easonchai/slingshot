@@ -12,6 +12,7 @@ export const ModelType = {
 export interface Feedback {
   meetingAddress: string;
   userAddress: string;
+  ensAddress: string;
   comment: string;
   stars: number;
   images: ReadonlyArray<string>;
