@@ -268,7 +268,7 @@ export class MeetingView extends React.Component<IProps, IState> {
         console.log("success withdraw ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchUpdateWithdraw(this.props.cachedMeeting._id, this.props.user._id);
-        //this.props.history.go(0);
+        this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleWithdraw: ' + reason);
         console.log("withdraw: ", reason);
@@ -387,7 +387,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     const started = cachedMeeting.data.isStarted
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
-    const status = started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
+    const status = this.props.loading.meetingDeployment ? "Deploying" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
 
     const prevMeetingAddress = cachedMeeting.data.parent;
     const prevMeeting = this.props.meetings.find(m => {
@@ -532,9 +532,10 @@ export class MeetingView extends React.Component<IProps, IState> {
                           size="small"
                           label={status}
                           color="primary"
-                          style={status === "Active" ? { opacity: 20 } :
-                            status === "Started" ? { background: "#4cae4f" } :
-                              status === "Ended" ? { background: "#ff9900" } : { background: "#f44034" }}
+                          style={status === "Deploying" ? { background: "#2094f3" } :
+                            status === "Active" ? { opacity: 20 } :
+                              status === "Started" ? { background: "#4cae4f" } :
+                                status === "Ended" ? { background: "#ff9900" } : { background: "#f44034" }}
                         />}
                       </Box><br />
                       {/* User actions */}

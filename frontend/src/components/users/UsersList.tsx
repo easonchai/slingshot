@@ -194,9 +194,15 @@ export class UsersList extends React.Component<IProps, IState> {
                           </Grid>
                           <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
                             <Typography component="div">
-                              <Box fontSize={16} fontWeight="fontWeightLight">
-                                {p.ens ? p.ens : p.address}
-                              </Box>
+                              {p.ens ?
+                                <Box fontSize={16} fontWeight="fontWeightLight">
+                                  {p.ens}
+                                </Box>
+                                :
+                                <Box fontSize={14} fontWeight="fontWeightLight">
+                                  {p.address}
+                                </Box>
+                              }
                             </Typography>
                           </Grid>
 
