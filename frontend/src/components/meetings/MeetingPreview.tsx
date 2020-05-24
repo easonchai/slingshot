@@ -65,8 +65,16 @@ export class MeetingPreview extends React.Component<IProps> {
       .then((res: any) => {
         this.props.dispatchUpdateRSVP(this.props.meeting._id, this.props.user._id);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
-        console.error(reason);
+        if (this.etherService.getUserAddress()) {
+          // Code 4001 reflects MetaMask's rejection by user.
+          // Hence we don't display it as an error.
+          if (reason?.code !== 4001) {
+            this.props.dispatchAddErrorNotification('Failed to RSVP: ' + reason);
+            console.error(reason);
+          }
+        } else {
+          this.props.dispatchAddErrorNotification('Please sign in to Metamask to continue');
+        }
       })
       .catch((err: any) => {
         this.props.dispatchAddErrorNotification('Failed to RSVP: ' + err);

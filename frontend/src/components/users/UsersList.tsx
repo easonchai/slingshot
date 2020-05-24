@@ -64,10 +64,16 @@ export class UsersList extends React.Component<IProps, IState> {
       .then((res: any) => {
         this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
       }, (reason: any) => {
-        this.props.dispatchAddErrorNotification('handleAttendance: ' + reason);
+        // Code 4001 reflects MetaMask's rejection by user.
+        // Hence we don't display it as an error.
+        if (reason?.code !== 4001) {
+          this.props.dispatchAddErrorNotification('There was an error marking an attendee: ' + reason);
+          console.error(reason);
+        }
       })
       .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('handleAttendance: ' + err);
+        this.props.dispatchAddErrorNotification('There was an error marking an attendee: ' + err);
+        console.error(err);
       });
   }
 
