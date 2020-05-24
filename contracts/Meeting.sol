@@ -124,7 +124,7 @@ contract Meeting is Ownable {
         require (participant.stakedAmount != 0, 'Guy cancelled'); 
 
         //Check if RSVP'd within 24 hours
-        require(participant.rsvpDate + 1 days > now, "1 day notice");
+        require(participant.rsvpDate + 1> now, "1 day notice"); //days Cooldown removed for demo
         addressToParticipant[msg.sender].stakedAmount = 0;
         msg.sender.transfer(participant.stakedAmount);
         registered--;
@@ -150,7 +150,7 @@ contract Meeting is Ownable {
     }
 
     function finaliseEvent() external onlyOwner duringEvent notPaused{
-        require(now > endDate.add(7 days), 'Cooldown period.');
+        require(now > endDate.add(7), 'Cooldown period.'); //days Cooldown removed for demo
         if (attendanceCount == 0){
             isActive = false;
             eventCancel();
@@ -172,14 +172,15 @@ contract Meeting is Ownable {
     /**@dev Organizer's `edit event` functions */
     function setStartDate(uint dateTimestamp) external onlyOwner notActive notPaused{
         //Check if new date is not within 24 hours of today or less
-        require(dateTimestamp > now.add(24 hours), 'Within 24 hours of event');
+        require(dateTimestamp > now.add(1), 'Within 24 hours of event'); //days Cooldown removed for demo
+        require(dateTimestamp < endDate, 'must start before endDate');
         startDate = dateTimestamp;
         emit EditStartDateEvent(dateTimestamp);
     }
 
     function setEndDate(uint dateTimestamp) external onlyOwner notActive notPaused notCancelled{
         //Check if new date is not within 24 hours of today or less && not before start date
-        require(startDate> now.add(24 hours), 'Within 24 hours of event');
+        require(startDate> now.add(1), 'Within 24 hours of event'); //days Cooldown removed for demo
         require(dateTimestamp > now, 'Cannot set in the past.');
         require(dateTimestamp > startDate, 'End must be after start');
         endDate = dateTimestamp;
@@ -187,7 +188,7 @@ contract Meeting is Ownable {
     }
 
     function setRequiredStake(uint stakeAmt) external onlyOwner notActive notPaused{
-        require(startDate > now.add(24 hours), 'Within 24 hours of event');
+        require(startDate > now.add(1), 'Within 24 hours of event'); //days Cooldown removed for demo
         if (requiredStake < stakeAmt){
             registered = 0; //All participants need to increase stake.
             } 
@@ -213,7 +214,8 @@ contract Meeting is Ownable {
     }
 
     function destroyAndSend() onlyOwner external notPaused{
-        require(now >endDate.add(14 days), 'Within cooldown period');  //Cooldown period 14 days. setEndDate() is limited to prevent early destruction.
+        require(now >endDate.add(14), 'Within cooldown period');  //Cooldown period 14 days. setEndDate() is limited to prevent early destruction.
+        //days Cooldown removed for demo
         selfdestruct(payable(address(club))); //This sends users leftover balances to club contract.
     }
 

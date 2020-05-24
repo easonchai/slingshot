@@ -9,8 +9,9 @@ contract Deployer{
 	Club public club;
 
 	function deploy() external returns(address){
-		club = new Club();
+		club = new Club(msg.sender);
 		emit NewClub(msg.sender, address(club));
 		return address(club);
 	}
 }
+

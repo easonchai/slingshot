@@ -7,8 +7,8 @@ contract Club{
 	using SafeMath for uint;
 
 	event NewMeetingEvent(address ownerAddr, address contractAddr);
-	event ProposalExecuted(address target, address[] addAdmins, address[] removeAdmins);
-	event ProposeAdminChange(address target, address[] addAdmins, address[] removeAdmins);
+	event ProposalExecuted(address payable target, address payable[] addAdmins, address payable[] removeAdmins);
+	event ProposeAdminChange(uint counter, address payable target, address payable[] addAdmins, address payable[] removeAdmins);
 	event ApproveProposal(uint proposal);
 	event PoolPayout(uint amount);
 
@@ -20,8 +20,8 @@ contract Club{
 
 	struct Proposal{
 		address payable target;
-		address[] addAdmins;
-		address[] removeAdmins;
+		address payable[] addAdmins;
+		address payable[] removeAdmins;
 		uint totalInFavour;
 		mapping(address => bool) isInFavour;
 		uint creationTime;
@@ -32,12 +32,12 @@ contract Club{
 	uint public proposalCounter;
 
 	modifier onlyAdmin(){
-		require(isAdmin[msg.sender] == true);
+		require(isAdmin[msg.sender] == true, 'Not admin');
 		_;
 	}
 
-	constructor () public{
-		isAdmin[msg.sender] = true;
+	constructor (address _firstAdmin) public{
+		isAdmin[_firstAdmin] = true;
 		totalAdmins = 1;
 	}
 
@@ -97,7 +97,7 @@ contract Club{
 
 	}
 
-	function proposeAdminChange(address payable _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external onlyAdmin{
+	function proposeAdminChange(address payable _target, address payable[] calldata _addAdmins, address payable[] calldata _removeAdmins) external onlyAdmin{
 		//Store proposal
 		uint counter = ++proposalCounter;
 		
@@ -106,7 +106,7 @@ contract Club{
 		proposal[counter].removeAdmins = _removeAdmins;
 		proposal[counter].creationTime = now;
 		
-		emit ProposeAdminChange(_target, _addAdmins, _removeAdmins);	
+		emit ProposeAdminChange(counter, _target, _addAdmins, _removeAdmins);	
 	}
 
 	function pause(address payable _meeting, uint _pauseUntil) external onlyAdmin {
