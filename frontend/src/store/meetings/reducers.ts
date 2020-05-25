@@ -270,13 +270,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   }
 
   if (isType(action, userActions.CreateUserFeedback)) {
+    let updatedFeedbacks = state.cachedMeeting.data.feedback.slice();
+    updatedFeedbacks.push(action.payload);
+
     return {
       ...state,
       cachedMeeting: {
         ...state.cachedMeeting,
         data: {
           ...state.cachedMeeting.data,
-          feedback: [...state.cachedMeeting.data.feedback, action.payload]
+          feedback: updatedFeedbacks
         }
       }
     };

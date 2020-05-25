@@ -78,13 +78,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
   }
 
   if (isType(action, userActions.CreateUserFeedback)) {
+    let updatedFeedbacks = state.user.data.feedback.slice();
+    updatedFeedbacks.push(action.payload);
+
     return {
       ...state,
       user: {
         ...state.user,
         data: {
           ...state.user.data,
-          feedback: [...state.user.data.feedback, action.payload]
+          feedback: updatedFeedbacks
         }
       }
     };
