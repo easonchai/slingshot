@@ -11,7 +11,7 @@ contract Meeting is Ownable {
 
     uint public startDate;
     uint public endDate;
-    uint public minStake; //should be entered in GWEI by frontend
+    uint public minStake;
     uint public registrationLimit;
     uint public registered;
     uint public prevStake;
@@ -63,7 +63,7 @@ contract Meeting is Ownable {
     }
     
     modifier duringEvent() {
-        require(isActive && !isEnded, "Event not happening");
+        require(isActive && !isEnded, "Event not happening or already happened");
         _;
     }
 
@@ -103,6 +103,7 @@ contract Meeting is Ownable {
     function getChange() external{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(amnt > 0);
+        addressToParticipant[msg.sender].stakedAmount = minStake;
         msg.sender.transfer(amnt.sub(minStake)); //Give change if user has overpaid. This can be done before or after the event.
     
         emit GetChange();
@@ -125,8 +126,8 @@ contract Meeting is Ownable {
 
         //Check if RSVP'd within 24 hours
         require(participant.rsvpDate + 1 days > now, "1 day notice");
-        msg.sender.transfer(participant.stakedAmount);
         addressToParticipant[msg.sender].stakedAmount = 0;
+        msg.sender.transfer(participant.stakedAmount);
         registered--;
         emit GuyCancelled(msg.sender);
     }
@@ -144,7 +145,7 @@ contract Meeting is Ownable {
 
     function startEvent() external onlyOwner notActive notCancelled{
         require(startDate < now && now < endDate, "Can't start out of scope");
-        //Not sure we need but means organiser cannot start event at arbitrary times.
+        //Means organiser cannot start event at arbitrary times.
         isActive = true;
         emit StartEvent(msg.sender); //Maybe not necessary to msg.sender
     }
@@ -159,7 +160,7 @@ contract Meeting is Ownable {
             if (address(meeting) != address(0)){
                 sendStake(address(this).balance.sub(prevStake));
             } 
-            emit EndEvent(msg.sender, attendanceCount); //Maybe not necessary to msg.sender
+            emit EndEvent(msg.sender, attendanceCount);
         }
     }
 
@@ -173,7 +174,8 @@ contract Meeting is Ownable {
 
     function setEndDate(uint dateTimestamp) external onlyOwner notActive{
         //Check if new date is not within 24 hours of today or less && not before start date
-        require(dateTimestamp > now.add(24 hours), 'Within 24 hours of event');
+        require(startDate> now.add(1 days), 'Within 24 hours of event'); //days Cooldown
+        require(dateTimestamp > now, 'Cannot set in the past.');
         require(dateTimestamp > startDate, 'End must be after start');
         endDate = dateTimestamp;
         emit EditEndDateEvent(dateTimestamp);
@@ -190,7 +192,6 @@ contract Meeting is Ownable {
 
     function setRegistrationLimit(uint max) external onlyOwner notActive{
         require(max >= registered, "Cant set less than registered");
-        //Ben: no reason for admin to not be able to lower limit if less than registered I think.
         registrationLimit = max;
         emit EditMaxLimitEvent(max);
     }
@@ -238,6 +239,7 @@ contract Meeting is Ownable {
     }
 
     function destroyAndSend(address payable _recipient) onlyOwner public {
+        require(now >endDate.add(14), 'Within cooldown period');
         selfdestruct(_recipient);
     }
 
