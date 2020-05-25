@@ -67,6 +67,11 @@ const QuickSignIn = styled(Button)({
     color: 'white'
 })
 
+const SponsorButton = styled(Button)({
+    background: 'none',
+    color: 'white'
+})
+
 const BlockAvatar = styled(Blockies)({
     height: "200%",
     width: "200%"
@@ -305,11 +310,11 @@ export default function ProfileBar() {
                                             {user.data?.ensDomain}
                                         </Domain> :
                                         <Link href="https://app.ens.domains/" target="_blank" style={{ textDecoration: 'none' }}>
-                                            <QuickSignIn>
-                                                Get ENS now!
+                                            <SponsorButton>
+                                                Get ENS!
                                             <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ"
-                                                    height={24} width={24} style={{ marginLeft: 7 }}></img>
-                                            </QuickSignIn>
+                                                    height={24} width={24} style={{ marginLeft: 7, border: '3px solid white', background: 'white', borderRadius: 5 }}></img>
+                                            </SponsorButton>
                                         </Link>
                                     :
                                     (
