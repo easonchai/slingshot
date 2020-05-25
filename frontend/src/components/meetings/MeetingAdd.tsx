@@ -213,7 +213,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					isCancelled: false,
 					isStarted: false,
 					isEnded: false,
-					deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+					deployerContractAddress: '0x4b916b0382291C18F69D1B86Ad7d791f15037Cc8',  // TODO: pull dynamically once we will have more versions
 					organizerAddress: this.props.user._id,
 					parent: '',
 					child: '',
@@ -294,7 +294,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						isCancelled: false,
 						isStarted: false,
 						isEnded: false,
-						deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',  // TODO: pull dynamically once we will have more versions
+						deployerContractAddress: '0x4b916b0382291C18F69D1B86Ad7d791f15037Cc8',  // TODO: pull dynamically once we will have more versions
 						organizerAddress: this.props.user._id,
 						parent: this.props.parent,
 						child: '',
