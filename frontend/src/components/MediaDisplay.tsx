@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Container } from '@material-ui/core';
+import { Grid, Container, Box } from '@material-ui/core';
 import { CardImage } from './meetings/MeetingAdd';
 import { Pagination } from '@material-ui/lab';
 
@@ -57,9 +57,9 @@ export class MediaDisplay extends React.Component<IProps, IState> {
 
                             }
                             <Grid item xs={12}>
-                                <Container style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                    <Pagination count={2} page={this.state.page} onChange={this.handleChange} style={{ marginTop: 5, marginLeft: 200 }} />
-                                </Container>
+                                <Box display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                    <Pagination count={2} page={this.state.page} onChange={this.handleChange} style={{ marginTop: 5 }} />
+                                </Box>
                             </Grid>
                         </Grid>
                     </React.Fragment>

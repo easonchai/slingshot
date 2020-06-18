@@ -12,7 +12,6 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import FeedbackForm from '../FeedbackForm';
 import Reviews from '../Reviews';
 import Footer from '../Footer';
-import Pagination from '@material-ui/lab/Pagination';
 import { MediaDisplay } from '../MediaDisplay';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { History } from 'history';
