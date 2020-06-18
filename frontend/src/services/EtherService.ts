@@ -11,6 +11,7 @@ export default class EtherService {
   contractAddress: string;
   deployerABI: Array<string>;
   meetingABI: Array<string>;
+  clubABI: Array<string>;
 
   private static instance: EtherService;
 
@@ -32,8 +33,8 @@ export default class EtherService {
 
     // TODO: can we generate ABI or retrieve it from compiled contract dynamically?
     this.deployerABI = [
-      'event NewMeetingEvent(address ownerAddr, address contractAddr)',
-      'function deploy(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address)'
+      'event NewClub(address admin, address clubAddress)',
+      'function deploy(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address payable)'
     ];
 
     this.meetingABI = [
@@ -44,15 +45,13 @@ export default class EtherService {
       'event WithdrawEvent(address addr, uint payout)',
       'event RSVPEvent(address addr)',
       'event StartEvent(address addr)',
-      'event EndEvent(address addr, uint attendance)',
+      'event EndEvent(address addr, uint attendance, uint meetingPool, uint clubPool)',
       'event SetStakeEvent(uint stake)',
       'event EditStartDateEvent(uint timeStamp)',
       'event EditEndDateEvent(uint timeStamp)',
       'event EditMaxLimitEvent(uint max)',
       'event Refund(address addr, uint refund)',
-      'event NextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit, address _nextMeeting)',
-      'event SetPrevStake(uint prevStake)',
-      'event SendStake(uint _amnt)',
+      'event Pause(uint pausedUntil)',
       'function getChange() external',
       'function eventCancel() external notActive onlyOwner notCancelled',
       'function guyCancel() external notActive notCancelled',
@@ -63,13 +62,32 @@ export default class EtherService {
       'function endEvent() external onlyOwner duringEvent',
       'function setStartDate(uint dateTimestamp) external',
       'function setEndDate(uint dateTimestamp) external',
+      'function finaliseEvent() external',
       'function setMinStake(uint stakeAmt) external',
       'function setRegistrationLimit(uint max) external',
       'function withdraw() external',
       'function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address)',
       'function getBalance() external view returns (uint)',
-      'function setPrevStake(uint _prevStake) external payable'
+      'function setPrevStake(uint _prevStake) external payable',
+      'function destroyAndSend() external',
+      'function pause(uint _pausedUntil) external',
+      'function unPause(address _newOwner) external'
       // ...
+    ];
+
+    this.clubABI = [
+      'event NewMeetingEvent(address ownerAddr, address contractAddr)',
+      'event ProposalExecuted(address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
+      'event ProposeAdminChange(uint counter, address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
+      'event ApproveProposal(uint proposal)',
+      'event PoolPayout(uint amount)',
+      'function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external',
+      'function poolPayout(uint _amount) external',
+      'function getBalance() external view returns (uint)',
+      'function approveProposal(uint _proposal) external',
+      'function executeProposal(uint _proposal) external',
+      'function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external',
+      'function pause(address _meeting, uint _pauseUntil) external'
     ];
   }
 
