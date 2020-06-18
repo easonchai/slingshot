@@ -1,12 +1,10 @@
 import React from 'react';
 import { MeetingList } from '../containers/meetings/MeetingList';
-import {
-  Theme, Grid, Button, Container, Typography, Box, CssBaseline, CardMedia
-} from '@material-ui/core';
+import { Grid, Button, Container, Typography, Box, CssBaseline, CardMedia } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import Header from './Header'
-import { Pagination } from '@material-ui/lab';
+import logo from '../logo/slingshot-colored.svg'
 
 const MyButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -70,7 +68,7 @@ export class Home extends React.Component<IProps> {
           <Hero maxWidth={false}>
             <Grid item container xs={12} alignItems="center" justify="center">
               <Logo
-                image="https://www.siasky.net/MABaGGBZCaCA4y5D8P7MUhfWbRRAZwzjr7va4pwVf1V_VQ"
+                image={logo}
               />
             </Grid>
 

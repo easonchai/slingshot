@@ -10,7 +10,6 @@ import {
 	Button,
 	Container,
 	Grid,
-	TextareaAutosize,
 	TextField,
 	Tooltip,
 	CssBaseline,
@@ -30,7 +29,6 @@ import Footer from '../Footer'
 import IconButton from '@material-ui/core/IconButton';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Videocam from '@material-ui/icons/Videocam';
-import { initState as userDefaultState } from '../../store/users/reducers';
 
 export const Hero = styled(Container)({
 	margin: 0,
@@ -576,9 +574,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 
 							{/* Image / Video upload Section */}
 							<Grid container spacing={3} >
-								<Grid item container xs={6} alignItems="center" justify="center">
+								<Grid item container xs={12} lg={6} alignItems="center" justify="center">
 									<Grid item xs={3} />
-									<UploadGrid item xs={6}>
+									<UploadGrid item xs={12} lg={6}>
 										<Tooltip title={this.getUploadButtonTooltipText()}>
 											<Container>
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
@@ -611,9 +609,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 										}
 									</Grid>
 								</Grid>
-								<Grid item container xs={6}>
+								<Grid item container xs={12} lg={6}>
 									<Grid item xs={3} />
-									<UploadGrid item xs={6}>
+									<UploadGrid item xs={12} lg={6}>
 										<Tooltip title={this.getUploadButtonTooltipText()}>
 											<Container>
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>

@@ -1,11 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Meeting } from '../../store/meetings/actions';
 import { MeetingPreview } from '../../containers/meetings/MeetingPreview';
-import { Grid, Container } from '@material-ui/core';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { Card, CardContent, CardActions } from '@material-ui/core';
-import { styled } from '@material-ui/core/styles';
+import { Grid, Box } from '@material-ui/core';
 
 interface IProps {
   meetings: Array<Meeting>;
@@ -15,10 +11,6 @@ interface IProps {
 interface IState {
   page: number
 }
-
-const Test = styled(Grid)({
-  border: '3px solid black'
-})
 
 export class MeetingList extends React.Component<IProps, IState> {
   render() {
@@ -38,8 +30,10 @@ export class MeetingList extends React.Component<IProps, IState> {
             (
               meetings.map((meeting) => {
                 return (
-                  <Grid item key={meeting._id} xs={3}>
-                    <MeetingPreview key={meeting._id} meeting={meeting} />
+                  <Grid item key={meeting._id} xs={12} sm={6} md={4} lg={3}>
+                    <Box display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+                      <MeetingPreview key={meeting._id} meeting={meeting} />
+                    </Box>
                   </Grid>
                 );
               })

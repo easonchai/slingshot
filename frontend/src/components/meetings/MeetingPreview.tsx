@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Meeting } from '../../store/meetings/actions';
-import { Card, CardContent, CardHeader, IconButton, Typography, CardActions, Button, Container, CircularProgress, CardMedia } from '@material-ui/core';
+import { Card, CardContent, CardHeader, Typography, CardActions, Button, CircularProgress, CardMedia } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
-import ShareIcon from "@material-ui/icons/Share";
 import SharePopup from "../SharePopup"
 import EtherService from '../../services/EtherService';
 import { User } from '../../store/users/actions';
@@ -20,13 +19,13 @@ const CustButton = styled(Button)({
 });
 
 const DisplayCard = styled(Card)({
-  maxWidth: 280,
-  minHeight: 300,
-  maxHeight: 400,
+  minWidth: 288,
+  minHeight: 400,
 })
 
 const CardImage = styled(CardMedia)({
   paddingTop: '56.25%',
+  minHeight: 167,
 })
 
 const Stake = styled(Typography)({
@@ -113,6 +112,7 @@ export class MeetingPreview extends React.Component<IProps> {
           titleTypographyProps={{ variant: 'h6' }}
           subheader={date}
           subheaderTypographyProps={{ variant: 'caption' }}
+          style={{ minHeight: 115 }}
         />
         <Link style={{ textDecoration: 'none' }} to={url}>
           {

@@ -7,26 +7,18 @@ import EtherService from '../services/EtherService';
 import { actions as userActions, User } from '../store/users/actions';
 import { actions as meetingActions } from '../store/meetings/actions';
 import { actions as notificationActions, Notification } from '../store/notifications/actions';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
+import {
+    AppBar, Toolbar, IconButton, Dialog, DialogContent,
+    DialogTitle, Slide, styled, Grid, Typography, Button, Box, Divider, Container, Paper, Link, Tooltip
+} from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Slide from '@material-ui/core/Slide';
-import { TransitionProps } from '@material-ui/core/transitions';
-import { styled } from '@material-ui/core/styles';
-import { Grid, Typography, Button, Box, Divider, Container, Paper, Link, Tooltip, CardMedia } from '@material-ui/core';
-import LockIcon from '@material-ui/icons/Lock';
+import { TransitionProps } from '@material-ui/core/transitions'; import LockIcon from '@material-ui/icons/Lock';
 import CloseIcon from '@material-ui/icons/Close';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import Blockies from 'react-blockies'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import { Meeting } from '../store/meetings/actions';
 import { initState as userDefaultState } from '../store/users/reducers';
+// import logo from '../logo/slingshot-white.svg';
 
 const TopBar = styled(AppBar)({
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -291,10 +283,9 @@ export default function ProfileBar() {
                 <Toolbar>
                     <Grid container>
                         <Grid item xs={3} container>
-                            <Link href="/" style={{ textDecoration: 'none' }}>
-                                <CardMedia style={{ alignItems: 'center', justifyContent: 'center', height: 48, width: 48, color: 'white' }}
-                                    image="https://www.siasky.net/KACEhRdglW80DQ_rxo-tGken1lzV8kfh5sY4G0W_b3kMEA"
-                                /></Link>
+                            {/* <Link href="/" style={{ textDecoration: 'none' }}>
+                                <img src={logo} width={46} />
+                            </Link> */}
                             <Link href="/" style={{ textDecoration: 'none' }}>
                                 <Typography component="h1" variant="h2" align="center" style={{ color: 'white', fontSize: 24, marginTop: 8, marginLeft: 6 }}>
                                     Slingshot
@@ -312,7 +303,7 @@ export default function ProfileBar() {
                                         <Link href="https://app.ens.domains/" target="_blank" style={{ textDecoration: 'none' }}>
                                             <SponsorButton>
                                                 Get ENS!
-                                            <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ"
+                                            <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ" alt="ENS Logo"
                                                     height={24} width={24} style={{ marginLeft: 7, border: '3px solid white', background: 'white', borderRadius: 5 }}></img>
                                             </SponsorButton>
                                         </Link>
@@ -396,7 +387,7 @@ export default function ProfileBar() {
                                                             <Container>
                                                                 <Grid container>
                                                                     <Grid item style={{ marginTop: 8, padding: 10 }}>
-                                                                        <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ"
+                                                                        <img src="https://www.siasky.net/AAD-CBTOGoG6kpMsNBnSS585Yaqmjk2jjZazFZ9Ja7mphQ" alt="ENS Logo"
                                                                             height={32} width={32}></img>
                                                                     </Grid>
                                                                     <Grid item>
@@ -417,7 +408,7 @@ export default function ProfileBar() {
                                                     <Box fontSize={24} fontWeight="fontWeightLight" lineHeight={3}>
                                                         Powered by
                                                     </Box>
-                                                    <img src="https://www.siasky.net/EABxJkl542vXYjkUM2EZyJXKjcGJRzU7jDSGLtcfUoD9zw"
+                                                    <img src="https://www.siasky.net/EABxJkl542vXYjkUM2EZyJXKjcGJRzU7jDSGLtcfUoD9zw" alt="ENS Logo"
                                                         height={108} width={108} style={{ marginLeft: 7 }}></img>
                                                 </Container>
                                             </Typography>
