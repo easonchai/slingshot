@@ -459,9 +459,6 @@ export class MeetingView extends React.Component<IProps, IState> {
       return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.data.isStarted;
     }
 
-    console.log(cachedMeeting.rsvp.length)
-    console.log(cachedMeeting.data.maxParticipants)
-
     return (
       <React.Fragment>
         <CssBaseline />
@@ -677,28 +674,30 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         </Typography>
                                       </ExpansionPanelSummary>
                                       <ExpansionPanelDetails>
-                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                          <Tooltip title="Pause Event">
-                                            <CustButton
-                                              onClick={() => { console.log("Pause Event") }}>Pause Event</CustButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                          <Tooltip title={"Event is not paused!"}>
-                                            <CustButton disabled={true}
-                                              onClick={() => { console.log("unpause Event") }}>Unpause Event</CustButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                          <Tooltip title="Create a proposal">
-                                            <CustButton
-                                              onClick={() => { console.log("Create proposal") }}>Create Proposal</CustButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                          <Tooltip title="View proposals">
-                                            <CustButton>View Proposals</CustButton>
-                                          </Tooltip>
+                                        <Grid container>
+                                          <Grid item md={6} lg={3} style={{ padding: 10 }}>
+                                            <Tooltip title="Pause Event">
+                                              <CustButton
+                                                onClick={() => { console.log("Pause Event") }}>Pause Event</CustButton>
+                                            </Tooltip>
+                                          </Grid>
+                                          <Grid item md={6} lg={3} style={{ padding: 10 }}>
+                                            <Tooltip title={"Event is not paused!"}>
+                                              <CustButton disabled={true}
+                                                onClick={() => { console.log("unpause Event") }}>Unpause Event</CustButton>
+                                            </Tooltip>
+                                          </Grid>
+                                          <Grid item md={6} lg={3} style={{ padding: 10 }}>
+                                            <Tooltip title="Create a proposal">
+                                              <CustButton
+                                                onClick={() => { console.log("Create proposal") }}>Create Proposal</CustButton>
+                                            </Tooltip>
+                                          </Grid>
+                                          <Grid item md={6} lg={3} style={{ padding: 10 }}>
+                                            <Tooltip title="View proposals">
+                                              <CustButton>View Proposals</CustButton>
+                                            </Tooltip>
+                                          </Grid>
                                         </Grid>
                                       </ExpansionPanelDetails>
                                     </ExpansionPanel>

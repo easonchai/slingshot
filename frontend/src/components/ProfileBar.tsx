@@ -364,11 +364,13 @@ export default function ProfileBar() {
                                                                         />
                                                                     </Grid>
                                                                     <Grid item>
-                                                                        <Box flexWrap="wrap" fontSize={20} fontWeight="500" lineHeight={3} style={{ marginTop: 5, marginLeft: 10 }}>
-                                                                            {user._id || (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
-                                                                                Click to sign in to MetaMask to link your account.
-                                                                            </AddressButton>)}
-                                                                        </Box>
+                                                                        <div style={window.innerWidth <= 480 ? { overflow: "hidden", textOverflow: "ellipsis", width: '11rem' } : { overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                                            <Box flexWrap="wrap" fontSize={20} fontWeight="500" lineHeight={3} style={{ marginTop: 5, marginLeft: 10 }}>
+                                                                                {user._id || (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
+                                                                                    Click to sign in to MetaMask to link your account.
+                                                                                </AddressButton>)}
+                                                                            </Box>
+                                                                        </div>
                                                                     </Grid>
                                                                 </Grid>
                                                             </Container>
