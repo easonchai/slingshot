@@ -10,10 +10,10 @@ contract Ownable {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor () internal {
-        _owner = tx.origin;
+    constructor (address owner) internal {
+        _owner = owner;
         _club = msg.sender;
-        emit OwnershipTransferred(address(0), tx.origin);
+        emit OwnershipTransferred(address(0), owner);
     }
 
     /**

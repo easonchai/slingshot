@@ -47,7 +47,7 @@ contract Club{
 	function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin returns(address) {
 		require(now < _startDate, 'Event in past');
 		require(_startDate < _endDate, 'End before start');
-		address meeting = address(new Meeting(_startDate, _endDate, _minStake, _registrationLimit));
+		address meeting = address(new Meeting(_startDate, _endDate, _minStake, _registrationLimit, msg.sender));
 		isMeeting[meeting] = true;
 		emit NewMeetingEvent(msg.sender, meeting);
 		return meeting;

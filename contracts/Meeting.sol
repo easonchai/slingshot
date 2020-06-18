@@ -77,7 +77,7 @@ contract Meeting is Ownable {
      */
 
     constructor (
-        uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit) public {
+        uint _startDate, uint _endDate, uint _requiredStake, uint _registrationLimit, address owner) Ownable(owner) public {
         startDate = _startDate;
         endDate = _endDate;
         requiredStake = _requiredStake;
