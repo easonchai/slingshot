@@ -1,6 +1,5 @@
 import React from 'react';
 import { Home } from './../containers/Home';
-import { Container } from '@material-ui/core';
 
 interface IProps {
 }

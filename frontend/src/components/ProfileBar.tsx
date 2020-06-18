@@ -64,11 +64,6 @@ const SponsorButton = styled(Button)({
     color: 'white'
 })
 
-const BlockAvatar = styled(Blockies)({
-    height: "200%",
-    width: "200%"
-})
-
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
     ref: React.Ref<unknown>,
@@ -346,8 +341,10 @@ export default function ProfileBar() {
                                 </StyledDialogTitle>
                                 <DialogContent dividers>
 
+                                    {/* Page details */}
                                     <Grid container>
-                                        <Grid item xs={5}>
+                                        <Grid item xs={1} />
+                                        <Grid item xs={10} lg={5}>
                                             <Typography component="div">
                                                 <Typography variant="h6" color="textPrimary">
                                                     Account Details
@@ -358,7 +355,7 @@ export default function ProfileBar() {
                                                 </Box>
                                                 <Link href={user._id ? "https://rinkeby.etherscan.io/address/" + user._id : "#"} style={{ textDecoration: 'none' }} target="_blank">
                                                     <Tooltip title={user._id ? "Click to view on Etherscan" : "Sign In"} aria-label="visit etherscan" placement="bottom">
-                                                        <Paper style={{ marginBottom: 20 }} elevation={3}>
+                                                        <Paper style={{ marginBottom: 20, textOverflow: "ellipsis" }} elevation={3}>
                                                             <Container>
                                                                 <Grid container>
                                                                     <Grid item style={{ marginTop: 8, padding: 10 }}>
@@ -367,7 +364,7 @@ export default function ProfileBar() {
                                                                         />
                                                                     </Grid>
                                                                     <Grid item>
-                                                                        <Box fontSize={20} fontWeight="500" lineHeight={3} style={{ marginTop: 5, marginLeft: 10 }}>
+                                                                        <Box flexWrap="wrap" fontSize={20} fontWeight="500" lineHeight={3} style={{ marginTop: 5, marginLeft: 10 }}>
                                                                             {user._id || (<AddressButton endIcon={<SignInIcon />} onClick={signIn}>
                                                                                 Click to sign in to MetaMask to link your account.
                                                                             </AddressButton>)}
@@ -404,7 +401,7 @@ export default function ProfileBar() {
                                                     </Tooltip>
                                                 </Link>
                                                 <br />
-                                                <Container>
+                                                <Container style={{ marginBottom: 30 }}>
                                                     <Box fontSize={24} fontWeight="fontWeightLight" lineHeight={3}>
                                                         Powered by
                                                     </Box>
@@ -414,7 +411,7 @@ export default function ProfileBar() {
                                             </Typography>
                                         </Grid>
                                         <Grid item xs={1} />
-                                        <Grid item xs={4}>
+                                        <Grid item xs={12} lg={5}>
                                             <Container>
                                                 <Typography component="div">
                                                     <Typography variant="h6" color="textPrimary">

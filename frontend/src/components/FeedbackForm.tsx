@@ -11,7 +11,7 @@ import {
     LinearProgress,
     TextField,
     Tooltip,
-    Typography,
+    Typography, Box
 } from '@material-ui/core';
 import Rating from '@material-ui/lab/Rating';
 import { PhotoCamera, Videocam } from '@material-ui/icons';
@@ -211,7 +211,8 @@ export default function FeedbackForm() {
                         </Grid>
                         <Grid item container xs={12} alignItems="flex-end" justify="center">
                             <Grid item container xs={12} alignItems="center" justify="center">
-                                <img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" height={64} width={64} style={{ marginTop: 5, alignItems: 'center', justifyContent: 'center' }} />
+                                <img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" alt="Sia logo"
+                                    height={64} width={64} style={{ marginTop: 5, alignItems: 'center', justifyContent: 'center' }} />
                             </Grid>
                             <Grid item>
                                 <SponsorMessage variant="subtitle1" align="center" paragraph>
@@ -230,69 +231,72 @@ export default function FeedbackForm() {
                         {/* TODO: refactor with MeetingAdd */}
                         <Grid container spacing={3} >
                             <Grid item container xs={6} alignItems="center" justify="center">
-                                <Grid item xs={3} />
-                                <UploadGrid item xs={6}>
+                                <Grid item xs={1} sm={2} md={3} />
+                                <UploadGrid item xs={10} sm={8} md={6} style={{ alignItems: 'center', justifyContent: 'center' }}>
                                     <Tooltip title={getUploadButtonTooltipText()}>
                                         <Container>
                                             <UploadText variant="body2" align="center" color="textSecondary" paragraph>
                                                 Upload an image
 												</UploadText>
-                                            <UploadButton
-                                                disabled={isUploadImageButtonDisabled()}
-                                                inputProps={
-                                                    {
-                                                        accept: "image/*"
+                                            <Box display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                                <UploadButton
+                                                    disabled={isUploadImageButtonDisabled()}
+                                                    inputProps={
+                                                        {
+                                                            accept: "image/*"
+                                                        }
                                                     }
-                                                }
-                                                id="icon-button-photo"
-                                                onChange={handleCaptureImage}
-                                                type="file"
-                                            />
-                                            <label htmlFor="icon-button-photo">
-                                                <IconButton color="secondary" style={{ marginLeft: 45 }} component="span">
-                                                    <PhotoCamera fontSize="large" />
-                                                </IconButton>
-                                            </label>
-
+                                                    id="icon-button-photo"
+                                                    onChange={handleCaptureImage}
+                                                    type="file"
+                                                />
+                                                <label htmlFor="icon-button-photo">
+                                                    <IconButton color="secondary" component="span">
+                                                        <PhotoCamera fontSize="large" />
+                                                    </IconButton>
+                                                </label>
+                                            </Box>
                                         </Container>
                                     </Tooltip>
                                 </UploadGrid>
-                                <Grid item xs={3} />
+                                <Grid item xs={1} sm={2} md={3} />
                                 <Grid item xs={12}>
                                     {
                                         loadingImage && <CircularProgress color="secondary" />
                                     }
                                 </Grid>
                             </Grid>
-                            <Grid item container xs={6}>
-                                <Grid item xs={3} />
-                                <UploadGrid item xs={6}>
+                            <Grid item container xs={6} alignItems="center" justify="center">
+                                <Grid item xs={1} sm={2} md={3} />
+                                <UploadGrid item xs={10} sm={8} md={6}>
                                     <Tooltip title={getUploadButtonTooltipText()}>
                                         <Container>
                                             <UploadText variant="body2" align="center" color="textSecondary" paragraph>
                                                 Upload a video
 												</UploadText>
-                                            <UploadButton
-                                                disabled={isUploadVideoButtonDisabled()}
-                                                inputProps={
-                                                    {
-                                                        accept: "video/*",
-                                                        capture: "camcorder"
+                                            <Box display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                                <UploadButton
+                                                    disabled={isUploadVideoButtonDisabled()}
+                                                    inputProps={
+                                                        {
+                                                            accept: "video/*",
+                                                            capture: "camcorder"
+                                                        }
                                                     }
-                                                }
-                                                id="icon-button-video"
-                                                onChange={handleCaptureVideo}
-                                                type="file"
-                                            />
-                                            <label htmlFor="icon-button-video">
-                                                <IconButton color="secondary" component="span" style={{ marginLeft: 45 }}>
-                                                    <Videocam fontSize="large" />
-                                                </IconButton>
-                                            </label>
+                                                    id="icon-button-video"
+                                                    onChange={handleCaptureVideo}
+                                                    type="file"
+                                                />
+                                                <label htmlFor="icon-button-video">
+                                                    <IconButton color="secondary" component="span">
+                                                        <Videocam fontSize="large" />
+                                                    </IconButton>
+                                                </label>
+                                            </Box>
                                         </Container>
                                     </Tooltip>
                                 </UploadGrid>
-                                <Grid item xs={3} />
+                                <Grid item xs={1} sm={2} md={3} />
                                 <Grid item xs={12}>
                                     {
                                         loadingVideo && <CircularProgress color="secondary" />

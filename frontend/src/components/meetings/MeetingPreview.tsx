@@ -95,12 +95,12 @@ export class MeetingPreview extends React.Component<IProps> {
           : 'nAGUnU56g96yjdeMpjHnh37LXnIDGWw2pCyb4--wGdy1FQ'
       )
 
-    const videoUrl = 'https://siasky.net/' +
-      (
-        this.props.meeting.data.videos.length
-          ? this.props.meeting.data.videos[0]
-          : 'AABFq923X6YAKtadoqauChu8aWnn5PWg7AtokrCvFBaMrw'
-      )
+    // const videoUrl = 'https://siasky.net/' +
+    //   (
+    //     this.props.meeting.data.videos.length
+    //       ? this.props.meeting.data.videos[0]
+    //       : 'AABFq923X6YAKtadoqauChu8aWnn5PWg7AtokrCvFBaMrw'
+    //   )
 
     return (
       <DisplayCard raised={true} className="meeting-preview">

@@ -18,7 +18,7 @@ import {
 	Input,
 	CircularProgress,
 	CardMedia,
-	LinearProgress
+	LinearProgress, Box
 } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
@@ -552,7 +552,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						<Container maxWidth="md">
 							<Grid item container xs={12} alignItems="flex-end" justify="center">
 								<Grid item container xs={12} alignItems="center" justify="center">
-									<img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" height={64} width={64} style={{ alignItems: 'center', justifyContent: 'center' }} />
+									<img src="https://www.siasky.net/AAAwORAbUuPv2ipKHVM2yxU-t808Kmx1PVuS6CJnENtIig" alt="Sia Logo"
+										height={64} width={64} style={{ alignItems: 'center', justifyContent: 'center' }} />
 								</Grid>
 								<Grid item>
 									<SponsorMessage variant="subtitle1" align="center" paragraph>
@@ -574,70 +575,73 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 
 							{/* Image / Video upload Section */}
 							<Grid container spacing={3} >
-								<Grid item container xs={12} lg={6} alignItems="center" justify="center">
-									<Grid item xs={3} />
-									<UploadGrid item xs={12} lg={6}>
+								<Grid item container xs={6} alignItems="center" justify="center">
+									<Grid item xs={1} sm={2} md={3} />
+									<UploadGrid item xs={10} sm={8} md={6} style={{ alignItems: 'center', justifyContent: 'center' }}>
 										<Tooltip title={this.getUploadButtonTooltipText()}>
 											<Container>
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
 													Upload an image
 												</UploadText>
-												<UploadButton
-													disabled={this.isUploadImageButtonDisabled()}
-													inputProps={
-														{
-															accept: "image/*"
+												<Box display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+													<UploadButton
+														disabled={this.isUploadImageButtonDisabled()}
+														inputProps={
+															{
+																accept: "image/*"
+															}
 														}
-													}
-													id="icon-button-photo"
-													onChange={this.handleCaptureImage}
-													type="file"
-												/>
-												<label htmlFor="icon-button-photo">
-													<IconButton color="secondary" style={{ marginLeft: 45 }} component="span">
-														<PhotoCamera fontSize="large" />
-													</IconButton>
-												</label>
-
+														id="icon-button-photo"
+														onChange={this.handleCaptureImage}
+														type="file"
+													/>
+													<label htmlFor="icon-button-photo">
+														<IconButton color="secondary" component="span">
+															<PhotoCamera fontSize="large" />
+														</IconButton>
+													</label>
+												</Box>
 											</Container>
 										</Tooltip>
 									</UploadGrid>
-									<Grid item xs={3} />
+									<Grid item xs={1} sm={2} md={3} />
 									<Grid item xs={12}>
 										{
 											this.state.loadingImage && <CircularProgress color="secondary" />
 										}
 									</Grid>
 								</Grid>
-								<Grid item container xs={12} lg={6}>
-									<Grid item xs={3} />
-									<UploadGrid item xs={12} lg={6}>
+								<Grid item container xs={6} alignItems="center" justify="center">
+									<Grid item xs={1} sm={2} md={3} />
+									<UploadGrid item xs={10} sm={8} md={6}>
 										<Tooltip title={this.getUploadButtonTooltipText()}>
 											<Container>
 												<UploadText variant="body2" align="center" color="textSecondary" paragraph>
 													Upload a video
 												</UploadText>
-												<UploadButton
-													disabled={this.isUploadVideoButtonDisabled()}
-													inputProps={
-														{
-															accept: "video/*",
-															capture: "camcorder"
+												<Box display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+													<UploadButton
+														disabled={this.isUploadVideoButtonDisabled()}
+														inputProps={
+															{
+																accept: "video/*",
+																capture: "camcorder"
+															}
 														}
-													}
-													id="icon-button-video"
-													onChange={this.handleCaptureVideo}
-													type="file"
-												/>
-												<label htmlFor="icon-button-video">
-													<IconButton color="secondary" component="span" style={{ marginLeft: 45 }}>
-														<Videocam fontSize="large" />
-													</IconButton>
-												</label>
+														id="icon-button-video"
+														onChange={this.handleCaptureVideo}
+														type="file"
+													/>
+													<label htmlFor="icon-button-video">
+														<IconButton color="secondary" component="span">
+															<Videocam fontSize="large" />
+														</IconButton>
+													</label>
+												</Box>
 											</Container>
 										</Tooltip>
 									</UploadGrid>
-									<Grid item xs={3} />
+									<Grid item xs={1} sm={2} md={3} />
 									<Grid item xs={12}>
 										{
 											this.state.loadingVideo && <CircularProgress color="secondary" />
@@ -701,7 +705,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											variant="outlined"
 										/>
 									</Grid>
-									<Grid item xs={3}>
+									<Grid item xs={5} md={3}>
 										<TextField
 											required
 											id="stake"
@@ -718,8 +722,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											defaultValue={cachedMeeting.data.stake}
 										/>
 									</Grid>
-									<Grid item xs={1} />
-									<Grid item xs={3}>
+									<Grid item xs={2} md={1} />
+									<Grid item xs={5} md={3}>
 										<TextField
 											required
 											id="maxParticipants"
@@ -732,8 +736,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 											defaultValue={cachedMeeting.data.maxParticipants}
 										/>
 									</Grid>
-									<Grid item xs={1} />
-									<Grid item xs={4}>
+									<Grid item md={1} />
+									<Grid item xs={12} md={4}>
 										<TextField
 											fullWidth
 											variant="outlined"
@@ -754,7 +758,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									</Grid>
 
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
-										<Grid item xs={3}>
+										<Grid item xs={6} md={3}>
 											<KeyboardDatePicker
 												required
 												disableToolbar
@@ -770,7 +774,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 												}}
 											/>
 										</Grid>
-										<Grid item xs={3}>
+										<Grid item xs={6} md={3}>
 											<KeyboardTimePicker
 												required
 												margin="normal"
@@ -783,7 +787,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 												}}
 											/>
 										</Grid>
-										<Grid item xs={3}>
+										<Grid item xs={6} md={3}>
 											<KeyboardDatePicker
 												required
 												disableToolbar
@@ -799,7 +803,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 												}}
 											/>
 										</Grid>
-										<Grid item xs={3}>
+										<Grid item xs={6} md={3}>
 											<KeyboardTimePicker
 												required
 												margin="normal"
@@ -826,13 +830,13 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 									</Grid>
 
 									<Grid item container xs={12}>
-										<Grid item xs={4} />
-										<Grid item xs={2} alignItems="center" justify="center">
+										<Grid item sm={1} md={3} />
+										<Grid item xs={6} sm={5} md={3} alignItems="center" justify="center">
 											<Link style={{ textDecoration: 'none' }} to={'/'}>
 												<MyButton>CANCEL</MyButton>
 											</Link>
 										</Grid>
-										<Grid item xs={2} alignItems="center" justify="center">
+										<Grid item xs={6} sm={5} md={3} alignItems="center" justify="center">
 											<Tooltip title={this.getFormButtonTooltipText()}>
 												<span>
 													<MyButton disabled={this.isFormButtonDisabled()} type="submit"
@@ -844,7 +848,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 												</span>
 											</Tooltip>
 										</Grid>
-										<Grid item xs={4} />
+										<Grid item sm={1} md={3} />
 									</Grid>
 								</Grid>
 							</form>

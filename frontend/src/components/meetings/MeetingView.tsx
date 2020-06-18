@@ -5,8 +5,7 @@ import { User } from '../../store/users/actions';
 import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
-import HomeIcon from '@material-ui/icons/Home';
-import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Container, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider } from '@material-ui/core';
 import Header from '../Header';
 import { styled } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -29,10 +28,6 @@ const Center = styled(Box)({
 
 const LoadingSpinner = styled(CircularProgress)({
   color: '#FF8E53'
-})
-
-const CardImage = styled(CardMedia)({
-  paddingTop: '56.25%',
 })
 
 const CustButton = styled(Button)({
@@ -480,7 +475,7 @@ export class MeetingView extends React.Component<IProps, IState> {
             (
               <Grid container>
                 <Grid item xs={12}><br /></Grid>
-                <Grid item container xs={6}>
+                <Grid item container xs={12} md={6}>
                   <Grid item xs={1} />
                   <Grid item xs={10}>
                     <Link to='/' style={{ textDecoration: "none" }}>
@@ -528,7 +523,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                   <Grid item xs={1} />
                 </Grid>
                 {/**RIGHT SIDE */}
-                <Grid item container xs={6}>
+                <Grid item container xs={12} md={6}>
+                  <Grid item xs={1} />
                   <Grid item xs={10}>
                     <Typography component="div"><br />
                       <Box fontSize={18} fontWeight="medium">
@@ -545,8 +541,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                       {/* User actions */}
                       {this.props.loading.meetingDeployment ||
                         <React.Fragment>
-                          <Grid item container style={{ padding: 10, marginLeft: 15 }}>
-                            <Grid item xs={3}>
+                          <Grid item container style={{ padding: 10 }}>
+                            <Grid item xs={6} sm={4}>
                               <Tooltip title={this.getRSVPButtonTooltipText()}>
                                 <span>
                                   <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
@@ -563,7 +559,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                             </Grid>
                             {isUserPartOfMeeting() ?
                               (<React.Fragment>
-                                <Grid item xs={3}>
+                                <Grid item xs={6} sm={4}>
                                   <Tooltip title={this.getCancelRsvpButtonTooltipText()}>
                                     <span>
                                       <CustButton
@@ -578,7 +574,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 {isWithdrawButtonVisible() ?
                                   <Tooltip title={this.getWithdrawButtonTooltipText()}>
                                     <span>
-                                      <Grid item xs={3}>
+                                      <Grid item xs={6} sm={4}>
                                         <CustButton disabled={isWithdrawButtonDisabled()}
                                           size="small" onClick={cachedMeeting.data.isEnded ? this.handleWithdraw : this.handleGetChange}>
                                           Withdraw
@@ -644,31 +640,25 @@ export class MeetingView extends React.Component<IProps, IState> {
                                       Check out what you can do!
                                     </Typography>
                                   </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                  <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                     <Tooltip title={this.getStartEventButtonTooltipText()}>
-                                      <span>
-                                        <CustButton disabled={isStartButtonDisabled()}
-                                          onClick={this.handleStart}>Start Event</CustButton>
-                                      </span>
+                                      <CustButton disabled={isStartButtonDisabled()}
+                                        onClick={this.handleStart}>Start Event</CustButton>
                                     </Tooltip>
                                   </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                  <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                     <Tooltip title={this.getEndEventButtonTooltipText()}>
-                                      <span>
-                                        <CustButton disabled={isEndButtonDisabled()}
-                                          onClick={this.handleEnd}>End Event</CustButton>
-                                      </span>
+                                      <CustButton disabled={isEndButtonDisabled()}
+                                        onClick={this.handleEnd}>End Event</CustButton>
                                     </Tooltip>
                                   </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                  <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                     <Tooltip title={this.getCancelEventButtonTooltipText()}>
-                                      <span>
-                                        <CustButton disabled={isCancelButtonDisabled()}
-                                          onClick={this.handleCancelEvent}>Cancel Event</CustButton>
-                                      </span>
+                                      <CustButton disabled={isCancelButtonDisabled()}
+                                        onClick={this.handleCancelEvent}>Cancel Event</CustButton>
                                     </Tooltip>
                                   </Grid>
-                                  <Grid item xs={3} style={{ padding: 10 }}>
+                                  <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                     <Link style={{ textDecoration: 'none' }} to={'/meeting/create/' + this.props.id}>
                                       <CustButton>New Event</CustButton>
                                     </Link>
@@ -687,35 +677,27 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         </Typography>
                                       </ExpansionPanelSummary>
                                       <ExpansionPanelDetails>
-                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                           <Tooltip title="Pause Event">
-                                            <span>
-                                              <CustButton
-                                                onClick={() => { console.log("Pause Event") }}>Pause Event</CustButton>
-                                            </span>
+                                            <CustButton
+                                              onClick={() => { console.log("Pause Event") }}>Pause Event</CustButton>
                                           </Tooltip>
                                         </Grid>
-                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                           <Tooltip title={"Event is not paused!"}>
-                                            <span>
-                                              <CustButton disabled={true}
-                                                onClick={() => { console.log("unpause Event") }}>Unpause Event</CustButton>
-                                            </span>
+                                            <CustButton disabled={true}
+                                              onClick={() => { console.log("unpause Event") }}>Unpause Event</CustButton>
                                           </Tooltip>
                                         </Grid>
-                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                           <Tooltip title="Create a proposal">
-                                            <span>
-                                              <CustButton
-                                                onClick={() => { console.log("Create proposal") }}>Create Proposal</CustButton>
-                                            </span>
+                                            <CustButton
+                                              onClick={() => { console.log("Create proposal") }}>Create Proposal</CustButton>
                                           </Tooltip>
                                         </Grid>
-                                        <Grid item xs={3} style={{ padding: 10 }}>
+                                        <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                           <Tooltip title="View proposals">
-                                            <span>
-                                              <CustButton>View Proposals</CustButton>
-                                            </span>
+                                            <CustButton>View Proposals</CustButton>
                                           </Tooltip>
                                         </Grid>
                                       </ExpansionPanelDetails>

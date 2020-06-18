@@ -3,7 +3,7 @@ import { Meeting } from '../../store/meetings/actions';
 import { Loading } from '../../store/loading/actions';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
-import { AppBar, Button, Container, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip, Box } from '@material-ui/core';
+import { AppBar, Button, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip, Box } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import BeenhereIcon from '@material-ui/icons/Beenhere';
@@ -63,18 +63,22 @@ export class UsersList extends React.Component<IProps, IState> {
   componentDidMount() {
     this.props.cachedMeeting.withdraw.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'WITHDRAWN' }] }))
+      return null;
     });
 
     this.props.cachedMeeting.attend.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => { this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'ATTENDED' }] }) })
+      return null;
     });
 
     this.props.cachedMeeting.rsvp.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: `RSVP'D` }] }))
+      return null;
     });
 
     this.props.cachedMeeting.cancel.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'CANCELLED' }] }))
+      return null;
     });
   }
 

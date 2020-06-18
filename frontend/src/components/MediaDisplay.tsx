@@ -1,5 +1,5 @@
 import React from 'react';
-import { CardMedia, Grid, Container } from '@material-ui/core';
+import { Grid, Container } from '@material-ui/core';
 import { CardImage } from './meetings/MeetingAdd';
 import { Pagination } from '@material-ui/lab';
 

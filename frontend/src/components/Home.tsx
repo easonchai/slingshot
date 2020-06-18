@@ -1,6 +1,6 @@
 import React from 'react';
 import { MeetingList } from '../containers/meetings/MeetingList';
-import { Grid, Button, Container, Typography, Box, CssBaseline, CardMedia } from '@material-ui/core';
+import { Grid, Button, Container, Typography, CssBaseline, CardMedia } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import Header from './Header'
