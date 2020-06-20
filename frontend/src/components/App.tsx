@@ -8,9 +8,7 @@ interface IProps {
 export class App extends React.Component<IProps> {
   render() {
     return (
-      <Container maxWidth="sm">
-        <Home />
-      </Container>
+      <Home />
     );
   }
 }

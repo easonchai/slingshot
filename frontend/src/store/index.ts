@@ -1,10 +1,13 @@
 import { createStore, combineReducers } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
-import { reducer as meetingsReducer } from './meetings/reducers'
-import { reducer as userReducer } from './users/reducers'
-import { reducer as loadingReducer } from './loading/reducers'
+import { reducer as notificationReducer } from './notifications/reducers';
+import { reducer as meetingsReducer } from './meetings/reducers';
+import { reducer as userReducer } from './users/reducers';
+import { reducer as loadingReducer } from './loading/reducers';
+
 
 const rootReducer = combineReducers({
+  notificationReducer,
   meetingsReducer,
   userReducer,
   loadingReducer

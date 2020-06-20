@@ -1,10 +1,20 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, User } from './actions';
+import { actions as userActions, ModelType, User } from './actions';
+import { actions as meetingActions } from '../meetings/actions';
 
-const initState: IState = {
+export const initState: IState = {
   user: {
-    ethereumAddress: ''
+    _id: '',
+    type: ModelType.USER,
+    data: {
+      ensDomain: '',
+      feedback: [],
+    },
+    cancel: [],
+    rsvp: [],
+    attend: [],
+    withdraw: []
   }
 };
 
@@ -13,11 +23,84 @@ export interface IState {
 }
 
 export const reducer = (state: IState = initState, action: Action): IState => {
-  if (isType(action, actions.UpdateUserEthereumAddress)) {
+  if (isType(action, meetingActions.UpdateOrganiserEthereumAddress) ||
+    isType(action, userActions.UpdateUserEthereumAddress)) {
     return {
+      ...state,
+      user: action.payload
+    };
+  }
+
+  if (isType(action, meetingActions.UpdateRSVPList)) {
+    return {
+      ...state,
       user: {
         ...state.user,
-        ethereumAddress: action.payload.ethereumAddress
+        cancel: state.user.cancel.filter(meeting => meeting !== action.payload.meetingAddress),
+        rsvp: [...state.user.rsvp, action.payload.meetingAddress]
+      }
+    };
+  }
+
+  if (isType(action, meetingActions.UpdateRSVPListCancellation)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: state.user.rsvp.filter((address) => address !== action.payload.meetingAddress),
+        cancel: [...state.user.cancel, action.payload.meetingAddress]
+      }
+    };
+  }
+
+  if (isType(action, meetingActions.UpdateHandleAttendance)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+        attend: [...state.user.attend, action.payload.meetingAddress]
+      }
+    };
+  }
+
+  if (isType(action, userActions.UpdateUserENSDomain)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        data: {
+          ...state.user.data,
+          ensDomain: action.payload,
+        }
+      }
+    };
+  }
+
+  if (isType(action, userActions.CreateUserFeedback)) {
+    let updatedFeedbacks = state.user.data.feedback.slice();
+    updatedFeedbacks.push(action.payload);
+
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        data: {
+          ...state.user.data,
+          feedback: updatedFeedbacks
+        }
+      }
+    };
+  }
+
+  if (isType(action, meetingActions.UpdateUserWithdraw)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+        attend: state.user.attend.filter(meeting => meeting !== action.payload.meetingAddress),
+        withdraw: [...state.user.withdraw, action.payload.meetingAddress]
       }
     };
   }
