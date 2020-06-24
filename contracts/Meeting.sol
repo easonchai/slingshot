@@ -16,7 +16,6 @@ contract Meeting is Ownable {
     uint public registrationLimit;
     uint public registered;
     uint public payout;
-    uint public attendanceCount;
     bool public isCancelled;
     bool public isFinalised;
     bool public isActive; //Event started.
@@ -36,11 +35,10 @@ contract Meeting is Ownable {
     event EventCancelled();
     event GetChange();
     event GuyCancelled(address participant);
-    event MarkAttendance(address _participant);
     event WithdrawEvent(address addr, uint payout);
     event RSVPEvent(address addr);
     event StartEvent(address addr);
-    event EndEvent(address addr, uint attendance, uint meetingPool, uint clubPool);
+    event EndEvent(uint meetingPool, uint clubPool);
     event SetStakeEvent(uint stake);
     event EditStartDateEvent(uint timeStamp);
     event EditEndDateEvent(uint timeStamp);
@@ -131,17 +129,6 @@ contract Meeting is Ownable {
         emit GuyCancelled(msg.sender);
     }
 
-    /**@dev Organizer's management functions */
-    function markAttendance(address _participant) external onlyOwner duringEvent notPaused{
-        //will pass in a list as parameter and use attendanceCount = list.length;
-        Participant memory participant = addressToParticipant[_participant];
-        require(participant.attended == false, 'already marked');
-        require(participant.stakedAmount >= requiredStake, 'Stake too low');
-        addressToParticipant[_participant].attended = true;
-        attendanceCount++;
-        emit MarkAttendance(_participant);
-    }
-
     function startEvent() external onlyOwner notActive notCancelled notPaused{
         require(startDate < now && now < endDate, "Can't start out of scope");
         //Means organiser cannot start event at arbitrary times.
@@ -149,23 +136,30 @@ contract Meeting is Ownable {
         emit StartEvent(msg.sender); //Maybe not necessary to msg.sender
     }
 
-    function finaliseEvent() external onlyOwner duringEvent notPaused{
+    function finaliseEvent(address payable[] _participants) external onlyOwner duringEvent notPaused{
         require(now > endDate.add(7), 'Cooldown period.'); //days Cooldown removed for demo
-        if (attendanceCount == 0){
+        if (_participants.length == 0){
             isActive = false;
             eventCancel();
         }else{
+            Participant memory participant;
+            for (uint i = 0; i < _participants.length; i++){
+                participant = addressToParticipant[_participants[i]];
+                require(participant.attended == false, 'Already marked');
+                require(participant.stakedAmount >= requiredStake, 'Stake too low');
+                addressToParticipant[_participants[i]].attended = true;
+            }
             isFinalised = true;
             uint clubPool = club.getBalance();
             uint meetingPool = address(this).balance;
-            payout = clubPool.div(attendanceCount);
+            payout = clubPool.div(_participants.length);
             if (meetingPool > clubPool){ //Set balance to current club balance.
                 payable(address(club)).transfer(meetingPool.sub(clubPool));
             }
             if (meetingPool < clubPool) {
                 club.poolPayout(clubPool.sub(meetingPool));
-            }    
-            emit EndEvent(msg.sender, attendanceCount, meetingPool, clubPool); //Maybe not necessary to msg.sender
+            }
+            emit EndEvent(meetingPool, clubPool);
         }
     }
 
