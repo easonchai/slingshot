@@ -136,7 +136,7 @@ contract Meeting is Ownable {
         emit StartEvent(msg.sender); //Maybe not necessary to msg.sender
     }
 
-    function finaliseEvent(address payable[] _participants) external onlyOwner duringEvent notPaused{
+    function finaliseEvent(address payable[] calldata _participants) external onlyOwner duringEvent notPaused{
         require(now > endDate.add(7), 'Cooldown period.'); //days Cooldown removed for demo
         if (_participants.length == 0){
             isActive = false;

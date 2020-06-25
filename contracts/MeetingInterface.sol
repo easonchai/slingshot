@@ -9,9 +9,8 @@ interface MeetingInterface {
 	function getChange() external;
 	function eventCancel() external;
 	function guyCancel() external;
-	function markAttendance(address _participant) external;
 	function startEvent() external;
-	function finaliseEvent() external;
+	function finaliseEvent(address payable[] calldata _participants) external;
 	function setStartDate(uint dateTimestamp) external;
 	function setEndDate(uint dateTimestamp) external;
 	function setRequiredStake(uint stakeAmt) external;
