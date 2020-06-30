@@ -2,7 +2,7 @@ pragma solidity >= 0.6.2 < 0.7.0;
 
 interface MeetingInterface {
 	//Ownable
-	function owner() public view returns (address);
+	function owner() external view returns (address);
 
 	//Meeting
 	function rsvp() external payable;

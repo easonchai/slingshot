@@ -44,3 +44,5 @@ test('some counting', async() =>{
     let b = await contract.count();
     expect(a).toStrictEqual(b.sub(1));
 });
+
+//test rsvp amounts.
