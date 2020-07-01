@@ -8,7 +8,7 @@ export default class EtherService {
   ethereum: any;
   provider: Provider;
   signer: any;
-  contractAddress: string;
+  deployerContractAddress: string;
   deployerABI: Array<string>;
   meetingABI: Array<string>;
   clubABI: Array<string>;
@@ -29,65 +29,58 @@ export default class EtherService {
     }
 
     // TODO: retrieve Deployer contractAddress from DB
-    this.contractAddress = '0xB96D588C7A4FAa5F25CE776096BcB68FAA8803BB';
+    this.deployerContractAddress = '0x955f6729274a7a8db786994f8f73792d5d868651';
 
     // TODO: can we generate ABI or retrieve it from compiled contract dynamically?
     this.deployerABI = [
       'event NewClub(address admin, address clubAddress)',
-      'function deploy(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address payable)'
+      'function deploy() external returns(address)'
+    ];
+
+    this.clubABI = [
+      'event NewMeetingEvent(address ownerAddr, address contractAddr)',
+      // 'event ProposalExecuted(address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
+      // 'event ProposeAdminChange(uint counter, address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
+      // 'event ApproveProposal(uint proposal)',
+      // 'event PoolPayout(uint amount)',
+      'function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin returns(address)',
+      'function poolPayout(uint _amount) external',
+      'function getBalance() external view returns (uint)',
+      'function approveProposal(uint _proposal) external onlyAdmin',
+      'function executeProposal(uint _proposal) external onlyAdmin',
+      'function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external',
+      'function pause(address payable _meeting, uint _pauseUntil) external onlyAdmin',
     ];
 
     this.meetingABI = [
       'event EventCancelled()',
       'event GetChange()',
       'event GuyCancelled(address participant)',
-      'event MarkAttendance(address _participant)',
       'event WithdrawEvent(address addr, uint payout)',
       'event RSVPEvent(address addr)',
       'event StartEvent(address addr)',
-      'event EndEvent(address addr, uint attendance, uint meetingPool, uint clubPool)',
+      'event EndEvent(uint meetingPool, uint clubPool)',
       'event SetStakeEvent(uint stake)',
       'event EditStartDateEvent(uint timeStamp)',
       'event EditEndDateEvent(uint timeStamp)',
       'event EditMaxLimitEvent(uint max)',
       'event Refund(address addr, uint refund)',
       'event Pause(uint pausedUntil)',
-      'function getChange() external',
-      'function eventCancel() external notActive onlyOwner notCancelled',
+      'function rsvp() external payable notPaused',
+      'function getChange() external notPaused',
+      'function eventCancel() public notActive onlyOwner notCancelled',
       'function guyCancel() external notActive notCancelled',
-      'function rsvp() external payable',
-      'function cancel() external',
-      'function markAttendance(address _participant) external',
-      'function startEvent() external',
-      'function endEvent() external onlyOwner duringEvent',
-      'function setStartDate(uint dateTimestamp) external',
-      'function setEndDate(uint dateTimestamp) external',
-      'function finaliseEvent() external',
-      'function setMinStake(uint stakeAmt) external',
-      'function setRegistrationLimit(uint max) external',
-      'function withdraw() external',
-      'function nextMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external returns(address)',
+      'function startEvent() external onlyOwner notActive notCancelled notPaused',
+      'function finaliseEvent(address[] calldata _participants) external onlyOwner duringEvent notPaused',
+      'function setStartDate(uint dateTimestamp) external onlyOwner notActive notPaused',
+      'function setEndDate(uint dateTimestamp) external onlyOwner notActive notPaused notCancelled',
+      'function setRequiredStake(uint stakeAmt) external onlyOwner notActive notPaused',
+      'function setRegistrationLimit(uint max) external onlyOwner notActive notPaused',
+      'function withdraw() external notPaused',
+      'function destroyAndSend() onlyOwner external notPaused',
+      'function pause(uint _pausedUntil) external onlyClub',
+      'function unPause(address _newOwner) external onlyClub',
       'function getBalance() external view returns (uint)',
-      'function setPrevStake(uint _prevStake) external payable',
-      'function destroyAndSend() external',
-      'function pause(uint _pausedUntil) external',
-      'function unPause(address _newOwner) external'
-      // ...
-    ];
-
-    this.clubABI = [
-      'event NewMeetingEvent(address ownerAddr, address contractAddr)',
-      'event ProposalExecuted(address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
-      'event ProposeAdminChange(uint counter, address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
-      'event ApproveProposal(uint proposal)',
-      'event PoolPayout(uint amount)',
-      'function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external',
-      'function poolPayout(uint _amount) external',
-      'function getBalance() external view returns (uint)',
-      'function approveProposal(uint _proposal) external',
-      'function executeProposal(uint _proposal) external',
-      'function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external',
-      'function pause(address _meeting, uint _pauseUntil) external'
     ];
   }
 
@@ -170,18 +163,34 @@ export default class EtherService {
     return new Promise<string>(async (resolve, reject) => {
       // TODO: verify whether we need this check in all functions or if we can refactor it globally on connection change
       if (this.isEthereumNodeAvailable()) {
-        const contract = new ethers.Contract(this.contractAddress, this.deployerABI, this.signer);
+        const deployerContract = new ethers.Contract(this.deployerContractAddress, this.deployerABI, this.signer);
 
         // Notify frontend about successful deployment (TX mined)
-        contract
-          .once("NewMeetingEvent", (ownerAddr, contractAddr, event) => eventCallback(event))
+        deployerContract
+          .once("NewClub", (admin, clubAddress, event) => {
+            const clubContract = new ethers.Contract(clubAddress, this.clubABI, this.signer);
+
+            clubContract
+              .once("NewMeetingEvent", (ownerAddr, contractAddr, event) => eventCallback(event))
+              .once("error", console.error);
+
+            clubContract
+              .deployMeeting(startDate, endDate, ethers.utils.parseEther(String(minStake)), registrationLimit)
+              .then(
+                (success: any) => resolve({...success, clubAddress: clubAddress }),
+                (reason: any) => reject(reason)
+              )
+              .catch((error: any) => reject(error.message));
+          })
           .once("error", console.error);
 
         // Send TX
-        contract
-          .deploy(startDate, endDate, ethers.utils.parseEther(String(minStake)), registrationLimit)
+        deployerContract
+          .deploy()
           .then(
-            (success: any) => resolve(success),
+            (success: any) => {
+              console.log(success);
+            },
             (reason: any) => reject(reason)
           )
           .catch((error: any) => reject(error.message));
@@ -281,28 +290,6 @@ export default class EtherService {
         .catch((error: any) => reject(error.reason));
     });
   }
-  public async markAttendance(
-    meetingAddress: string,
-    _participant: any,//correct type?
-    eventCallback: (event: any) => void
-  ): Promise<string> {
-    return new Promise<string>(async (resolve, reject) => {
-      const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
-
-      contract
-        .once("MarkAttendance", (participant, event) => eventCallback(event))
-        .once("error", console.error);
-
-      // Send TX
-      contract
-        .markAttendance(_participant)
-        .then(
-          (success: any) => resolve(success),
-          (reason: any) => reject(reason)
-        )
-        .catch((error: any) => reject(error.reason));
-    });
-  }
   public async startEvent(
     meetingAddress: string,
     eventCallback: (event: any) => void
@@ -326,6 +313,7 @@ export default class EtherService {
   }
   public async endEvent(
     meetingAddress: string,
+    participants: string[],
     eventCallback: (event: any) => void
   ): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
@@ -337,7 +325,7 @@ export default class EtherService {
 
       // Send TX
       contract
-        .endEvent()
+        .finaliseEvent(participants)
         .then(
           (success: any) => resolve(success),
           (reason: any) => reject(reason)
@@ -367,7 +355,7 @@ export default class EtherService {
     });
   }
   public async nextMeeting(
-    meetingAddress: string,
+    _clubAddress: string,
     _startDate: number,
     _endDate: number,
     _minStake: number,
@@ -375,20 +363,19 @@ export default class EtherService {
     eventCallback: (event: any) => void
   ): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
-      const contract = new ethers.Contract(meetingAddress, this.meetingABI, this.signer);
+      const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
 
-      contract
-        .once("NextMeeting", (_startDate, _endDate, _minStake, _registrationLimit, _meeting, event) => eventCallback(event))
+      clubContract
+        .once("NewMeetingEvent", (ownerAddr, contractAddr, event) => eventCallback(event))
         .once("error", console.error);
 
-      // Send TX
-      contract
-        .nextMeeting(_startDate, _endDate, ethers.utils.parseEther(String(_minStake)), _registrationLimit)
+      clubContract
+        .deployMeeting(_startDate, _endDate, ethers.utils.parseEther(String(_minStake)), _registrationLimit)
         .then(
           (success: any) => resolve(success),
           (reason: any) => reject(reason)
         )
-        .catch((error: any) => reject(error.reason));
+        .catch((error: any) => reject(error.message));
     });
   }
 }

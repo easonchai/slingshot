@@ -181,10 +181,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.etherService = EtherService.getInstance();
 	}
 
-	callbackDeployedFirstMeeting = (confirmation: any) => {
+	callbackDeployedMeeting = (confirmation: any) => {
 		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
 
-		console.log(confirmation.transactionHash, confirmation);
 		const payload: GroupHashAndAddress = {
 			txHash: confirmation.transactionHash,
 			meetingAddress: confirmation.args.contractAddr
@@ -193,13 +192,15 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
-	createFirstMeeting = (hash: string, event: any, startDateTime: number, endDateTime: number) => {
+	createFirstMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
 		this.props.dispatchCreateFirstMeeting(this.props.history,
 			{
 				_id: hash,
 				type: ModelType.PENDING,
 				data: {
 					name: event.target.meetingName.value,
+					clubName: event.target.clubName.value,
+					clubAddress: clubAddress,
 					location: event.target.location.value,
 					description: event.target.description.value,
 					startDateTime: startDateTime,
@@ -211,7 +212,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					isCancelled: false,
 					isStarted: false,
 					isEnded: false,
-					deployerContractAddress: '0xB96D588C7A4FAa5F25CE776096BcB68FAA8803BB',  // TODO: pull dynamically once we will have more versions
+					deployerContractAddress: '0x955f6729274a7a8db786994f8f73792d5d868651',  // TODO: pull dynamically once we will have more versions
 					organizerAddress: this.props.user._id,
 					parent: '',
 					child: '',
@@ -234,12 +235,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.etherService.deployFirstMeeting(
 			startDateTime,
 			endDateTime,
-			event.target.stake.value,
-			event.target.maxParticipants.value,
-			this.callbackDeployedFirstMeeting
+			parseFloat(event.target.stake.value),
+			parseInt(event.target.maxParticipants.value),
+			this.callbackDeployedMeeting
 		)
 			.then((ethersResponse: any) => {
-				this.createFirstMeeting(ethersResponse.hash, event, startDateTime, endDateTime);
+				this.createFirstMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
 			}, (reason: any) => {
 				// Code 4001 reflects MetaMask's rejection by user.
 				// Hence we don't display it as an error.
@@ -254,26 +255,14 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			});
 	}
 
-	callbackDeployedNextMeeting = (confirmation: any) => {
-		// TODO: handle case when the user quit the browser or even refreshed the page, before the meetingAddress could be updated
-
-		console.log(confirmation.transactionHash, confirmation);
-		const payload: GroupHashAndAddress = {
-			txHash: confirmation.transactionHash,
-			meetingAddress: confirmation.args._nextMeeting
-		};
-
-		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
-	}
-
 	handleNextMeeting = (event: any, startDateTime: number, endDateTime: number) => {
 		this.etherService.nextMeeting(
-			this.props.cachedMeeting._id,
+			this.props.cachedMeeting.data.clubAddress,
 			startDateTime,
 			endDateTime,
 			parseFloat(event.target.stake.value),
 			parseInt(event.target.maxParticipants.value),
-			this.callbackDeployedNextMeeting
+			this.callbackDeployedMeeting
 		)
 			.then((res: any) => {
 				this.props.dispatchCreateNextMeeting(this.props.history, {
@@ -281,6 +270,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					type: ModelType.PENDING,
 					data: {
 						name: event.target.meetingName.value,
+						clubName: this.props.cachedMeeting.data.clubName,
+						clubAddress: this.props.cachedMeeting.data.clubAddress,
 						location: event.target.location.value,
 						description: event.target.description.value,
 						startDateTime: startDateTime,
@@ -292,7 +283,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						isCancelled: false,
 						isStarted: false,
 						isEnded: false,
-						deployerContractAddress: '0xB96D588C7A4FAa5F25CE776096BcB68FAA8803BB',  // TODO: pull dynamically once we will have more versions
+						deployerContractAddress: '0x955f6729274a7a8db786994f8f73792d5d868651',  // TODO: pull dynamically once we will have more versions
 						organizerAddress: this.props.user._id,
 						parent: this.props.parent,
 						child: '',
@@ -695,6 +686,17 @@ export class MeetingAdd extends React.Component<IProps, IState> {
               				</Typography>
 							<form onSubmit={this.handleSubmit} className="add-meeting-form">
 								<Grid container spacing={3} >
+									<Grid item xs={12}>
+										<TextField
+											fullWidth
+											required
+											disabled={cachedMeeting.data.clubAddress !== ''}
+											id="clubName"
+											label="Club Name"
+											defaultValue={cachedMeeting.data.clubName}
+											variant="outlined"
+										/>
+									</Grid>
 									<Grid item xs={12}>
 										<TextField
 											fullWidth

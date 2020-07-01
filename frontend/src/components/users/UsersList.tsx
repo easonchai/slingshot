@@ -84,28 +84,9 @@ export class UsersList extends React.Component<IProps, IState> {
 
   handleAttendance = (event: any) => {
     const participantWallet = event.currentTarget.value;
-
-    this.etherService.markAttendance(
-      this.props.cachedMeeting._id,
-      participantWallet,
-      confirmation => this.props.dispatchHandleMarkAttendanceConfirmationLoading(false)
-    )
-      .then((res: any) => {
-        this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
-        this.props.history.go(0);
-      }, (reason: any) => {
-        // Code 4001 reflects MetaMask's rejection by user.
-        // Hence we don't display it as an error.
-        if (reason?.code !== 4001) {
-          this.props.dispatchAddErrorNotification('There was an error marking an attendee: ' + reason);
-          console.error(reason);
-        }
-      })
-      .catch((err: any) => {
-        this.props.dispatchAddErrorNotification('There was an error marking an attendee: ' + err);
-        console.error(err);
-      });
-  }
+    this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
+    this.props.history.go(0);
+  };
 
   handleTabSwitch = (event: React.ChangeEvent<{}>, newValue: string) => {
     this.setState({ tabIndex: newValue });

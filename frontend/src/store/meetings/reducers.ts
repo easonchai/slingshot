@@ -19,6 +19,8 @@ export const initState: IState = {
       //txHash: string;  // only used as primary key for pending TX's
       //meetingAddress: string;  // id is replaced by contract address as primary key once TX is mined
       name: '',
+      clubName: '',
+      clubAddress: '',
       location: '',
       description: '',
 

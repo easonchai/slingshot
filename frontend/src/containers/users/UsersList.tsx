@@ -34,6 +34,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         .put('/api/meeting/attendance', payload)
         .then(res => {
           dispatch(meetingActions.UpdateHandleAttendance(payload));
+          dispatch(loadingActions.UpdateMarkAttendanceConfirmationLoading(false));
         });
     },
 
