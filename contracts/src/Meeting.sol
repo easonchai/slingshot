@@ -93,7 +93,7 @@ contract Meeting is Ownable {
         require(amnt < requiredStake, 'Already registered');
         require(msg.value.add(amnt) == requiredStake, 'Incorrect stake');
         require(registered < registrationLimit, 'Limit reached');
-        addressToParticipant[msg.sender] = Participant(uint32(now), msg.value, false);
+        addressToParticipant[msg.sender] = Participant(uint32(now), msg.value.add(amnt), false);
         registered++;
         /*Can store return value of the above function into `RegistrationId` which can be used to uniquely
         identify & distribute QR code (still figuring out if needed and how)*/
