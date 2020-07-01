@@ -122,7 +122,7 @@ contract Meeting is Ownable {
         require (participant.stakedAmount != 0, 'Guy cancelled'); 
 
         //Check if RSVP'd within 24 hours
-        require(participant.rsvpDate + 1> now, "1 day notice"); //days Cooldown removed for demo
+        require(participant.rsvpDate + 1 days> now, "1 day notice"); 
         addressToParticipant[msg.sender].stakedAmount = 0;
         msg.sender.transfer(participant.stakedAmount);
         registered--;
