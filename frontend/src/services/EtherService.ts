@@ -29,7 +29,7 @@ export default class EtherService {
     }
 
     // TODO: retrieve Deployer contractAddress from DB
-    this.deployerContractAddress = '0x955f6729274a7a8db786994f8f73792d5d868651';
+    this.deployerContractAddress = '0x4F40574184bC0bed3eE6df209118bD0eE06EC067';
 
     // TODO: can we generate ABI or retrieve it from compiled contract dynamically?
     this.deployerABI = [
