@@ -78,7 +78,7 @@ contract Club{
 		Proposal memory p = proposal[_proposal];
 		require(now < p.creationTime + 7 days, 'proposal expired'); //Proposal expires after 7 days.
 		require(p.totalInFavour.mul(5) >= totalAdmins.mul(4), 'Quorum not reached'); //Require at least 4/5 admins to approve proposal.  
-
+		proposal[_proposal].creationTime = now - 7 days; //Stops proposals from being executed twice.
 		if (p.target == address(this)){
 			for (uint i=0; i<p.addAdmins.length; i++) {
 				isAdmin[p.addAdmins[i]] = true;

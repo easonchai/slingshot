@@ -2,8 +2,6 @@ pragma solidity >= 0.6.2 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
-//import "./Ownable.sol";
-//import "./SafeMath.sol";
 import "./ClubInterface.sol";
 
 contract Meeting is Ownable {
