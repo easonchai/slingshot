@@ -15,6 +15,8 @@ import Footer from '../Footer';
 import { MediaDisplay } from '../MediaDisplay';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { History } from 'history';
+import ViewProposal from '../panels/ViewProposal';
+import CreateProposal from '../panels/CreateProposal';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -83,6 +85,8 @@ export interface IProps {
 
 interface IState {
   id: String;
+  viewPanelOpen: boolean;
+  createPanelOpen: boolean;
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -99,7 +103,9 @@ export class MeetingView extends React.Component<IProps, IState> {
       */
 
     this.state = {
-      id: this.props.id
+      id: this.props.id,
+      viewPanelOpen: false,
+      createPanelOpen: false,
     };
   }
 
@@ -376,6 +382,20 @@ export class MeetingView extends React.Component<IProps, IState> {
     return `You've earned it!`;
   }
 
+  handleViewProposalPane = () => {
+    this.setState(prevState => ({
+      ...this.state,
+      viewPanelOpen: !prevState.viewPanelOpen,
+    }))
+  }
+
+  handleCreateProposalPane = () => {
+    this.setState(prevState => ({
+      ...this.state,
+      createPanelOpen: !prevState.createPanelOpen,
+    }))
+  }
+
 
   render() {
     const { cachedMeeting } = this.props;
@@ -465,6 +485,8 @@ export class MeetingView extends React.Component<IProps, IState> {
     return (
       <React.Fragment>
         <CssBaseline />
+        <ViewProposal open={this.state.viewPanelOpen} />
+        <CreateProposal open={this.state.createPanelOpen} />
         <Header />
         {
           this.props.loading.cachedMeeting && cachedMeeting
@@ -646,7 +668,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         <CustButton
                                           disabled={isStartButtonDisabled()}
                                           onClick={this.handleStart}>
-                                            Start Event
+                                          Start Event
                                         </CustButton>
                                       </span>
                                     </Tooltip>
@@ -657,7 +679,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         <CustButton
                                           disabled={isEndButtonDisabled()}
                                           onClick={this.handleEnd}>
-                                            End Event
+                                          End Event
                                         </CustButton>
                                       </span>
                                     </Tooltip>
@@ -668,7 +690,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         <CustButton
                                           disabled={isCancelButtonDisabled()}
                                           onClick={this.handleCancelEvent}>
-                                            Cancel Event
+                                          Cancel Event
                                         </CustButton>
                                       </span>
                                     </Tooltip>
@@ -698,7 +720,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                               <span>
                                                 <CustButton
                                                   onClick={() => { console.log("Pause Event") }}>
-                                                    Pause Event
+                                                  Pause Event
                                                 </CustButton>
                                               </span>
                                             </Tooltip>
@@ -709,7 +731,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                                 <CustButton
                                                   disabled={true}
                                                   onClick={() => { console.log("unpause Event") }}>
-                                                    Unpause Event
+                                                  Unpause Event
                                                 </CustButton>
                                               </span>
                                             </Tooltip>
@@ -718,8 +740,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             <Tooltip title="Create a proposal">
                                               <span>
                                                 <CustButton
-                                                  onClick={() => { console.log("Create proposal") }}>
-                                                    Create Proposal
+                                                  onClick={() => { this.handleCreateProposalPane() }}>
+                                                  Create Proposal
                                                 </CustButton>
                                               </span>
                                             </Tooltip>
@@ -727,7 +749,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                             <Tooltip title="View proposals">
                                               <span>
-                                                <CustButton>View Proposals</CustButton>
+                                                <CustButton onClick={() => this.handleViewProposalPane()}>View Proposals</CustButton>
                                               </span>
                                             </Tooltip>
                                           </Grid>
