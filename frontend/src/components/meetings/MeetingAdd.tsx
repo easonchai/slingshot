@@ -88,6 +88,7 @@ interface IProps {
 
 	dispatchUpdateCachedMeeting(meeting: Meeting): void;
 
+	dispatchIsClubNameUnique(name: string): Promise<boolean>;
 	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateOrganiserEthereumAddress(organizer: User): void;
@@ -228,30 +229,51 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			});
 	}
 
+	isClubNameUnique = () => {
+
+	}
+
 	handleFirstMeeting = (event: any, startDateTime: number, endDateTime: number) => {
 		/**
-		 * TODO: verify that the user is still connected to MetaMask.
-		 * Preferably listen to events (network change, account change, logout).
+		 * Verify that the club name is unique.
 		 */
-		this.etherService.deployFirstMeeting(
-			startDateTime,
-			endDateTime,
-			parseFloat(event.target.stake.value),
-			parseInt(event.target.maxParticipants.value),
-			this.callbackDeployedMeeting
-		)
-			.then((ethersResponse: any) => {
-				this.createFirstMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
-			}, (reason: any) => {
-				// Code 4001 reflects MetaMask's rejection by user.
-				// Hence we don't display it as an error.
-				if (reason?.code !== 4001) {
-					this.props.dispatchAddErrorNotification("There was an error creating this event: " + reason);
-					console.error(reason);
+		this.props.dispatchIsClubNameUnique(event.target.clubName.value)
+			.then((isUnique: boolean) => {
+				if(!isUnique) {
+					this.props.dispatchAddErrorNotification("The name of the club already exists, please choose another one.");
+				} else {
+					/**
+					 * TODO: verify that the user is still connected to MetaMask.
+					 * Preferably listen to events (network change, account change, logout).
+					 */
+					this.etherService.deployFirstMeeting(
+						startDateTime,
+						endDateTime,
+						parseFloat(event.target.stake.value),
+						parseInt(event.target.maxParticipants.value),
+						this.callbackDeployedMeeting
+					)
+						.then((ethersResponse: any) => {
+							this.createFirstMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
+						}, (reason: any) => {
+							// Code 4001 reflects MetaMask's rejection by user.
+							// Hence we don't display it as an error.
+							if (reason?.code !== 4001) {
+								this.props.dispatchAddErrorNotification("There was an error creating this event: " + reason);
+								console.error(reason);
+							}
+						})
+						.catch((err: any) => {
+							this.props.dispatchAddErrorNotification("There was an error creating this event: " + err);
+							console.error(err);
+						});
 				}
+			}, (reason: any) => {
+				this.props.dispatchAddErrorNotification("Please try again later. A rejection occured while checking for club name uniqueness: " + reason);
+				console.error(reason);
 			})
 			.catch((err: any) => {
-				this.props.dispatchAddErrorNotification("There was an error creating this event: " + err);
+				this.props.dispatchAddErrorNotification("Please try again later. An error occured while checking for club name uniqueness: " + err);
 				console.error(err);
 			});
 	}
