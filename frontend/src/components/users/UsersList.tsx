@@ -85,7 +85,16 @@ export class UsersList extends React.Component<IProps, IState> {
   handleAttendance = (event: any) => {
     const participantWallet = event.currentTarget.value;
     this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
-    this.props.history.go(0);
+
+    // Update local state without reloading the page.
+    const updatedParticipants = this.state.participants.map(p => {
+      if (p.address === participantWallet) {
+        p.status = 'ATTENDED';
+      }
+
+      return p;
+    });
+    this.setState({ participants: updatedParticipants});
   };
 
   handleTabSwitch = (event: React.ChangeEvent<{}>, newValue: string) => {
