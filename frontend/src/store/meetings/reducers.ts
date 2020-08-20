@@ -36,6 +36,7 @@ export const initState: IState = {
       isCancelled: false,
       isStarted: false,
       isEnded: false,
+      isPaused: false,
       deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',
       organizerAddress: '',
 

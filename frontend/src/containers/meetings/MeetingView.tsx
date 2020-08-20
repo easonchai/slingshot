@@ -160,7 +160,6 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
     },
 
     dispatchPauseMeeting: (meetingAddress: string) => {
-
       const payload = {
         meetingAddress: meetingAddress,
       };
@@ -170,7 +169,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         .then(res => {
           dispatch(meetingActions.PauseMeeting(meetingAddress));
         });
-    },
+    }
   };
 };
 

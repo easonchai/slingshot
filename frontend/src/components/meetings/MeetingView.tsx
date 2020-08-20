@@ -79,6 +79,7 @@ export interface IProps {
   dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
+  dispatchPauseMeeting(meetingAddress: string): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -405,13 +406,16 @@ export class MeetingView extends React.Component<IProps, IState> {
       this.props.cachedMeeting._id,
       pauseUntil,
       this.callbackFn
-    ).then((res: any) => {
-      this.props.dispatchPauseMeeting(pauseUntil);
-      this.props.history.go(0);
-    }, (reason: any) => {
-      this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
-      console.log("pause: ", reason);
-    })
+    )
+      .then((res: any) => {
+        console.log("success withdraw ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchPauseMeeting(this.props.cachedMeeting._id);
+        this.props.history.go(0);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
+        console.log("pause: ", reason);
+      })
       .catch((err: any) => {
         this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
         console.log("pause: ", err);
@@ -741,6 +745,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             <Tooltip title="Pause Event">
                                               <span>
                                                 <CustButton
+                                                  disabled={this.props.cachedMeeting.data.isPaused}
                                                   onClick={this.handlePauseMeeting}>
                                                   Pause Event
                                                 </CustButton>
