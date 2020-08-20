@@ -157,7 +157,20 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         .then(res => {
           dispatch(meetingActions.UpdateUserWithdraw(payload));
         });
-    }
+    },
+
+    dispatchPauseMeeting: (meetingAddress: string) => {
+
+      const payload = {
+        meetingAddress: meetingAddress,
+      };
+
+      axios
+        .put('/api/meeting/pause', payload)
+        .then(res => {
+          dispatch(meetingActions.PauseMeeting(meetingAddress));
+        });
+    },
   };
 };
 

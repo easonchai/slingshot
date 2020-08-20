@@ -177,7 +177,7 @@ export default class EtherService {
             clubContract
               .deployMeeting(startDate, endDate, ethers.utils.parseEther(String(minStake)), registrationLimit)
               .then(
-                (success: any) => resolve({...success, clubAddress: clubAddress }),
+                (success: any) => resolve({ ...success, clubAddress: clubAddress }),
                 (reason: any) => reject(reason)
               )
               .catch((error: any) => reject(error.message));
@@ -371,6 +371,29 @@ export default class EtherService {
 
       clubContract
         .deployMeeting(_startDate, _endDate, ethers.utils.parseEther(String(_minStake)), _registrationLimit)
+        .then(
+          (success: any) => resolve(success),
+          (reason: any) => reject(reason)
+        )
+        .catch((error: any) => reject(error.message));
+    });
+  }
+  public async pause(
+    _clubAddress: string,
+    _meeting: string,
+    _pauseUntil: number,
+    eventCallback: (event: any) => void
+  ): Promise<string> {
+    return new Promise<string>(async (resolve, reject) => {
+      const meetingContract = new ethers.Contract(_meeting, this.meetingABI, this.signer);
+      const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
+
+      meetingContract
+        .once("Pause", (_pauseUntil, event) => eventCallback(event))
+        .once("error", console.error);
+
+      clubContract
+        .pause(_meeting, _pauseUntil)
         .then(
           (success: any) => resolve(success),
           (reason: any) => reject(reason)

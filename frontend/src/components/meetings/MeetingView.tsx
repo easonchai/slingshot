@@ -396,6 +396,28 @@ export class MeetingView extends React.Component<IProps, IState> {
     }))
   }
 
+  handlePauseMeeting = () => {
+    const today = new Date();
+    const pauseUntil = Math.floor((today.getTime() / 1000) + 601200);
+
+    this.etherService.pause(
+      this.props.cachedMeeting.data.clubAddress,
+      this.props.cachedMeeting._id,
+      pauseUntil,
+      this.callbackFn
+    ).then((res: any) => {
+      this.props.dispatchPauseMeeting(pauseUntil);
+      this.props.history.go(0);
+    }, (reason: any) => {
+      this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
+      console.log("pause: ", reason);
+    })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
+        console.log("pause: ", err);
+      });
+  }
+
 
   render() {
     const { cachedMeeting } = this.props;
@@ -719,7 +741,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             <Tooltip title="Pause Event">
                                               <span>
                                                 <CustButton
-                                                  onClick={() => { console.log("Pause Event") }}>
+                                                  onClick={this.handlePauseMeeting}>
                                                   Pause Event
                                                 </CustButton>
                                               </span>

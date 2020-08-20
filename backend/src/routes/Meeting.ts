@@ -404,4 +404,26 @@ router.put('/withdraw', async (req: Request, res: Response, next: NextFunction) 
         .catch(err => next(err));
 });
 
+/**
+ * Update pause meeting
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/pause', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            { $set: { 'data.isPaused': true } },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
 export default router;

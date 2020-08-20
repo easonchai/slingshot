@@ -45,6 +45,7 @@ export interface Meeting {
     isCancelled: boolean;
     isStarted: boolean;
     isEnded: boolean;
+    isPaused: boolean;
     deployerContractAddress: string;
     organizerAddress: string;
 
@@ -90,6 +91,7 @@ export const UpdateCancelMeeting = actionCreator<string>(AppActions.UPDATE_CANCE
 export const UpdateHandleAttendance = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_HANDLE_ATTENDANCE);
 export const UpdateUserWithdraw = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_USER_WITHDRAW);
 export const CreateNextMeeting = actionCreator<Meeting>(AppActions.CREATE_NEXT_MEETING);
+export const PauseMeeting = actionCreator<string>(AppActions.PAUSE_MEETING);
 
 export const actions = {
   UpdateOrganiserEthereumAddress,
@@ -104,5 +106,6 @@ export const actions = {
   UpdateCancelMeeting,
   UpdateHandleAttendance,
   UpdateUserWithdraw,
-  CreateNextMeeting
+  CreateNextMeeting,
+  PauseMeeting
 };
