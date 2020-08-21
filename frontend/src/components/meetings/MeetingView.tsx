@@ -80,7 +80,7 @@ export interface IProps {
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
   dispatchPauseMeeting(meetingAddress: string): void;
-  dispatchAddProposal(meetingAddress: string, id: number, newAdmin: string, oldAdmin: string): void;
+  dispatchAddProposal(meetingAddress: string, newAdmin: string, oldAdmin: string): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -289,7 +289,26 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleCreateProposal = (event: any) => {
-
+    this.etherService.proposeAdminChange(
+      this.props.cachedMeeting.data.clubAddress,
+      this.props.cachedMeeting._id,
+      this.state.newAdmin,
+      this.state.oldAdmin,
+      this.callbackFn
+    )
+      .then((res: any) => {
+        console.log("proposal created ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchAddProposal(this.props.cachedMeeting._id, this.state.newAdmin, this.state.oldAdmin,);
+        this.props.history.go(0);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
+        console.log("proposal: ", reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleCreateProposal: ' + err);
+        console.log("proposal: ", err);
+      });
   }
 
   handleProposalDataChange = (event: any) => {
@@ -557,7 +576,7 @@ export class MeetingView extends React.Component<IProps, IState> {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleCreateProposalPane} color="primary">
+            <Button onClick={this.handleCreateProposal} color="primary">
               Propose
             </Button>
             <Button onClick={this.handleCreateProposalPane} color="primary" autoFocus>

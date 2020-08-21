@@ -87,7 +87,6 @@ export interface GroupMeetingAndUserAddress {
 
 export interface GroupMeetingAndProposal {
   meetingAddress: string,
-  id: number,
   newAdmin: string,
   oldAdmin: string,
 }
