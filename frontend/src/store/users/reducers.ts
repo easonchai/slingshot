@@ -64,6 +64,17 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, meetingActions.UpdateHandleAbsence)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        rsvp: [...state.user.rsvp, action.payload.meetingAddress],
+        attend: state.user.attend.filter(meeting => meeting !== action.payload.meetingAddress)
+      }
+    };
+  }
+
   if (isType(action, userActions.UpdateUserENSDomain)) {
     return {
       ...state,

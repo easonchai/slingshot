@@ -13,6 +13,7 @@ const initState: IState = {
     cancelMeetingConfirmation: false,
 
     markAttendanceConfirmation: false,
+    markAbsenceConfirmation: false,
   }
 };
 
@@ -97,6 +98,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       loading: {
         ...state.loading,
         markAttendanceConfirmation: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateMarkAbsenceConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        markAbsenceConfirmation: action.payload
       }
     };
   }

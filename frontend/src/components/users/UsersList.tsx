@@ -35,6 +35,7 @@ interface IProps {
 
   dispatchHandleMarkAttendanceConfirmationLoading(status: boolean): void;
   dispatchHandleMarkAttendance(meetingAddress: string, userAddress: string): void;
+  dispatchHandleMarkAbsence(meetingAddress: string, userAddress: string): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -97,6 +98,21 @@ export class UsersList extends React.Component<IProps, IState> {
     this.setState({ participants: updatedParticipants});
   };
 
+  handleAbsence = (event: any) => {
+    const participantWallet = event.currentTarget.value;
+    this.props.dispatchHandleMarkAbsence(this.props.cachedMeeting._id, participantWallet);
+
+    // Update local state without reloading the page.
+    const updatedParticipants = this.state.participants.map(p => {
+      if (p.address === participantWallet) {
+        p.status = `RSVP'D`;
+      }
+
+      return p;
+    });
+    this.setState({ participants: updatedParticipants});
+  };
+
   handleTabSwitch = (event: React.ChangeEvent<{}>, newValue: string) => {
     this.setState({ tabIndex: newValue });
   };
@@ -117,9 +133,28 @@ export class UsersList extends React.Component<IProps, IState> {
     return '';
   }
 
+  getMarkAbsenceButtonTooltipText = (participantWallet: string) => {
+    if (!this.props.cachedMeeting.attend.includes(participantWallet))
+      return `The participant is not marked as attendee.`;
+
+    if (!this.props.cachedMeeting.data.isStarted)
+      return `You can't mark absences before the start of the event.`;
+
+    if (this.props.cachedMeeting.data.isEnded)
+      return `You can't mark absences after the end of the event.`;
+
+    return '';
+  }
+
   isMarkAttendanceButtonDisabled = (participantWallet: string) => {
     return this.props.loading.rsvpConfirmation
       || this.props.cachedMeeting.attend.includes(participantWallet)
+      || !this.props.cachedMeeting.data.isStarted
+      || this.props.cachedMeeting.data.isEnded
+  }
+
+  isMarkAbsenceButtonDisabled = (participantWallet: string) => {
+    return !this.props.cachedMeeting.attend.includes(participantWallet)
       || !this.props.cachedMeeting.data.isStarted
       || this.props.cachedMeeting.data.isEnded
   }
@@ -163,17 +198,35 @@ export class UsersList extends React.Component<IProps, IState> {
                           {
                             this.isUserOrganizer() &&
                             <Grid item>
-                              <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
-                                <span>
-                                  <AttendanceButton
-                                    disabled={this.isMarkAttendanceButtonDisabled(p.address)}
-                                    onClick={this.handleAttendance}
-                                    value={p.address}
-                                    type="submit">
-                                    MARK ATTENDANCE
-                                  </AttendanceButton>
-                                </span>
-                              </Tooltip>
+
+                              { p.status !== 'ATTENDED' &&
+                                <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
+                                  <span>
+                                    <AttendanceButton
+                                      disabled={this.isMarkAttendanceButtonDisabled(p.address)}
+                                      onClick={this.handleAttendance}
+                                      value={p.address}
+                                      type="submit">
+                                      MARK ATTENDANCE
+                                    </AttendanceButton>
+                                  </span>
+                                </Tooltip>
+                              }
+
+                              { p.status === 'ATTENDED' &&
+                                <Tooltip title={this.getMarkAbsenceButtonTooltipText(p.address)}>
+                                  <span>
+                                    <AttendanceButton
+                                      disabled={this.isMarkAbsenceButtonDisabled(p.address)}
+                                      onClick={this.handleAbsence}
+                                      value={p.address}
+                                      type="submit">
+                                      MARK ABSENCE
+                                    </AttendanceButton>
+                                  </span>
+                                </Tooltip>
+                              }
+
                             </Grid>
                           }
                           <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>

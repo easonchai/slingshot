@@ -11,6 +11,7 @@ export interface Loading {
   cancelMeetingConfirmation: boolean;
 
   markAttendanceConfirmation: boolean;
+  markAbsenceConfirmation: boolean;
 }
 
 const actionCreator = actionCreatorFactory();
@@ -23,6 +24,7 @@ export const UpdateStartMeetingConfirmationLoading = actionCreator<boolean>(AppA
 export const UpdateEndMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_END_MEETING_CONFIRMATION_LOADING);
 export const UpdateCancelMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_CANCEL_MEETING_CONFIRMATION_LOADING);
 export const UpdateMarkAttendanceConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_MARK_ATTENDANCE_CONFIRMATION_LOADING);
+export const UpdateMarkAbsenceConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_MARK_ABSENCE_CONFIRMATION_LOADING);
 
 
 export const actions = {
@@ -33,5 +35,6 @@ export const actions = {
   UpdateStartMeetingConfirmationLoading,
   UpdateEndMeetingConfirmationLoading,
   UpdateCancelMeetingConfirmationLoading,
-  UpdateMarkAttendanceConfirmationLoading
+  UpdateMarkAttendanceConfirmationLoading,
+  UpdateMarkAbsenceConfirmationLoading
 };

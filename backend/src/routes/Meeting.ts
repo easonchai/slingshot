@@ -326,6 +326,44 @@ router.put('/attendance', async (req: Request, res: Response, next: NextFunction
 });
 
 /**
+ * Update rsvp & attend lists both for provided meeting as well as the participant.
+ * 
+ * @params  meetingAddress  The meeting's address to look for.
+ * @params  userAddress     The user's address to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/absence', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'rsvp': req.body['userAddress'] },
+                $pull: { 'attend': req.body['userAddress'] }
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            Models.Item
+                .updateOne(
+                    { _id: req.body['userAddress'], type: ModelType.USER },
+                    {
+                        $push: { 'rsvp': req.body['meetingAddress'] },
+                        $pull: { 'attend': req.body['meetingAddress'] }
+                    },
+                    { safe: true, upsert: true }
+                )
+                .then(user => {
+                    res
+                        .status(OK)
+                        .json(meeting);
+                })
+                .catch(err => next(err));
+        })
+        .catch(err => next(err));
+});
+
+/**
  * Add participant's feedback to a specific meeting (and user's profile).
  * 
  * @params  Feedback     Value of the feedback (meetingAddress, userAddress, rating, comment, uploadedImages, uploadedVideos).

@@ -810,21 +810,6 @@ export class MeetingView extends React.Component<IProps, IState> {
             )
         }
 
-        {/* 
-                  <div>Name: {cachedMeeting.data.name}</div>
-                  <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
-                  <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
-                  <div>Is ended: {String(cachedMeeting.data.isEnded)}</div>
-                  <div>Stake: {cachedMeeting.data.stake}</div>
-                  <div>Max participants: {cachedMeeting.data.maxParticipants}</div>
-                  <div>Start time: {new Date(cachedMeeting.data.startDateTime * 1000).toUTCString()}</div>
-                  <div>End time: {new Date(cachedMeeting.data.endDateTime * 1000).toUTCString()}</div>
-                  <div>Location: {cachedMeeting.data.location}</div>
-                  <div>Description: {cachedMeeting.data.description}</div>
-                  <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
-                  <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
-                  */}
-
       </React.Fragment>
     );
   }

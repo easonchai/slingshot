@@ -250,6 +250,30 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, actions.UpdateHandleAbsence)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          rsvp: [...meeting.rsvp, action.payload.userAddress],
+          attend: meeting.attend.filter(userAddress => userAddress !== action.payload.userAddress)
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        rsvp: [...state.cachedMeeting.rsvp, action.payload.userAddress],
+        attend: state.cachedMeeting.attend.filter(user => user !== action.payload.userAddress)
+      }
+    };
+  }
+
   if (isType(action, actions.CreateNextMeeting)) {
     const updatedMeetings = state.meetings.map(meeting => {
       if (meeting._id === action.payload.data.parent) {

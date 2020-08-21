@@ -229,10 +229,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			});
 	}
 
-	isClubNameUnique = () => {
-
-	}
-
 	handleFirstMeeting = (event: any, startDateTime: number, endDateTime: number) => {
 		/**
 		 * Verify that the club name is unique.
