@@ -38,7 +38,8 @@ export const Hero = styled(Container)({
 })
 
 export const Middle = styled(Grid)({
-	padding: '60px 20px'
+	padding: '60px 20px',
+	margin: '-30px',
 })
 
 export const MyButton = styled(Button)({
@@ -240,7 +241,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		 */
 		this.props.dispatchIsClubNameUnique(event.target.clubName.value)
 			.then((isUnique: boolean) => {
-				if(!isUnique) {
+				if (!isUnique) {
 					this.props.dispatchAddErrorNotification("The name of the club already exists, please choose another one.");
 				} else {
 					/**

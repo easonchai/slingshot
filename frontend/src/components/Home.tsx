@@ -87,7 +87,7 @@ export class Home extends React.Component<IProps> {
           </Hero>
 
           {/* Card Section */}
-          <Middle item container className="meetings-list" spacing={2}>
+          <Middle item container className="meetings-list" spacing={2} style={{ margin: "-30px" }}>
             <Container maxWidth="lg">
               <Typography variant="h3" align="center" color="textPrimary" paragraph>
                 Active Meetings

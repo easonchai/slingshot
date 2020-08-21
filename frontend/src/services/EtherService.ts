@@ -413,7 +413,7 @@ export default class EtherService {
       const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
 
       clubContract
-        .once("ProposeAdminChange", (_counter, _meeting, _addAdmins, _removeAdmins, event) => eventCallback(event))
+        .once("ProposeAdminChange", (counter, meeting, addAdmins, removeAdmins, event) => eventCallback(event))
         .once("error", console.error);
 
       clubContract
