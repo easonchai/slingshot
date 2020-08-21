@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/actions';
+import { Meeting, Proposal } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
@@ -80,7 +80,7 @@ export interface IProps {
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
   dispatchPauseMeeting(meetingAddress: string): void;
-  dispatchAddProposal(meetingAddress: string, newAdmin: string, oldAdmin: string): void;
+  dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -289,17 +289,35 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleCreateProposal = (event: any) => {
+    let tempNewArr = [this.state.newAdmin];
+    let tempOldArr = [this.state.oldAdmin];
+
     this.etherService.proposeAdminChange(
       this.props.cachedMeeting.data.clubAddress,
       this.props.cachedMeeting._id,
-      this.state.newAdmin,
-      this.state.oldAdmin,
+      tempNewArr,
+      tempOldArr,
       this.callbackFn
     )
       .then((res: any) => {
         console.log("proposal created ", res);
+
+        let proposalId = 1;
+
+        if (this.props.cachedMeeting.data.proposals) {
+          proposalId = this.props.cachedMeeting.data.proposals.length + 1;
+        }
+
+        let proposal = {
+          created: (new Date()).getTime(),
+          id: proposalId,
+          newAdmin: tempNewArr,
+          oldAdmin: tempOldArr,
+          voted: 0,
+          state: "Active",
+        }
         // TODO: add loading animation while we wait for callback / TX to be mined
-        this.props.dispatchAddProposal(this.props.cachedMeeting._id, this.state.newAdmin, this.state.oldAdmin,);
+        this.props.dispatchAddProposal(this.props.cachedMeeting._id, proposal);
         this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);

@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
-import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
+import { actions as meetingActions, Meeting, Proposal } from '../../store/meetings/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
 
 const mapStateToProps = (state: IAppState, props: any) => {
@@ -171,11 +171,10 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
-    dispatchAddProposal: (meetingAddress: string, newAdmin: string, oldAdmin: string) => {
+    dispatchAddProposal: (meetingAddress: string, proposal: Proposal) => {
       const payload = {
         meetingAddress: meetingAddress,
-        newAdmin: newAdmin,
-        oldAdmin: oldAdmin,
+        proposal: proposal,
       };
 
       axios

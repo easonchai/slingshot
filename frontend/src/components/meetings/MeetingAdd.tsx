@@ -38,8 +38,9 @@ export const Hero = styled(Container)({
 })
 
 export const Middle = styled(Grid)({
-	padding: '60px 20px',
-	margin: '-30px',
+	width: '95%',
+	margin: 'auto',
+	padding: '60px 20px'
 })
 
 export const MyButton = styled(Button)({

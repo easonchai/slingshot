@@ -20,9 +20,12 @@ export interface Feedback {
 };
 
 export interface Proposal {
+  created: number;
   id: number;
-  newAdmin: string;
-  oldAdmin: string;
+  newAdmin: string[];
+  oldAdmin: string[];
+  voted: number;
+  state: string;
 }
 
 export interface Meeting {
@@ -87,8 +90,7 @@ export interface GroupMeetingAndUserAddress {
 
 export interface GroupMeetingAndProposal {
   meetingAddress: string,
-  newAdmin: string,
-  oldAdmin: string,
+  proposal: Proposal,
 }
 
 const actionCreator = actionCreatorFactory();
