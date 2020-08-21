@@ -85,7 +85,16 @@ export class UsersList extends React.Component<IProps, IState> {
   handleAttendance = (event: any) => {
     const participantWallet = event.currentTarget.value;
     this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
-    this.props.history.go(0);
+
+    // Update local state without reloading the page.
+    const updatedParticipants = this.state.participants.map(p => {
+      if (p.address === participantWallet) {
+        p.status = 'ATTENDED';
+      }
+
+      return p;
+    });
+    this.setState({ participants: updatedParticipants});
   };
 
   handleTabSwitch = (event: React.ChangeEvent<{}>, newValue: string) => {
@@ -201,121 +210,6 @@ export class UsersList extends React.Component<IProps, IState> {
                   })
             }
           </TabPanel>
-
-
-          <TabPanel value={this.state.tabIndex} index={'rsvp'}>
-            {
-              // Simulate awaiting confirmation of RSVP cancellation (gray out + spinner)
-              // TODO: switch tabindex to 'cancel' upon confirmation
-              this.props.loading.rsvpCancellationConfirmation &&
-              <span key={this.props.userWallet}>
-                <Grid container>
-                  <Grid item>
-                    <LoadingSpinner size={16} style={{ marginTop: 5, marginRight: 5 }} />
-                  </Grid>
-                  <Grid item>
-                    <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                      {this.props.userWallet}
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <br />
-              </span>
-            }
-
-            {
-              this.props.cachedMeeting.rsvp
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Grid container>
-                        <Grid item>
-                          {
-                            this.props.loading.rsvpConfirmation &&
-                            participantWallet === this.props.userWallet &&
-                            <LoadingSpinner size={16} style={{ marginTop: 10, marginRight: 5 }} />
-                          }
-                        </Grid>
-                        <Grid item>
-                          <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', marginTop: 10, marginRight: 5 }}>
-                            {participantWallet}
-                          </Typography>
-                        </Grid>
-                        {
-                          this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                          <Grid item>
-                            <Tooltip title={this.getMarkAttendanceButtonTooltipText(participantWallet)}>
-                              <span>
-                                <AttendanceButton
-                                  disabled={this.isMarkAttendanceButtonDisabled(participantWallet)}
-                                  onClick={this.handleAttendance}
-                                  value={participantWallet}
-                                  type="submit">
-                                  MARK ATTENDANCE
-                                  </AttendanceButton>
-                              </span>
-                            </Tooltip>
-                          </Grid>
-                        }
-                      </Grid>
-                      <br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
-
-          <TabPanel value={this.state.tabIndex} index={'cancel'}>
-            {
-              this.props.cachedMeeting.cancel
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography><br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
-
-
-          <TabPanel value={this.state.tabIndex} index={'attend'}>
-            {
-              this.props.cachedMeeting.attend
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography><br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
-
-
-          <TabPanel value={this.state.tabIndex} index={'withdraw'}>
-            {
-              this.props.cachedMeeting.withdraw
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography>
-                      <br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
         </Grid>
       </Grid>
     );

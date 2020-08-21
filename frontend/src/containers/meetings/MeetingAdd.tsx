@@ -86,6 +86,14 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
           dispatch(meetingActions.CreateNextMeeting(meeting));
           history.push('/meeting/' + meeting._id);
         });
+    },
+
+    dispatchIsClubNameUnique: (name: string) => {
+      return axios.get('/api/club/names')
+        .then(names => {
+            return names.data.indexOf(name) === -1;
+          }
+        );
     }
   };
 }
