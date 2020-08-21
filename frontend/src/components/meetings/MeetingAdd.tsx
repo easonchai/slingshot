@@ -219,7 +219,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					child: '',
 					images: this.state.form.images,
 					videos: this.state.form.videos,
-					feedback: []
+					feedback: [],
+					proposals: [],
 				},
 				cancel: [],
 				rsvp: [],
@@ -292,7 +293,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						// TODO replace files if needed
 						images: this.state.form.images,
 						videos: this.state.form.videos,
-						feedback: []
+						feedback: [],
+						proposals: [],
 					},
 					cancel: [],
 					rsvp: [],

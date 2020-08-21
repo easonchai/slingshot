@@ -47,6 +47,9 @@ export const initState: IState = {
       videos: [],
 
       feedback: [],
+
+      //For proposals
+      proposals: [],
     },
 
     // list of user wallets (ethereum address) linked to this meeting per status

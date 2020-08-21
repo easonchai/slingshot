@@ -169,7 +169,22 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         .then(res => {
           dispatch(meetingActions.PauseMeeting(meetingAddress));
         });
-    }
+    },
+
+    dispatchAddProposal: (meetingAddress: string, id: number, newAdmin: string, oldAdmin: string) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        id: id,
+        newAdmin: newAdmin,
+        oldAdmin: oldAdmin,
+      };
+
+      axios
+        .put('/api/meeting/proposal/add', payload)
+        .then(res => {
+          dispatch(meetingActions.AddProposal(payload));
+        });
+    },
   };
 };
 
