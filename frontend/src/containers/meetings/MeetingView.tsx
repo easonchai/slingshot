@@ -171,7 +171,7 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
-    dispatchAddProposal: (meetingAddress: string, newAdmin: string, oldAdmin: string) => {
+    dispatchAddProposal: (meetingAddress: string, newAdmin: string[], oldAdmin: string[]) => {
       const payload = {
         meetingAddress: meetingAddress,
         newAdmin: newAdmin,

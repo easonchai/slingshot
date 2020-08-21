@@ -389,7 +389,7 @@ export default class EtherService {
       const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
 
       meetingContract
-        .once("Pause", (_pauseUntil, event) => eventCallback(event))
+        .once("Pause", (pauseUntil, event) => eventCallback(event))
         .once("error", console.error);
 
       clubContract
@@ -405,15 +405,15 @@ export default class EtherService {
   public async proposeAdminChange(
     _clubAddress: string,
     _meeting: string,
-    _addAdmins: string,
-    _removeAdmins: string,
+    _addAdmins: string[],
+    _removeAdmins: string[],
     eventCallback: (event: any) => void
   ): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
       const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
 
       clubContract
-        .once("ProposeAdminChange", (_counter, _meeting, _addAdmins, _removeAdmins, event) => eventCallback(event))
+        .once("ProposeAdminChange", (counter, meeting, addAdmins, removeAdmins, event) => eventCallback(event))
         .once("error", console.error);
 
       clubContract

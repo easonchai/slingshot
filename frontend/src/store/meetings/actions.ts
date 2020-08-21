@@ -87,8 +87,8 @@ export interface GroupMeetingAndUserAddress {
 
 export interface GroupMeetingAndProposal {
   meetingAddress: string,
-  newAdmin: string,
-  oldAdmin: string,
+  newAdmin: string[],
+  oldAdmin: string[],
 }
 
 const actionCreator = actionCreatorFactory();
