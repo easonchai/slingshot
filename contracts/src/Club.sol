@@ -85,7 +85,7 @@ contract Club{
 				isAdmin[p.addAdmins[i]] = true;
 			}
 			for (uint i=0; i<p.removeAdmins.length; i++) {
-				require(isAdmin[p.addAdmins[i]] == true, 'already non-admin');
+				require(isAdmin[p.removeAdmins[i]] == true, 'already non-admin');
 				isAdmin[p.removeAdmins[i]] = false;
 			}
 			totalAdmins = totalAdmins.add(p.addAdmins.length).sub(p.removeAdmins.length);
