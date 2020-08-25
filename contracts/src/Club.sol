@@ -81,9 +81,11 @@ contract Club{
 		proposal[_proposal].creationTime = now - 7 days; //Stops proposals from being executed twice.
 		if (p.target == address(this)){
 			for (uint i=0; i<p.addAdmins.length; i++) {
+				require(isAdmin[p.addAdmins[i]] == false, 'already admin');
 				isAdmin[p.addAdmins[i]] = true;
 			}
 			for (uint i=0; i<p.removeAdmins.length; i++) {
+				require(isAdmin[p.addAdmins[i]] == true, 'already non-admin');
 				isAdmin[p.removeAdmins[i]] = false;
 			}
 			totalAdmins = totalAdmins.add(p.addAdmins.length).sub(p.removeAdmins.length);

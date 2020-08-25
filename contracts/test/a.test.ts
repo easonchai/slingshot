@@ -18,28 +18,14 @@ const end = testTime + 1000;
 const someProvider = new MockProvider({ganacheOptions:{
     gasLimit: "0x989680"}});
 
-const providerStartMeeting = new MockProvider({ganacheOptions:{
-    gasLimit: "0x989680", time: new Date((start+1)*1000)}});
-
-const providerEndMeeting = new MockProvider({ganacheOptions:{
-    gasLimit: "0x989680", time: new Date((end+1)*1000)}});
-
 let [wallet, wallet2, wallet3, guy] = someProvider.getWallets();
 
 const advanceTime = async (time: number) => {
     const timeReturn = await someProvider.send(
         'evm_increaseTime', [time]);
-    console.log(timeReturn);
   }
 
-// let [swallet, swallet2, swallet3, sguy] = providerStartMeeting.getWallets();
-
-
 const loadFixture = createFixtureLoader([wallet, wallet2, wallet3, guy], someProvider);
-//Create another provider time travelling with corresponding loadFixture.
-const loadStartMeeting = createFixtureLoader([wallet, wallet2, wallet3, guy], providerStartMeeting);
-
-const loadEndMeeting = createFixtureLoader([wallet, wallet2, wallet3, guy], providerEndMeeting);
 
 
 async function deployerFixture([wallet, other]: Wallet[], provider: MockProvider) {
@@ -52,6 +38,7 @@ async function clubFixture([wallet, other]: Wallet[], provider: MockProvider) {
     const deployer = p.deployer;
     wallet = p.wallet;
     let tx = await deployer.deploy();
+    //let GasUsed = (await (await deployer.deploy()).wait()).gasUsed.toString();
     let receipt = await tx.wait();
     let event = receipt.events.pop();
     const club = new Contract(event.args.clubAddress, Club.abi, wallet);
@@ -95,23 +82,29 @@ async function MeetingDeployedFixt([wallet, other]: Wallet[], provider: MockProv
 
 async function MeetingBeforeStartFixt([wallet, other]: Wallet[], provider: MockProvider) {
     let p = await loadFixture(MeetingDeployedFixt);
-    // let swallet2 = wallet2.connect(providerStartMeeting);
-    // let swallet3 = wallet3.connect(providerStartMeeting);
-    let meeting2 = p.meeting.connect(wallet2);
-    let meeting3 = p.meeting.connect(wallet3);
+    let meeting = p.meeting;
+    let meeting2 = meeting.connect(wallet2);
+    let meeting3 = meeting.connect(wallet3);
     await (await meeting2.rsvp({value:1})).wait();
     await (await meeting3.rsvp({value:1})).wait();
-
-    return {meeting2, meeting3, other};
+    console.log(wallet2.address, wallet3.address);
+    return {meeting, meeting2, meeting3};
 };
 
-console.log(testTime);
-console.log(Date());
-console.log(new Date(testTime*1000));
+async function MeetingAfterStartFix([wallet, other]: Wallet[], provider: MockProvider) {
+    let p = await loadFixture(MeetingBeforeStartFixt);
+    advanceTime(101);
+    await (await p.meeting.startEvent()).wait();
+    advanceTime(3000);
+
+    return p; 
+}
+
+
 
 describe('deployer unit test', () => {
     
-    it('Attempt2 - deployer deploys', async () => {
+    it('deployer deploys', async () => {
         const {deployer, wallet} = await loadFixture(deployerFixture);
         let tx = await deployer.deploy();
         let receipt = await tx.wait();
@@ -236,26 +229,50 @@ describe('after meeting deployed', () => {
         await expect(meeting2.setStartDate(start + 1))
         .to.revertedWith('Ownable: caller is not the owner');
         await expect(meeting.setStartDate(start + 10000))
-        .to.revertedWith('must start before endDate');
+        .to.revertedWith('must start before endDate'); 
     });
 })
 
 describe('start event', () => {
+    let meeting: Contract;
+    let meeting2: Contract;
+    beforeEach( async() => {
+        let p = await loadFixture(MeetingBeforeStartFixt);
+        meeting = p.meeting2.connect(wallet);
+        meeting2 = p.meeting2;
+    });
+
     it('starts event', async() => {
-        let p = await loadStartMeeting(MeetingBeforeStartFixt);
         advanceTime(101);
-        let meeting = p.meeting2.connect(wallet);
-        let meeting2 = p.meeting2;
-        // console.log(await (await meeting2.getChange()).wait());
-        console.log((await (await (await meeting2.getChange()).wait()).events.pop().getBlock()).timestamp);
-        console.log('date set:', new Date((start+1)*1000));
-        console.log('now:', Date.now(), Date());
         await expect(meeting.startEvent())
         .to.emit(meeting, 'StartEvent')
         .withArgs(wallet.address);
     });
+
+    it('guy cancels before event started', async() => {
+        expect(meeting2.guyCancel())
+        .to.emit(meeting2, 'GuyCancelled')
+        .withArgs(wallet2.address);
+    })
 });
 
+describe('after start', () => {
+    let p:any;
+    beforeEach( async() => {
+        p = await loadFixture(MeetingAfterStartFix);
+        // meeting = p.meeting2.connect(wallet);
+    });
+    
+    
+        
+    it('finalise event', async() => {
+        expect(p.meeting.finaliseEvent(
+            [wallet3.address]
+        ));
+    });
+});
+
+//Test total admins for club contract
 
     it('poolPayout function', () => {
         //Very hard to *unit* test functions that can only be called by a specific contract 
