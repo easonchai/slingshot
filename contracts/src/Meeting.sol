@@ -128,7 +128,7 @@ contract Meeting is Ownable {
     }
 
     function startEvent() external onlyOwner notActive notCancelled notPaused{
-        require(startDate < now && now < endDate, "Can't start out of scope");
+        require(startDate < now, "Can't start out of scope");
         //Means organiser cannot start event at arbitrary times.
         isActive = true;
         emit StartEvent(msg.sender); //Maybe not necessary to msg.sender

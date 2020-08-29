@@ -242,8 +242,21 @@ describe('start event', () => {
         meeting2 = p.meeting2;
     });
 
-    it('starts event', async() => {
-        advanceTime(101);
+    it('starts event at start time', async() => {
+        advanceTime(start - testTime + 3);
+        await expect(meeting.startEvent())
+        .to.emit(meeting, 'StartEvent')
+        .withArgs(wallet.address);
+    });
+
+    it('starts event before start time', async() => {
+        advanceTime(start - testTime - 5);
+        await expect(meeting.startEvent())
+        .to.revertedWith("Can't start out of scope");
+    });
+
+    it('starts event after end time', async() => {
+        advanceTime(end - start + 1000);
         await expect(meeting.startEvent())
         .to.emit(meeting, 'StartEvent')
         .withArgs(wallet.address);
@@ -273,6 +286,8 @@ describe('after start', () => {
 });
 
 //Test total admins for club contract
+
+//Test that event can be started any time after start time.
 
     it('poolPayout function', () => {
         //Very hard to *unit* test functions that can only be called by a specific contract 
