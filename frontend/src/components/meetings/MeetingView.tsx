@@ -493,7 +493,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     const started = cachedMeeting.data.isStarted
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
-    const status = this.props.loading.meetingDeployment ? "Deploying" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
+    const status = this.props.loading.meetingDeployment ? "Deploying" : this.props.cachedMeeting.data.isPaused ? "Paused" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
 
     const prevMeetingAddress = cachedMeeting.data.parent;
     const prevMeeting = this.props.meetings.find(m => {
@@ -672,7 +672,9 @@ export class MeetingView extends React.Component<IProps, IState> {
                           style={status === "Deploying" ? { background: "#2094f3" } :
                             status === "Active" ? { opacity: 20 } :
                               status === "Started" ? { background: "#4cae4f" } :
-                                status === "Ended" ? { background: "#ff9900" } : { background: "#f44034" }}
+                                status === "Ended" ? { background: "#ff9900" } :
+                                  status === "Paused" ? { background: "#e66e07" } :
+                                    { background: "#f44034" }}
                         />}
                       </Box><br />
                       {/* User actions */}
@@ -842,10 +844,10 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             </Tooltip>
                                           </Grid>
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                            <Tooltip title={"Event is not paused!"}>
+                                            <Tooltip title={this.props.cachedMeeting.data.isPaused ? "Execute proposal to unpause event" : "Event is not paused!"}>
                                               <span>
                                                 <CustButton
-                                                  disabled={true}
+                                                  disabled={!this.props.cachedMeeting.data.isPaused}
                                                   onClick={() => { console.log("unpause Event") }}>
                                                   Unpause Event
                                                 </CustButton>
