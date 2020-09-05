@@ -19,6 +19,15 @@ export interface Feedback {
   videos: ReadonlyArray<string>;
 };
 
+export interface Proposal {
+  created: number;
+  id: number;
+  newAdmin: string[];
+  oldAdmin: string[];
+  voted: number;
+  state: string;
+}
+
 export interface Meeting {
   _id: string;
   type: string;
@@ -57,6 +66,9 @@ export interface Meeting {
     videos: ReadonlyArray<string>;
 
     feedback: ReadonlyArray<Feedback>;
+
+    //For proposals
+    proposals: ReadonlyArray<Proposal>;
   },
 
   // list of user wallets (ethereum address) linked to this meeting per status
@@ -76,6 +88,11 @@ export interface GroupMeetingAndUserAddress {
   userAddress: string
 };
 
+export interface GroupMeetingAndProposal {
+  meetingAddress: string,
+  proposal: Proposal,
+}
+
 const actionCreator = actionCreatorFactory();
 
 export const UpdateOrganiserEthereumAddress = actionCreator<User>(AppActions.UPDATE_ORGANIZER_ETHEREUM_ADDRESS);
@@ -93,6 +110,7 @@ export const UpdateHandleAbsence = actionCreator<GroupMeetingAndUserAddress>(App
 export const UpdateUserWithdraw = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_USER_WITHDRAW);
 export const CreateNextMeeting = actionCreator<Meeting>(AppActions.CREATE_NEXT_MEETING);
 export const PauseMeeting = actionCreator<string>(AppActions.PAUSE_MEETING);
+export const AddProposal = actionCreator<GroupMeetingAndProposal>(AppActions.ADD_PROPOSAL);
 
 export const actions = {
   UpdateOrganiserEthereumAddress,
@@ -109,5 +127,6 @@ export const actions = {
   UpdateHandleAbsence,
   UpdateUserWithdraw,
   CreateNextMeeting,
-  PauseMeeting
+  PauseMeeting,
+  AddProposal,
 };

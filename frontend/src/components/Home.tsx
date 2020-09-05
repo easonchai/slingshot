@@ -24,6 +24,8 @@ const Hero = styled(Container)({
 })
 
 const Middle = styled(Grid)({
+  width: '95%',
+  margin: 'auto',
   padding: '60px 20px'
 })
 

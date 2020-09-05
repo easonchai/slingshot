@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/actions';
+import { Meeting, Proposal } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import { Loading } from '../../store/loading/actions';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
-import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@material-ui/core';
 import Header from '../Header';
 import { styled } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -80,6 +80,7 @@ export interface IProps {
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
   dispatchPauseMeeting(meetingAddress: string): void;
+  dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -88,6 +89,9 @@ interface IState {
   id: String;
   viewPanelOpen: boolean;
   createPanelOpen: boolean;
+  proposalPanelOpen: boolean;
+  newAdmin: string;
+  oldAdmin: string;
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -107,6 +111,9 @@ export class MeetingView extends React.Component<IProps, IState> {
       id: this.props.id,
       viewPanelOpen: false,
       createPanelOpen: false,
+      proposalPanelOpen: false,
+      newAdmin: '',
+      oldAdmin: '',
     };
   }
 
@@ -281,6 +288,61 @@ export class MeetingView extends React.Component<IProps, IState> {
       });
   }
 
+  handleCreateProposal = (event: any) => {
+    let tempNewArr = [this.state.newAdmin];
+    let tempOldArr = [this.state.oldAdmin];
+
+    this.etherService.proposeAdminChange(
+      this.props.cachedMeeting.data.clubAddress,
+      this.props.cachedMeeting._id,
+      tempNewArr,
+      tempOldArr,
+      this.callbackFn
+    )
+      .then((res: any) => {
+        console.log("proposal created ", res);
+
+        let proposalId = 1;
+
+        if (this.props.cachedMeeting.data.proposals) {
+          proposalId = this.props.cachedMeeting.data.proposals.length + 1;
+        }
+
+        let proposal = {
+          created: (new Date()).getTime(),
+          id: proposalId,
+          newAdmin: tempNewArr,
+          oldAdmin: tempOldArr,
+          voted: 0,
+          state: "Active",
+        }
+        // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchAddProposal(this.props.cachedMeeting._id, proposal);
+        this.props.history.go(0);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
+        console.log("proposal: ", reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleCreateProposal: ' + err);
+        console.log("proposal: ", err);
+      });
+  }
+
+  handleProposalDataChange = (event: any) => {
+    if (event.target.id === "new_address") {
+      this.setState({
+        ...this.state,
+        newAdmin: event.target.value
+      })
+    } else {
+      this.setState({
+        ...this.state,
+        oldAdmin: event.target.value
+      })
+    }
+  }
+
   isUserLoggedOut = () => {
     return this.props.user._id === '';
   }
@@ -393,7 +455,7 @@ export class MeetingView extends React.Component<IProps, IState> {
   handleCreateProposalPane = () => {
     this.setState(prevState => ({
       ...this.state,
-      createPanelOpen: !prevState.createPanelOpen,
+      proposalPanelOpen: !prevState.proposalPanelOpen,
     }))
   }
 
@@ -510,9 +572,36 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-        <CssBaseline />
         <ViewProposal open={this.state.viewPanelOpen} />
-        <CreateProposal open={this.state.createPanelOpen} />
+        <CssBaseline />
+        <Dialog
+          open={this.state.proposalPanelOpen}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Create Proposals"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Enter the address of the new admin to be proposed and old admin to be removed.
+                </DialogContentText>
+            <TextField
+              autoFocus margin="dense" id="new_address" label="New Admin" type="text" fullWidth value={this.state.newAdmin}
+              onChange={(e) => this.handleProposalDataChange(e)}
+            />
+            <TextField
+              autoFocus margin="dense" id="old_address" label="Remove Admin" type="text"
+              fullWidth value={this.state.oldAdmin} onChange={(e) => this.handleProposalDataChange(e)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleCreateProposal} color="primary">
+              Propose
+            </Button>
+            <Button onClick={this.handleCreateProposalPane} color="primary" autoFocus>
+              Exit
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Header />
         {
           this.props.loading.cachedMeeting && cachedMeeting

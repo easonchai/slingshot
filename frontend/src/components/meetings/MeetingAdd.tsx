@@ -38,6 +38,8 @@ export const Hero = styled(Container)({
 })
 
 export const Middle = styled(Grid)({
+	width: '95%',
+	margin: 'auto',
 	padding: '60px 20px'
 })
 
@@ -220,7 +222,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					child: '',
 					images: this.state.form.images,
 					videos: this.state.form.videos,
-					feedback: []
+					feedback: [],
+					proposals: [],
 				},
 				cancel: [],
 				rsvp: [],
@@ -235,7 +238,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		 */
 		this.props.dispatchIsClubNameUnique(event.target.clubName.value)
 			.then((isUnique: boolean) => {
-				if(!isUnique) {
+				if (!isUnique) {
 					this.props.dispatchAddErrorNotification("The name of the club already exists, please choose another one.");
 				} else {
 					/**
@@ -310,7 +313,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						// TODO replace files if needed
 						images: this.state.form.images,
 						videos: this.state.form.videos,
-						feedback: []
+						feedback: [],
+						proposals: [],
 					},
 					cancel: [],
 					rsvp: [],
