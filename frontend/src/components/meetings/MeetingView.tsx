@@ -249,7 +249,7 @@ export class MeetingView extends React.Component<IProps, IState> {
   handleEnd = (event: any) => {
     this.etherService.endEvent(
       this.props.cachedMeeting._id,
-      this.props.cachedMeeting.attend.slice(),
+      this.props.cachedMeeting.data.attend.slice(),
       confirmation => { console.log(confirmation); this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false) }
     )
       .then((res: any) => {

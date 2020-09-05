@@ -13,7 +13,8 @@ export const initState: IState = {
   cachedMeeting: {
     _id: '',
     type: ModelType.PENDING,
-
+    admins: [],
+    
     data: {
       // BACKEND
       //txHash: string;  // only used as primary key for pending TX's
