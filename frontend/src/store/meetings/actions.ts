@@ -5,8 +5,9 @@ import { User } from '../users/actions';
 // TODO refactor duplicate
 export const ModelType = {
   USER: 'user',
+  PENDING: 'pending',
   MEETING: 'meeting',
-  PENDING: 'pending'
+  CLUB: 'club',
 };
 
 export interface Feedback {
@@ -31,6 +32,7 @@ export interface Proposal {
 export interface Meeting {
   _id: string;
   type: string;
+  admins: ReadonlyArray<string>;
 
   data: {
     // BACKEND
@@ -69,13 +71,13 @@ export interface Meeting {
 
     //For proposals
     proposals: ReadonlyArray<Proposal>;
-  },
 
-  // list of user wallets (ethereum address) linked to this meeting per status
-  cancel: ReadonlyArray<string>,
-  rsvp: ReadonlyArray<string>,
-  attend: ReadonlyArray<string>,
-  withdraw: ReadonlyArray<string>
+    // list of user wallets (ethereum address) linked to this meeting per status
+    cancel: ReadonlyArray<string>,
+    rsvp: ReadonlyArray<string>,
+    attend: ReadonlyArray<string>,
+    withdraw: ReadonlyArray<string>
+  },
 };
 
 export interface GroupHashAndAddress {

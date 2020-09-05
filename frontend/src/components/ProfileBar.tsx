@@ -170,9 +170,9 @@ export default function ProfileBar() {
      * Sort by start datetime, with most recent one coming up first.
      *
      * We can make use of redux store by directly working with:
-     *      user.rsvp
-     *      user.attend
-     *      user.withdraw
+     *      user.data.rsvp
+     *      user.data.attend
+     *      user.data.withdraw
      * to find all the meetings the user registered for.
      *
      * Once the user switches to another account,
@@ -180,7 +180,7 @@ export default function ProfileBar() {
      */
     const getUpcoming = () => {
         // Filter out active upcoming meetings.
-        let result = user.rsvp.reduce((result: Meeting[], userMeeting) => {
+        let result = user.data.rsvp.reduce((result: Meeting[], userMeeting) => {
             let found = meetings.find(globalMeeting => {
                 return globalMeeting._id === userMeeting
             })
@@ -204,7 +204,7 @@ export default function ProfileBar() {
     }
 
     const getCancelledMeetings = () => {
-        let result = user.rsvp.reduce((state: Meeting[], meeting) => {
+        let result = user.data.rsvp.reduce((state: Meeting[], meeting) => {
             let found = meetings.find(allMeeting => {
                 return allMeeting._id === meeting
             })
@@ -219,7 +219,7 @@ export default function ProfileBar() {
     }
 
     const getAttended = () => {
-        let result = user.attend.reduce((state: Meeting[], meeting) => {
+        let result = user.data.attend.reduce((state: Meeting[], meeting) => {
             let found = meetings.find(allMeeting => {
                 return allMeeting._id === meeting
             })

@@ -5,23 +5,26 @@ import { Feedback } from '../meetings/actions';
 // TODO refactor duplicate
 export const ModelType = {
   USER: 'user',
+  PENDING: 'pending',
   MEETING: 'meeting',
-  PENDING: 'pending'
+  CLUB: 'club',
 };
 
 export interface User {
   _id: string;
   type: string;
+  admins: ReadonlyArray<string>;
+
   data: {
     ensDomain: string,
     feedback: ReadonlyArray<Feedback>,
-  };
 
-  // list of meeting wallets (smart contract address) linked to this user profile per status
-  cancel: ReadonlyArray<string>;
-  rsvp: ReadonlyArray<string>;
-  attend: ReadonlyArray<string>;
-  withdraw: ReadonlyArray<string>;
+    // list of meeting wallets (smart contract address) linked to this user profile per status
+    cancel: ReadonlyArray<string>;
+    rsvp: ReadonlyArray<string>;
+    attend: ReadonlyArray<string>;
+    withdraw: ReadonlyArray<string>;
+  };
 }
 
 const actionCreator = actionCreatorFactory();

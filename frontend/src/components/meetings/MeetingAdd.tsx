@@ -200,6 +200,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			{
 				_id: hash,
 				type: ModelType.PENDING,
+				admins: [this.props.user._id],
 				data: {
 					name: event.target.meetingName.value,
 					clubName: event.target.clubName.value,
@@ -224,11 +225,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					videos: this.state.form.videos,
 					feedback: [],
 					proposals: [],
+					cancel: [],
+					rsvp: [],
+					attend: [],
+					withdraw: []
 				},
-				cancel: [],
-				rsvp: [],
-				attend: [],
-				withdraw: []
 			});
 	}
 
@@ -290,6 +291,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				this.props.dispatchCreateNextMeeting(this.props.history, {
 					_id: res.hash,
 					type: ModelType.PENDING,
+					admins: [this.props.user._id],
 					data: {
 						name: event.target.meetingName.value,
 						clubName: this.props.cachedMeeting.data.clubName,
@@ -315,11 +317,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						videos: this.state.form.videos,
 						feedback: [],
 						proposals: [],
+						cancel: [],
+						rsvp: [],
+						attend: [],
+						withdraw: []
 					},
-					cancel: [],
-					rsvp: [],
-					attend: [],
-					withdraw: []
 				});
 			}, (reason: any) => {
 				// Code 4001 reflects MetaMask's rejection by user.

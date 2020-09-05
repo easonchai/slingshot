@@ -7,14 +7,17 @@ export const initState: IState = {
   user: {
     _id: '',
     type: ModelType.USER,
+    admins: [],
+
     data: {
       ensDomain: '',
       feedback: [],
-    },
-    cancel: [],
-    rsvp: [],
-    attend: [],
-    withdraw: []
+      
+      cancel: [],
+      rsvp: [],
+      attend: [],
+      withdraw: []
+    }
   }
 };
 
@@ -36,9 +39,12 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        cancel: state.user.cancel.filter(meeting => meeting !== action.payload.meetingAddress),
-        rsvp: [...state.user.rsvp, action.payload.meetingAddress]
-      }
+        data: {
+          ...state.user.data,
+          cancel: state.user.data.cancel.filter(meeting => meeting !== action.payload.meetingAddress),
+          rsvp: [...state.user.data.rsvp, action.payload.meetingAddress]
+        }
+      },
     };
   }
 
@@ -47,8 +53,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter((address) => address !== action.payload.meetingAddress),
-        cancel: [...state.user.cancel, action.payload.meetingAddress]
+        data: {
+          ...state.user.data,
+          rsvp: state.user.data.rsvp.filter((address) => address !== action.payload.meetingAddress),
+          cancel: [...state.user.data.cancel, action.payload.meetingAddress]
+        }
       }
     };
   }
@@ -58,8 +67,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
-        attend: [...state.user.attend, action.payload.meetingAddress]
+        data: {
+          ...state.user.data,
+          rsvp: state.user.data.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+          attend: [...state.user.data.attend, action.payload.meetingAddress]
+        }
       }
     };
   }
@@ -69,8 +81,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: [...state.user.rsvp, action.payload.meetingAddress],
-        attend: state.user.attend.filter(meeting => meeting !== action.payload.meetingAddress)
+        data: {
+          ...state.user.data,
+          rsvp: [...state.user.data.rsvp, action.payload.meetingAddress],
+          attend: state.user.data.attend.filter(meeting => meeting !== action.payload.meetingAddress)
+        }
       }
     };
   }
@@ -109,9 +124,12 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
-        attend: state.user.attend.filter(meeting => meeting !== action.payload.meetingAddress),
-        withdraw: [...state.user.withdraw, action.payload.meetingAddress]
+        data: {
+          ...state.user.data,
+          rsvp: state.user.data.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+          attend: state.user.data.attend.filter(meeting => meeting !== action.payload.meetingAddress),
+          withdraw: [...state.user.data.withdraw, action.payload.meetingAddress]
+        }
       }
     };
   }

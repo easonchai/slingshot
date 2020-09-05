@@ -62,22 +62,22 @@ export class UsersList extends React.Component<IProps, IState> {
   }
 
   componentDidMount() {
-    this.props.cachedMeeting.withdraw.map(p => {
+    this.props.cachedMeeting.data.withdraw.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'WITHDRAWN' }] }))
       return null;
     });
 
-    this.props.cachedMeeting.attend.map(p => {
+    this.props.cachedMeeting.data.attend.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => { this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'ATTENDED' }] }) })
       return null;
     });
 
-    this.props.cachedMeeting.rsvp.map(p => {
+    this.props.cachedMeeting.data.rsvp.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: `RSVP'D` }] }))
       return null;
     });
 
-    this.props.cachedMeeting.cancel.map(p => {
+    this.props.cachedMeeting.data.cancel.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'CANCELLED' }] }))
       return null;
     });
@@ -121,7 +121,7 @@ export class UsersList extends React.Component<IProps, IState> {
     if (this.props.loading.rsvpConfirmation)
       return `Please hold on until the RSVP transaction confirms.`;
 
-    if (this.props.cachedMeeting.attend.includes(participantWallet))
+    if (this.props.cachedMeeting.data.attend.includes(participantWallet))
       return `Already marked as attendee.`;
 
     if (!this.props.cachedMeeting.data.isStarted)
@@ -134,7 +134,7 @@ export class UsersList extends React.Component<IProps, IState> {
   }
 
   getMarkAbsenceButtonTooltipText = (participantWallet: string) => {
-    if (!this.props.cachedMeeting.attend.includes(participantWallet))
+    if (!this.props.cachedMeeting.data.attend.includes(participantWallet))
       return `The participant is not marked as attendee.`;
 
     if (!this.props.cachedMeeting.data.isStarted)
@@ -148,13 +148,13 @@ export class UsersList extends React.Component<IProps, IState> {
 
   isMarkAttendanceButtonDisabled = (participantWallet: string) => {
     return this.props.loading.rsvpConfirmation
-      || this.props.cachedMeeting.attend.includes(participantWallet)
+      || this.props.cachedMeeting.data.attend.includes(participantWallet)
       || !this.props.cachedMeeting.data.isStarted
       || this.props.cachedMeeting.data.isEnded
   }
 
   isMarkAbsenceButtonDisabled = (participantWallet: string) => {
-    return !this.props.cachedMeeting.attend.includes(participantWallet)
+    return !this.props.cachedMeeting.data.attend.includes(participantWallet)
       || !this.props.cachedMeeting.data.isStarted
       || this.props.cachedMeeting.data.isEnded
   }
