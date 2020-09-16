@@ -585,7 +585,7 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-        <ViewProposal open={this.state.viewPanelOpen} proposals={cachedMeeting.data.proposals} />
+        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} />
         <CssBaseline />
         <Dialog
           open={this.state.proposalPanelOpen}

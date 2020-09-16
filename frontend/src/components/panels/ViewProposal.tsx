@@ -117,7 +117,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                     this.props.proposals.map(data => {
                                         return (
                                             <TabPanel value={this.state.value} index={data.id - 1}>
-                                                <Typography component="div" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+                                                <Typography component="div" style={{ paddingLeft: '1rem', paddingRight: '1rem', display: 'inline-block' }}>
                                                     <Box fontWeight="700" fontSize="2rem">
                                                         {`Proposal ${data.id}`}
                                                     </Box>
@@ -130,10 +130,22 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                                     </Box>
                                                     <Box fontWeight="300" fontSize="1rem">
                                                         New Admins: <br />
-                                                        {data.newAdmin.join("\n")}
+                                                        {data.newAdmin.map(admin => {
+                                                            return (
+                                                                <div>
+                                                                    {admin} <br />
+                                                                </div>
+                                                            )
+                                                        })}
                                                         <br /><br />
                                                         Old Admins: <br />
-                                                        {data.oldAdmin.join("\n")}
+                                                        {data.oldAdmin.map(admin => {
+                                                            return (
+                                                                <div>
+                                                                    {admin} <br />
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </Box>
                                                     <br /><br />
                                                     <Box display="flex" flexDirection="row" fontWeight="500" fontSize="1.2rem" alignItems="center">
