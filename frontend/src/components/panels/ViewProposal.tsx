@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Tabs, Tab, Grid, Typography, Box, makeStyles, Theme } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Tabs, Tab, Grid, Typography, Box, makeStyles, Theme, DialogContentText } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { Proposal } from '../../store/meetings/actions';
+import EtherService from '../../services/EtherService';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -51,6 +52,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface IProps {
     open: boolean;
     proposals: ReadonlyArray<Proposal>;
+    clubAddress: string;
 }
 
 interface IState {
@@ -60,12 +62,16 @@ interface IState {
 
 export default class ViewProposal extends React.Component<IProps, IState> {
     // classes = useStyles();
+    etherService: EtherService;
 
-    componentWillMount = () => {
-        this.setState({
+    constructor(props: any) {
+        super(props);
+        this.etherService = EtherService.getInstance();
+
+        this.state = {
             open: this.props.open,
             value: 0,
-        })
+        }
     }
 
     componentDidUpdate(prevProps: any) {
@@ -76,11 +82,41 @@ export default class ViewProposal extends React.Component<IProps, IState> {
         }
     }
 
+    callbackFn = (result: any) => {
+        console.log("cb fn ", result);
+    }
+
     handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         this.setState({
             value: newValue,
         })
     };
+
+    hasProposal = () => {
+        if (this.props.proposals.length > 0) {
+            return true
+        }
+        return false
+    }
+
+    handleVote = () => {
+        this.etherService.approveProposal(
+            this.props.clubAddress,
+            (this.state.value + 1),
+            this.callbackFn
+        )
+            .then((res: any) => {
+                console.log("success approve ", res);
+                //   this.props.dispatchPauseMeeting(this.props.cachedMeeting._id);
+            }, (reason: any) => {
+                //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
+                console.log("pause: ", reason);
+            })
+            .catch((err: any) => {
+                //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
+                console.log("pause: ", err);
+            });
+    }
 
     render() {
         return (
@@ -94,73 +130,80 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                 >
                     <DialogTitle id="alert-dialog-title">{"View Proposals"}</DialogTitle>
                     <DialogContent>
-                        <Grid container>
-                            <Grid item xs={4} style={{ borderRight: '1px solid #8C8C8C', paddingRight: '2rem' }}>
-                                <Tabs
-                                    orientation="vertical"
-                                    variant="scrollable"
-                                    value={this.state.value}
-                                    onChange={this.handleChange}
-                                    aria-label="Proposal Tabs"
-                                // className={this.classes.tabs}
-                                >
-                                    {
-                                        this.props.proposals.map(data => {
-                                            let title = "Proposal " + data.id;
-                                            return (<Tab label={title} {...a11yProps(data.id - 1)} />);
-                                        })
-                                    }
-                                </Tabs>
-                            </Grid>
-                            <Grid item xs={8}>
-                                {
-                                    this.props.proposals.map(data => {
-                                        return (
-                                            <TabPanel value={this.state.value} index={data.id - 1}>
-                                                <Typography component="div" style={{ paddingLeft: '1rem', paddingRight: '1rem', display: 'inline-block' }}>
-                                                    <Box fontWeight="700" fontSize="2rem">
-                                                        {`Proposal ${data.id}`}
-                                                    </Box>
-                                                    <Box fontWeight="300" fontSize="1rem">
-                                                        Created {(new Date(data.created)).toLocaleDateString()}
-                                                    </Box>
-                                                    <br />
-                                                    <Box fontWeight="400" fontSize="1rem">
-                                                        Proposal Details: <br />
-                                                    </Box>
-                                                    <Box fontWeight="300" fontSize="1rem">
-                                                        New Admins: <br />
-                                                        {data.newAdmin.map(admin => {
-                                                            return (
-                                                                <div>
-                                                                    {admin} <br />
-                                                                </div>
-                                                            )
-                                                        })}
-                                                        <br /><br />
+                        {
+                            this.hasProposal() ?
+                                <Grid container>
+                                    <Grid item xs={4} style={{ borderRight: '1px solid #8C8C8C', paddingRight: '2rem' }}>
+                                        <Tabs
+                                            orientation="vertical"
+                                            variant="scrollable"
+                                            value={this.state.value}
+                                            onChange={this.handleChange}
+                                            aria-label="Proposal Tabs"
+                                        // className={this.classes.tabs}
+                                        >
+                                            {
+                                                this.props.proposals.map(data => {
+                                                    let title = "Proposal " + data.id;
+                                                    return (<Tab label={title} {...a11yProps(data.id - 1)} />);
+                                                })
+                                            }
+                                        </Tabs>
+                                    </Grid>
+                                    <Grid item xs={8}>
+                                        {
+                                            this.props.proposals.map(data => {
+                                                return (
+                                                    <TabPanel value={this.state.value} index={data.id - 1}>
+                                                        <Typography component="div" style={{ paddingLeft: '1rem', paddingRight: '1rem', display: 'inline-block' }}>
+                                                            <Box fontWeight="700" fontSize="2rem">
+                                                                {`Proposal ${data.id}`}
+                                                            </Box>
+                                                            <Box fontWeight="300" fontSize="1rem">
+                                                                Created {(new Date(data.created)).toLocaleDateString()}
+                                                            </Box>
+                                                            <br />
+                                                            <Box fontWeight="400" fontSize="1rem">
+                                                                Proposal Details: <br />
+                                                            </Box>
+                                                            <Box fontWeight="300" fontSize="1rem">
+                                                                New Admins: <br />
+                                                                {data.newAdmin.map(admin => {
+                                                                    return (
+                                                                        <div>
+                                                                            {admin} <br />
+                                                                        </div>
+                                                                    )
+                                                                })}
+                                                                <br /><br />
                                                         Old Admins: <br />
-                                                        {data.oldAdmin.map(admin => {
-                                                            return (
-                                                                <div>
-                                                                    {admin} <br />
-                                                                </div>
-                                                            )
-                                                        })}
-                                                    </Box>
-                                                    <br /><br />
-                                                    <Box display="flex" flexDirection="row" fontWeight="500" fontSize="1.2rem" alignItems="center">
-                                                        <CheckCircleIcon style={{ marginRight: '1rem', color: "#4cae4f" }} />
-                                                        {data.state}
-                                                    </Box>
-                                                </Typography>
-                                            </TabPanel>);
-                                    })
-                                }
-                            </Grid>
-                        </Grid>
+                                                                {data.oldAdmin.map(admin => {
+                                                                    return (
+                                                                        <div>
+                                                                            {admin} <br />
+                                                                        </div>
+                                                                    )
+                                                                })}
+                                                            </Box>
+                                                            <br /><br />
+                                                            <Box display="flex" flexDirection="row" fontWeight="500" fontSize="1.2rem" alignItems="center">
+                                                                <CheckCircleIcon style={{ marginRight: '1rem', color: "#4cae4f" }} />
+                                                                {data.state}
+                                                            </Box>
+                                                        </Typography>
+                                                    </TabPanel>);
+                                            })
+                                        }
+                                    </Grid>
+                                </Grid>
+                                :
+                                <DialogContentText>
+                                    No proposals have been created!
+                                </DialogContentText>
+                        }
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => {
+                        <Button disabled={this.hasProposal()} onClick={() => {
                             this.setState({
                                 open: this.props.open
                             })
