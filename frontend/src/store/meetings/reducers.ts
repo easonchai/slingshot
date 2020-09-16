@@ -317,5 +317,39 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, actions.PauseMeeting)) {
+    if (state.cachedMeeting._id === action.payload) {
+      return {
+        ...state,
+        cachedMeeting: {
+          ...state.cachedMeeting,
+          data: {
+            ...state.cachedMeeting.data,
+            isPaused: true
+          }
+        }
+      };
+    }
+
+    return state;
+  }
+
+  if (isType(action, actions.AddProposal)) {
+    if (state.cachedMeeting._id === action.payload.meetingAddress) {
+      return {
+        ...state,
+        cachedMeeting: {
+          ...state.cachedMeeting,
+          data: {
+            ...state.cachedMeeting.data,
+            proposals: [...state.cachedMeeting.data.proposals, action.payload.proposal]
+          }
+        }
+      };
+    }
+
+    return state;
+  }
+
   return state;
 }

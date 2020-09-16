@@ -16,7 +16,6 @@ import { MediaDisplay } from '../MediaDisplay';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { History } from 'history';
 import ViewProposal from '../panels/ViewProposal';
-import CreateProposal from '../panels/CreateProposal';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -79,7 +78,7 @@ export interface IProps {
   dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
-  dispatchPauseMeeting(meetingAddress: string): void;
+  dispatchPauseMeeting(meetingAddress: String): void;
   dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
 
   dispatchAddErrorNotification(message: String): void;
@@ -289,8 +288,22 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleCreateProposal = (event: any) => {
-    let tempNewArr = [this.state.newAdmin];
-    let tempOldArr = [this.state.oldAdmin];
+    let tempNewArr: string[] = [];
+    let tempOldArr: string[] = [];
+
+    let splitNew = this.state.newAdmin.split(",");
+    if (!this.state.oldAdmin) {
+      tempOldArr = ["0x0000000000000000000000000000000000000000"]
+    } else {
+      let splitOld = this.state.oldAdmin.split(",");
+      splitOld.map((unprocessedData) => tempOldArr.push(unprocessedData.trim()));
+    }
+
+    splitNew.map((unprocessedData) => tempNewArr.push(unprocessedData.trim()));
+
+
+    console.log("New admins", tempNewArr);
+    console.log("Old admins", tempOldArr);
 
     this.etherService.proposeAdminChange(
       this.props.cachedMeeting.data.clubAddress,
@@ -307,7 +320,7 @@ export class MeetingView extends React.Component<IProps, IState> {
         if (this.props.cachedMeeting.data.proposals) {
           proposalId = this.props.cachedMeeting.data.proposals.length + 1;
         }
-
+        console.log("proposal id", proposalId)
         let proposal = {
           created: (new Date()).getTime(),
           id: proposalId,
@@ -318,7 +331,7 @@ export class MeetingView extends React.Component<IProps, IState> {
         }
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchAddProposal(this.props.cachedMeeting._id, proposal);
-        this.props.history.go(0);
+        this.handleCreateProposalPane();
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
         console.log("proposal: ", reason);
@@ -572,7 +585,7 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-        <ViewProposal open={this.state.viewPanelOpen} />
+        <ViewProposal open={this.state.viewPanelOpen} proposals={cachedMeeting.data.proposals} />
         <CssBaseline />
         <Dialog
           open={this.state.proposalPanelOpen}
@@ -583,13 +596,13 @@ export class MeetingView extends React.Component<IProps, IState> {
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               Enter the address of the new admin to be proposed and old admin to be removed.
-                </DialogContentText>
+            </DialogContentText>
             <TextField
-              autoFocus margin="dense" id="new_address" label="New Admin" type="text" fullWidth value={this.state.newAdmin}
+              autoFocus margin="dense" id="new_address" label="New Admin (separated by comma)" type="text" fullWidth value={this.state.newAdmin}
               onChange={(e) => this.handleProposalDataChange(e)}
             />
             <TextField
-              autoFocus margin="dense" id="old_address" label="Remove Admin" type="text"
+              autoFocus margin="dense" id="old_address" label="Remove Admin (separated by comma)" type="text"
               fullWidth value={this.state.oldAdmin} onChange={(e) => this.handleProposalDataChange(e)}
             />
           </DialogContent>
