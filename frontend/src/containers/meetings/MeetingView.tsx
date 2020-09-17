@@ -183,6 +183,32 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
           dispatch(meetingActions.AddProposal(payload));
         });
     },
+
+    dispatchVoteProposal: (meetingAddress: string, proposal: Proposal) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        proposal: proposal,
+      };
+
+      axios
+        .put('/api/meeting/proposal/vote', payload)
+        .then(res => {
+          dispatch(meetingActions.VoteProposal(payload));
+        });
+    },
+
+    dispatchExecuteProposal: (meetingAddress: string, proposal: Proposal) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        proposal: proposal,
+      };
+
+      axios
+        .put('/api/meeting/proposal/execute', payload)
+        .then(res => {
+          dispatch(meetingActions.ExecuteProposal(payload));
+        });
+    },
   };
 };
 

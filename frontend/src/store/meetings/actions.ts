@@ -93,11 +93,6 @@ export interface GroupMeetingAndProposal {
   proposal: Proposal,
 }
 
-export interface GroupMeetingAndProposalId {
-  meetingAddress: string,
-  proposalId: number,
-}
-
 const actionCreator = actionCreatorFactory();
 
 export const UpdateOrganiserEthereumAddress = actionCreator<User>(AppActions.UPDATE_ORGANIZER_ETHEREUM_ADDRESS);
@@ -115,8 +110,8 @@ export const UpdateUserWithdraw = actionCreator<GroupMeetingAndUserAddress>(AppA
 export const CreateNextMeeting = actionCreator<Meeting>(AppActions.CREATE_NEXT_MEETING);
 export const PauseMeeting = actionCreator<string>(AppActions.PAUSE_MEETING);
 export const AddProposal = actionCreator<GroupMeetingAndProposal>(AppActions.ADD_PROPOSAL);
-export const VoteProposal = actionCreator<GroupMeetingAndProposalId>(AppActions.VOTE_PROPOSAL);
-export const ExecuteProposal = actionCreator<GroupMeetingAndProposalId>(AppActions.EXECUTE_PROPOSAL);
+export const VoteProposal = actionCreator<GroupMeetingAndProposal>(AppActions.VOTE_PROPOSAL);
+export const ExecuteProposal = actionCreator<GroupMeetingAndProposal>(AppActions.EXECUTE_PROPOSAL);
 
 export const actions = {
   UpdateOrganiserEthereumAddress,
