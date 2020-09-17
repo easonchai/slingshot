@@ -373,5 +373,33 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  // if (isType(action, actions.ApproveProposal)) {
+  //   const updatedMeetings = state.meetings.map(meeting => {
+  //     if (meeting._id === action.payload.meetingAddress) {
+  //       return {
+  //         ...meeting,
+  //         data: {
+  //           ...meeting.data,
+  //           proposals: [...meeting.data.proposals, action.payload.proposal]
+  //         }
+  //       };
+  //     }
+
+  //     return meeting;
+  //   });
+
+  //   return {
+  //     ...state,
+  //     meetings: updatedMeetings,
+  //     cachedMeeting: {
+  //       ...state.cachedMeeting,
+  //       data: {
+  //         ...state.cachedMeeting.data,
+  //         proposals: [...state.cachedMeeting.data.proposals, action.payload.proposal]
+  //       }
+  //     }
+  //   };
+  // }
+
   return state;
 }

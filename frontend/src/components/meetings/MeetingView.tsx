@@ -301,10 +301,6 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     splitNew.map((unprocessedData) => tempNewArr.push(unprocessedData.trim()));
 
-
-    console.log("New admins", tempNewArr);
-    console.log("Old admins", tempOldArr);
-
     this.etherService.proposeAdminChange(
       this.props.cachedMeeting.data.clubAddress,
       this.props.cachedMeeting._id,
@@ -313,14 +309,12 @@ export class MeetingView extends React.Component<IProps, IState> {
       this.callbackFn
     )
       .then((res: any) => {
-        console.log("proposal created ", res);
-
         let proposalId = 1;
 
         if (this.props.cachedMeeting.data.proposals) {
           proposalId = this.props.cachedMeeting.data.proposals.length + 1;
         }
-        console.log("proposal id", proposalId)
+
         let proposal = {
           created: (new Date()).getTime(),
           id: proposalId,
@@ -483,10 +477,10 @@ export class MeetingView extends React.Component<IProps, IState> {
       this.callbackFn
     )
       .then((res: any) => {
-        console.log("success withdraw ", res);
+        console.log("success pause ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchPauseMeeting(this.props.cachedMeeting._id);
-        this.props.history.go(0);
+        // this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
         console.log("pause: ", reason);

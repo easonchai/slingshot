@@ -100,9 +100,10 @@ export default class ViewProposal extends React.Component<IProps, IState> {
     }
 
     handleVote = () => {
+        let id = this.state.value + 1
         this.etherService.approveProposal(
             this.props.clubAddress,
-            (this.state.value + 1),
+            id,
             this.callbackFn
         )
             .then((res: any) => {
@@ -176,7 +177,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                                                     )
                                                                 })}
                                                                 <br /><br />
-                                                        Old Admins: <br />
+                                                                Old Admins: <br />
                                                                 {data.oldAdmin.map(admin => {
                                                                     return (
                                                                         <div>
@@ -184,6 +185,9 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                                                         </div>
                                                                     )
                                                                 })}
+                                                                <br /><br />
+                                                                Votes: <br />
+                                                                {`${data.voted}`}
                                                             </Box>
                                                             <br /><br />
                                                             <Box display="flex" flexDirection="row" fontWeight="500" fontSize="1.2rem" alignItems="center">
@@ -203,11 +207,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                         }
                     </DialogContent>
                     <DialogActions>
-                        <Button disabled={this.hasProposal()} onClick={() => {
-                            this.setState({
-                                open: this.props.open
-                            })
-                        }} color="primary">
+                        <Button disabled={!this.hasProposal()} onClick={this.handleVote} color="primary">
                             Vote
                         </Button>
                         <Button onClick={() => {

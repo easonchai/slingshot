@@ -426,4 +426,28 @@ router.put('/pause', async (req: Request, res: Response, next: NextFunction) => 
         .catch(err => next(err));
 });
 
+/**
+ * Update proposal
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/proposal/add', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'data.proposals': req.body['proposal'] },
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
 export default router;
