@@ -52,7 +52,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface IProps {
     open: boolean;
     proposals: ReadonlyArray<Proposal>;
+    meetingAddress: string;
     clubAddress: string;
+    dispatchExecuteProposal(meetingAddress: string, proposal: Proposal): void;
+    dispatchVoteProposal(meetingAddress: string, proposal: Proposal): void;
 }
 
 interface IState {
@@ -99,23 +102,61 @@ export default class ViewProposal extends React.Component<IProps, IState> {
         return false
     }
 
+    retrieveProposal = (id: number) => {
+        return this.props.proposals.filter(proposal => proposal.id === id);
+    }
+
     handleVote = () => {
         let id = this.state.value + 1
+        let proposalArray = this.retrieveProposal(id);
+        let updatedProposal = proposalArray[0];
+
+        updatedProposal.voted = updatedProposal.voted + 1
+
+        console.log("New votes: " + updatedProposal.voted);
+
         this.etherService.approveProposal(
             this.props.clubAddress,
             id,
             this.callbackFn
         )
             .then((res: any) => {
-                console.log("success approve ", res);
-                //   this.props.dispatchPauseMeeting(this.props.cachedMeeting._id);
+                console.log("success vote ", res);
+                this.props.dispatchVoteProposal(this.props.meetingAddress, updatedProposal);
             }, (reason: any) => {
                 //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
-                console.log("pause: ", reason);
+                console.log("vote: ", reason);
             })
             .catch((err: any) => {
                 //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
-                console.log("pause: ", err);
+                console.log("vote: ", err);
+            });
+    }
+
+    handleExecute = () => {
+        let id = this.state.value + 1
+        let proposalArray = this.retrieveProposal(id);
+        let updatedProposal = proposalArray[0];
+
+        updatedProposal.state = "Executed"
+
+        console.log("New state: " + updatedProposal.state);
+
+        this.etherService.approveProposal(
+            this.props.clubAddress,
+            id,
+            this.callbackFn
+        )
+            .then((res: any) => {
+                console.log("success execute ", res);
+                this.props.dispatchExecuteProposal(this.props.meetingAddress, updatedProposal);
+            }, (reason: any) => {
+                //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
+                console.log("execute: ", reason);
+            })
+            .catch((err: any) => {
+                //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
+                console.log("execute: ", err);
             });
     }
 

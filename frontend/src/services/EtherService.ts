@@ -39,8 +39,8 @@ export default class EtherService {
 
     this.clubABI = [
       'event NewMeetingEvent(address ownerAddr, address contractAddr)',
-      'event ProposalExecuted(address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
-      'event ProposeAdminChange(uint counter, address payable target, address[] addAdmins, address[] removeAdmins)',
+      'event ProposalExecuted(address payable target, address payable addAdmins, address payable removeAdmins)',
+      'event ProposeAdminChange(uint counter, address payable target, address addAdmins, address removeAdmins)',
       'event ApproveProposal(uint proposal)',
       // 'event PoolPayout(uint amount)',
       'function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin returns(address)',
@@ -48,7 +48,7 @@ export default class EtherService {
       'function getBalance() external view returns (uint)',
       'function approveProposal(uint _proposal) external onlyAdmin',
       'function executeProposal(uint _proposal) external onlyAdmin',
-      'function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external',
+      'function proposeAdminChange(address _target, address calldata _addAdmins, address calldata _removeAdmins) external',
       'function pause(address payable _meeting, uint _pauseUntil) external onlyAdmin',
     ];
 

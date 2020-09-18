@@ -80,7 +80,8 @@ export interface IProps {
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
   dispatchPauseMeeting(meetingAddress: String): void;
   dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
-
+  dispatchExecuteProposal(meetingAddress: string, proposal: Proposal): void;
+  dispatchVoteProposal(meetingAddress: string, proposal: Proposal): void;
   dispatchAddErrorNotification(message: String): void;
 }
 
@@ -579,7 +580,9 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress} />
+        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress}
+          meetingAddress={this.props.cachedMeeting._id} dispatchExecuteProposal={this.props.dispatchExecuteProposal} dispatchVoteProposal={this.props.dispatchVoteProposal}
+        />
         <CssBaseline />
         <Dialog
           open={this.state.proposalPanelOpen}
