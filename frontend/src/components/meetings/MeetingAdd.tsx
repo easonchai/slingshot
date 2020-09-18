@@ -2,6 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
+import { Club } from '../../store/clubs/actions';
 import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
 import { initState } from '../../store/meetings/reducers';
 import { User } from '../../store/users/actions';
@@ -91,7 +92,7 @@ interface IProps {
 	dispatchUpdateCachedMeeting(meeting: Meeting): void;
 
 	dispatchIsClubNameUnique(name: string): Promise<boolean>;
-	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
+	dispatchCreateFirstClubAndMeeting(history: History, club: Club, meeting: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateOrganiserEthereumAddress(organizer: User): void;
 
@@ -195,8 +196,19 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
-	createFirstMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
-		this.props.dispatchCreateFirstMeeting(this.props.history,
+	createFirstClubAndMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
+		this.props.dispatchCreateFirstClubAndMeeting(this.props.history,
+			{
+				_id: clubAddress,
+				type: ModelType.CLUB,
+				admins: [this.props.user._id],
+				data: {
+					name: event.target.clubName.value,
+					deployerContractAddress: '0x4F40574184bC0bed3eE6df209118bD0eE06EC067',  // TODO: pull dynamically once we will have more versions
+					organizerAddress: this.props.user._id,
+					proposals: []
+				}
+			},
 			{
 				_id: hash,
 				type: ModelType.PENDING,
@@ -254,7 +266,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						this.callbackDeployedMeeting
 					)
 						.then((ethersResponse: any) => {
-							this.createFirstMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
+							this.createFirstClubAndMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
 						}, (reason: any) => {
 							// Code 4001 reflects MetaMask's rejection by user.
 							// Hence we don't display it as an error.

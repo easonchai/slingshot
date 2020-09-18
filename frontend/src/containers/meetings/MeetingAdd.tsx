@@ -3,6 +3,7 @@ import { Dispatch } from 'react';
 import { compose, Action } from 'redux';
 import { connect } from 'react-redux';
 import { History } from 'history';
+import { actions as clubActions, Club } from '../../store/clubs/actions';
 import { actions as meetingActions, Meeting, GroupHashAndAddress } from '../../store/meetings/actions';
 import { User } from '../../store/users/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
@@ -24,15 +25,22 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
       dispatch(meetingActions.ReadCachedMeeting(meeting));
     },
 
-    dispatchCreateFirstMeeting: (history: History, payload: Meeting) => {
+    dispatchCreateFirstClubAndMeeting: (history: History, club: Club, meeting: Meeting) => {
       dispatch(loadingActions.UpdateMeetingDeploymentLoading(true));
 
       axios
-        .post('/api/meeting/create', payload)
-        .then(res => {
-          dispatch(meetingActions.CreateFirstMeeting(payload));
-          history.push('/meeting/' + payload._id);
-        });
+      .post('/api/club/create', club)
+      .then(res => {
+          dispatch(clubActions.CreateClub(club));
+
+          axios
+          .post('/api/meeting/create', meeting)
+          .then(res => {
+            dispatch(meetingActions.CreateFirstMeeting(meeting));
+            history.push('/meeting/' + meeting._id);
+          });
+      });
+
     },
 
     dispatchUpdateMeetingContractAddress: (history: History, payload: GroupHashAndAddress) => {

@@ -29,6 +29,22 @@ export interface Proposal {
   state: string;
 }
 
+export interface Club {
+  _id: string;
+  type: string;
+  admins: ReadonlyArray<string>;
+
+  data: {
+    name: string;
+
+    deployerContractAddress: string;
+    organizerAddress: string;
+
+    //For proposals
+    proposals: ReadonlyArray<Proposal>;
+  },
+};
+
 export interface Meeting {
   _id: string;
   type: string;
