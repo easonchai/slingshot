@@ -98,6 +98,10 @@ contract Meeting is Ownable {
         emit RSVPEvent(msg.sender);
     }
 
+    function testingCheckStake(address _guy) external view returns (uint stake) {
+        stake = addressToParticipant[_guy].stakedAmount;
+    }
+
     function getChange() external notPaused{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(amnt > 0);
