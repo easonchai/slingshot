@@ -38,6 +38,7 @@ const Logo = styled(CardMedia)({
 })
 
 interface IProps {
+  dispatchGetAllClubs(): void;
   dispatchGetAllMeetings(): void;
 }
 
@@ -57,6 +58,7 @@ export class Home extends React.Component<IProps> {
   };
 
   componentWillMount() {
+    this.props.dispatchGetAllClubs();
     this.props.dispatchGetAllMeetings();
   }
 

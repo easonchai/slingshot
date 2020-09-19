@@ -158,8 +158,8 @@ router.put('/rsvp/add', async (req: Request, res: Response, next: NextFunction) 
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
             {
-                $push: { 'rsvp': req.body['userAddress'] },
-                $pull: { 'cancel': req.body['userAddress'] },
+                $push: { 'data.rsvp': req.body['userAddress'] },
+                $pull: { 'data.cancel': req.body['userAddress'] },
             },
             { safe: true, upsert: true }
         )
@@ -168,8 +168,8 @@ router.put('/rsvp/add', async (req: Request, res: Response, next: NextFunction) 
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
                     {
-                        $push: { 'rsvp': req.body['meetingAddress'] },
-                        $pull: { 'cancel': req.body['meetingAddress'] },
+                        $push: { 'data.rsvp': req.body['meetingAddress'] },
+                        $pull: { 'data.cancel': req.body['meetingAddress'] },
                     },
                     { safe: true, upsert: true }
                 )
@@ -196,8 +196,8 @@ router.put('/rsvp/cancel', async (req: Request, res: Response, next: NextFunctio
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
             {
-                $push: { 'cancel': req.body['userAddress'] },
-                $pull: { 'rsvp': req.body['userAddress'] },
+                $push: { 'data.cancel': req.body['userAddress'] },
+                $pull: { 'data.rsvp': req.body['userAddress'] },
             },
             { safe: true, upsert: true }
         )
@@ -206,8 +206,8 @@ router.put('/rsvp/cancel', async (req: Request, res: Response, next: NextFunctio
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
                     {
-                        $push: { 'cancel': req.body['meetingAddress'] },
-                        $pull: { 'rsvp': req.body['meetingAddress'] }
+                        $push: { 'data.cancel': req.body['meetingAddress'] },
+                        $pull: { 'data.rsvp': req.body['meetingAddress'] }
                     },
                     { safe: true, upsert: true }
                 )
@@ -300,8 +300,8 @@ router.put('/attendance', async (req: Request, res: Response, next: NextFunction
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
             {
-                $push: { 'attend': req.body['userAddress'] },
-                $pull: { 'rsvp': req.body['userAddress'] }
+                $push: { 'data.attend': req.body['userAddress'] },
+                $pull: { 'data.rsvp': req.body['userAddress'] }
             },
             { safe: true, upsert: true }
         )
@@ -310,8 +310,46 @@ router.put('/attendance', async (req: Request, res: Response, next: NextFunction
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
                     {
-                        $push: { 'attend': req.body['meetingAddress'] },
-                        $pull: { 'rsvp': req.body['meetingAddress'] }
+                        $push: { 'data.attend': req.body['meetingAddress'] },
+                        $pull: { 'data.rsvp': req.body['meetingAddress'] }
+                    },
+                    { safe: true, upsert: true }
+                )
+                .then(user => {
+                    res
+                        .status(OK)
+                        .json(meeting);
+                })
+                .catch(err => next(err));
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Update rsvp & attend lists both for provided meeting as well as the participant.
+ * 
+ * @params  meetingAddress  The meeting's address to look for.
+ * @params  userAddress     The user's address to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/absence', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'data.rsvp': req.body['userAddress'] },
+                $pull: { 'data.attend': req.body['userAddress'] }
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            Models.Item
+                .updateOne(
+                    { _id: req.body['userAddress'], type: ModelType.USER },
+                    {
+                        $push: { 'data.rsvp': req.body['meetingAddress'] },
+                        $pull: { 'data.attend': req.body['meetingAddress'] }
                     },
                     { safe: true, upsert: true }
                 )
@@ -373,10 +411,10 @@ router.put('/withdraw', async (req: Request, res: Response, next: NextFunction) 
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
             {
-                $push: { 'withdraw': req.body['userAddress'] },
+                $push: { 'data.withdraw': req.body['userAddress'] },
                 $pull: {
-                    'rsvp': req.body['userAddress'],
-                    'attend': req.body['userAddress']
+                    'data.rsvp': req.body['userAddress'],
+                    'data.attend': req.body['userAddress']
                 }
             },
             { safe: true, upsert: true }
@@ -386,10 +424,10 @@ router.put('/withdraw', async (req: Request, res: Response, next: NextFunction) 
                 .updateOne(
                     { _id: req.body['userAddress'], type: ModelType.USER },
                     {
-                        $push: { 'withdraw': req.body['meetingAddress'] },
+                        $push: { 'data.withdraw': req.body['meetingAddress'] },
                         $pull: {
-                            'rsvp': req.body['meetingAddress'],
-                            'attend': req.body['meetingAddress']
+                            'data.rsvp': req.body['meetingAddress'],
+                            'data.attend': req.body['meetingAddress']
                         }
                     },
                     { safe: true, upsert: true }

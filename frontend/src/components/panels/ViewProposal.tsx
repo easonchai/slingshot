@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Tabs, Tab, Grid, Typography, Box, makeStyles, Theme, DialogContentText } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { Proposal } from '../../store/meetings/actions';
+import { Proposal } from '../../store/interfaces';
 import EtherService from '../../services/EtherService';
 
 interface TabPanelProps {

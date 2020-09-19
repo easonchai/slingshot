@@ -1,12 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/actions';
 import { Card, CardContent, CardHeader, Typography, CardActions, Button, CircularProgress, CardMedia } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import SharePopup from "../SharePopup"
 import EtherService from '../../services/EtherService';
-import { User } from '../../store/users/actions';
-import { Loading } from '../../store/loading/actions';
+import { User, Meeting, Loading } from '../../store/interfaces';
 
 const CustButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -135,18 +133,18 @@ export class MeetingPreview extends React.Component<IProps> {
               ?
               this.props.loading.rsvpConfirmation ? <CircularProgress color="secondary" /> :
                 (<CustButton size="small" onClick={this.handleRSVP}
-                  disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
-                  style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                  disabled={this.props.user.data.rsvp.includes(this.props.meeting._id)}
+                  style={this.props.user.data.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
                     { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
-                  {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
+                  {this.props.user.data.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
                 </CustButton>)
 
               : (
                 <CustButton size="small" onClick={this.handleRSVP}
-                  disabled={this.props.user.rsvp.includes(this.props.meeting._id)}
-                  style={this.props.user.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
+                  disabled={this.props.user.data.rsvp.includes(this.props.meeting._id)}
+                  style={this.props.user.data.rsvp.includes(this.props.meeting._id) ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
                     { background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
-                  {this.props.user.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
+                  {this.props.user.data.rsvp.includes(this.props.meeting._id) ? "RSVP'd" : "RSVP"}
                 </CustButton>
               )
             }

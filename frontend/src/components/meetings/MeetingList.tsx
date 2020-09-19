@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meeting } from '../../store/meetings/actions';
+import { Meeting } from '../../store/interfaces';
 import { MeetingPreview } from '../../containers/meetings/MeetingPreview';
 import { Grid, Box } from '@material-ui/core';
 
