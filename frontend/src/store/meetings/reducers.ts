@@ -14,7 +14,8 @@ export const initState: IState = {
     _id: '',
     type: ModelType.PENDING,
     admins: [],
-    
+    proposals: [],
+
     data: {
       // BACKEND
       //txHash: string;  // only used as primary key for pending TX's
@@ -48,9 +49,6 @@ export const initState: IState = {
       videos: [],
 
       feedback: [],
-
-      //For proposals
-      proposals: [],
 
       // list of user wallets (ethereum address) linked to this meeting per status
       cancel: [],

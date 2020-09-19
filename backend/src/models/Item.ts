@@ -16,6 +16,7 @@ export const Item = mongoose.model(
             enum: Object.values(ModelType)
         },
         admins: [String],
+        proposals: Object,
         data: Object
     })
 );

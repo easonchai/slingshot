@@ -1,6 +1,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
 import { User } from '../users/actions';
+import { Club } from '../clubs/actions';
 
 // TODO refactor duplicate
 export const ModelType = {
@@ -29,26 +30,11 @@ export interface Proposal {
   state: string;
 }
 
-export interface Club {
-  _id: string;
-  type: string;
-  admins: ReadonlyArray<string>;
-
-  data: {
-    name: string;
-
-    deployerContractAddress: string;
-    organizerAddress: string;
-
-    //For proposals
-    proposals: ReadonlyArray<Proposal>;
-  },
-};
-
 export interface Meeting {
   _id: string;
   type: string;
   admins: ReadonlyArray<string>;
+  proposals: ReadonlyArray<Proposal>;
 
   data: {
     // BACKEND
@@ -84,9 +70,6 @@ export interface Meeting {
     videos: ReadonlyArray<string>;
 
     feedback: ReadonlyArray<Feedback>;
-
-    //For proposals
-    proposals: ReadonlyArray<Proposal>;
 
     // list of user wallets (ethereum address) linked to this meeting per status
     cancel: ReadonlyArray<string>,

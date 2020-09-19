@@ -304,8 +304,8 @@ export class MeetingView extends React.Component<IProps, IState> {
 
         let proposalId = 1;
 
-        if (this.props.cachedMeeting.data.proposals) {
-          proposalId = this.props.cachedMeeting.data.proposals.length + 1;
+        if (this.props.cachedMeeting.proposals) {
+          proposalId = this.props.cachedMeeting.proposals.length + 1;
         }
 
         let proposal = {

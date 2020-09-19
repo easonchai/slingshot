@@ -202,17 +202,19 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				_id: clubAddress,
 				type: ModelType.CLUB,
 				admins: [this.props.user._id],
+				proposals: [],
+
 				data: {
 					name: event.target.clubName.value,
 					deployerContractAddress: '0x4F40574184bC0bed3eE6df209118bD0eE06EC067',  // TODO: pull dynamically once we will have more versions
-					organizerAddress: this.props.user._id,
-					proposals: []
-				}
+					organizerAddress: this.props.user._id,				}
 			},
 			{
 				_id: hash,
 				type: ModelType.PENDING,
 				admins: [this.props.user._id],
+				proposals: [],
+
 				data: {
 					name: event.target.meetingName.value,
 					clubName: event.target.clubName.value,
@@ -236,7 +238,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					images: this.state.form.images,
 					videos: this.state.form.videos,
 					feedback: [],
-					proposals: [],
 					cancel: [],
 					rsvp: [],
 					attend: [],
@@ -304,6 +305,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					_id: res.hash,
 					type: ModelType.PENDING,
 					admins: [this.props.user._id],
+					proposals: [],
+
 					data: {
 						name: event.target.meetingName.value,
 						clubName: this.props.cachedMeeting.data.clubName,
@@ -328,7 +331,6 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						images: this.state.form.images,
 						videos: this.state.form.videos,
 						feedback: [],
-						proposals: [],
 						cancel: [],
 						rsvp: [],
 						attend: [],

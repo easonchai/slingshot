@@ -24,14 +24,13 @@ export interface Club {
   _id: string;
   type: string;
   admins: ReadonlyArray<string>;
+  proposals: ReadonlyArray<Proposal>;
 
   data: {
     name: string;
 
     deployerContractAddress: string;
     organizerAddress: string;
-
-    proposals: ReadonlyArray<Proposal>;
   },
 };
 
