@@ -476,7 +476,7 @@ router.put('/proposal/add', async (req: Request, res: Response, next: NextFuncti
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
             {
-                $push: { 'data.proposals': req.body['proposal'] },
+                $push: { 'proposals': req.body['proposal'] },
             },
             { safe: true, upsert: true }
         )
@@ -498,9 +498,13 @@ router.put('/proposal/add', async (req: Request, res: Response, next: NextFuncti
 router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
         .updateOne(
-            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
             {
-                $push: { 'data.proposals': req.body['proposal'] },
+                _id: req.body['meetingAddress'],
+                type: ModelType.MEETING,
+                proposals: { $elemMatch: { id: req.body['proposal'].id } }
+            },
+            {
+                $set: { 'proposals': req.body['proposal'] },
             },
             { safe: true, upsert: true }
         )
@@ -518,7 +522,7 @@ router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunct
  * @params  meetingAddress  The _id to look for.
  * 
  * @returns Meeting
- */
+
 router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
         .updateOne(
@@ -535,5 +539,6 @@ router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunct
         })
         .catch(err => next(err));
 });
+ */
 
 export default router;
