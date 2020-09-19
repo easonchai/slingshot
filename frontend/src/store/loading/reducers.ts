@@ -1,6 +1,7 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, Loading } from './actions';
+import { actions } from './actions';
+import { Loading } from '../interfaces';
 
 const initState: IState = {
   loading: {

@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
-import { actions as meetingActions, Meeting, Proposal } from '../../store/meetings/actions';
+import { actions as meetingActions } from '../../store/meetings/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
+import { Meeting, Proposal } from '../../store/interfaces';
+
 
 const mapStateToProps = (state: IAppState, props: any) => {
   return {

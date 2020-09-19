@@ -1,38 +1,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
-import { User } from '../users/actions';
+import { Club } from '../interfaces';
 
-// TODO refactor duplicate
-export const ModelType = {
-  USER: 'user',
-  PENDING: 'pending',
-  MEETING: 'meeting',
-  CLUB: 'club',
-};
-
-// TODO: refactor duplicate interfaces
-export interface Proposal {
-  created: number;
-  id: number;
-  newAdmin: string[];
-  oldAdmin: string[];
-  voted: number;
-  state: string;
-}
-
-export interface Club {
-  _id: string;
-  type: string;
-  admins: ReadonlyArray<string>;
-  proposals: ReadonlyArray<Proposal>;
-
-  data: {
-    name: string;
-
-    deployerContractAddress: string;
-    organizerAddress: string;
-  },
-};
 
 const actionCreator = actionCreatorFactory();
 

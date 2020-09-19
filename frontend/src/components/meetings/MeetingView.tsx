@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting, Proposal } from '../../store/meetings/actions';
-import { User } from '../../store/users/actions';
-import { Loading } from '../../store/loading/actions';
+import { Proposal, User, Meeting, Loading } from '../../store/interfaces';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@material-ui/core';

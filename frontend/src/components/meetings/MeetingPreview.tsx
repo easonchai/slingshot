@@ -1,12 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/actions';
 import { Card, CardContent, CardHeader, Typography, CardActions, Button, CircularProgress, CardMedia } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import SharePopup from "../SharePopup"
 import EtherService from '../../services/EtherService';
-import { User } from '../../store/users/actions';
-import { Loading } from '../../store/loading/actions';
+import { User, Meeting, Loading } from '../../store/interfaces';
 
 const CustButton = styled(Button)({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',

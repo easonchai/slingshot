@@ -1,7 +1,9 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions as userActions, ModelType, User } from './actions';
+import { actions as userActions } from './actions';
 import { actions as meetingActions } from '../meetings/actions';
+import { ModelType, User } from '../interfaces';
+
 
 export const initState: IState = {
   user: {

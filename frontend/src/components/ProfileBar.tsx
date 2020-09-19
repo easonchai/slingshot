@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { IAppState } from '../store/index';
 import EtherService from '../services/EtherService';
-import { actions as userActions, User } from '../store/users/actions';
+import { User, Meeting } from '../store/interfaces';
+import { actions as userActions } from '../store/users/actions';
 import { actions as meetingActions } from '../store/meetings/actions';
 import { actions as notificationActions, Notification } from '../store/notifications/actions';
 import {
@@ -16,7 +17,6 @@ import { TransitionProps } from '@material-ui/core/transitions'; import LockIcon
 import CloseIcon from '@material-ui/icons/Close';
 import Blockies from 'react-blockies'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
-import { Meeting } from '../store/meetings/actions';
 import { initState as userDefaultState } from '../store/users/reducers';
 // import logo from '../logo/slingshot-white.svg';
 

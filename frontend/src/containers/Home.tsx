@@ -4,8 +4,10 @@ import { Action, compose } from 'redux';
 import { connect } from 'react-redux';
 import { IAppState } from '../store/index';
 import { Home as Component } from '../components/Home';
-import { actions as clubActions, Club } from '../store/clubs/actions';
-import { actions as meetingActions, Meeting } from '../store/meetings/actions';
+import { actions as clubActions } from '../store/clubs/actions';
+import { actions as meetingActions } from '../store/meetings/actions';
+import { Club, Meeting } from '../store/interfaces';
+
 
 const mapStateToProps = (state: IAppState) => {
   return {

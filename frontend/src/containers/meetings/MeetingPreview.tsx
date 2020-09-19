@@ -4,8 +4,10 @@ import { IAppState } from '../../store/index';
 import { MeetingPreview as Component } from '../../components/meetings/MeetingPreview';
 import { actions as loadingActions } from '../../store/loading/actions';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
-import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
+import { actions as meetingActions } from '../../store/meetings/actions';
+import { Meeting } from '../../store/interfaces';
 import axios from 'axios';
+
 
 const mapStateToProps = (state: IAppState, props: { meeting: Meeting }) => {
   return {

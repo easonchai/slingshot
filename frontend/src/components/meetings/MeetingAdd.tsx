@@ -2,10 +2,8 @@ import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
-import { Club } from '../../store/clubs/actions';
-import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
+import { ModelType, User, Club, Meeting, GroupHashAndAddress } from '../../store/interfaces';
 import { initState } from '../../store/meetings/reducers';
-import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
 import {
 	Button,

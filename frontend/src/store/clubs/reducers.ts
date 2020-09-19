@@ -1,6 +1,7 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, Club, ModelType } from './actions';
+import { actions } from './actions';
+import { Club } from '../interfaces';
 
 export interface IState {
   clubs: ReadonlyArray<Club>;}

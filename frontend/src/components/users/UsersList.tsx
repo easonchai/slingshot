@@ -1,6 +1,5 @@
 import React from 'react';
-import { Meeting } from '../../store/meetings/actions';
-import { Loading } from '../../store/loading/actions';
+import { Meeting, Loading } from '../../store/interfaces';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
 import { AppBar, Button, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip, Box } from '@material-ui/core';
@@ -10,6 +9,7 @@ import BeenhereIcon from '@material-ui/icons/Beenhere';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EventSeatIcon from '@material-ui/icons/EventSeat';
 import { History } from 'history';
+
 
 const AttendanceButton = styled(Button)({
   backgroundColor: '#FE6B8B',

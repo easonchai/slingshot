@@ -1,7 +1,9 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, Meeting, ModelType } from './actions';
+import { actions } from './actions';
 import { actions as userActions } from '../users/actions';
+import { Meeting, ModelType } from '../interfaces';
+
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
