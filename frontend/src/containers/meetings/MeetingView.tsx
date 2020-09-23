@@ -173,42 +173,45 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
-    dispatchAddProposal: (meetingAddress: string, proposal: Proposal) => {
+    dispatchAddMeetingProposal: (meetingAddress: string, userAddress: string, proposal: Proposal) => {
       const payload = {
         meetingAddress: meetingAddress,
+        userAddress: userAddress,
         proposal: proposal,
       };
 
       axios
         .put('/api/meeting/proposal/add', payload)
         .then(res => {
-          dispatch(meetingActions.AddProposal(payload));
+          dispatch(meetingActions.AddMeetingProposal(payload));
         });
     },
 
-    dispatchVoteProposal: (meetingAddress: string, proposal: Proposal) => {
+    dispatchVoteMeetingProposal: (meetingAddress: string, userAddress: string, proposal: Proposal) => {
       const payload = {
         meetingAddress: meetingAddress,
+        userAddress: userAddress,
         proposal: proposal,
       };
 
       axios
         .put('/api/meeting/proposal/vote', payload)
         .then(res => {
-          dispatch(meetingActions.VoteProposal(payload));
+          dispatch(meetingActions.VoteMeetingProposal(payload));
         });
     },
 
-    dispatchExecuteProposal: (meetingAddress: string, proposal: Proposal) => {
+    dispatchExecuteMeetingProposal: (meetingAddress: string, userAddress: string, proposal: Proposal) => {
       const payload = {
         meetingAddress: meetingAddress,
+        userAddress: userAddress,
         proposal: proposal,
       };
 
       axios
         .put('/api/meeting/proposal/execute', payload)
         .then(res => {
-          dispatch(meetingActions.ExecuteProposal(payload));
+          dispatch(meetingActions.ExecuteMeetingProposal(payload));
         });
     },
   };

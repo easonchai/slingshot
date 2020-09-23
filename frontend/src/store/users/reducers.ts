@@ -10,6 +10,7 @@ export const initState: IState = {
     _id: '',
     type: ModelType.USER,
     admins: [],
+    proposals: [],
 
     data: {
       ensDomain: '',
@@ -136,5 +137,29 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, meetingActions.AddMeetingProposal)) {
+    return state;
+
+    // TODO: next version of smart contract (creator of the proposal should automatically vote on it)
+    // return {
+    //   ...state,
+    //   user: {
+    //     ...state.user,
+    //     proposals: [...state.user.proposals, action.payload.proposal]
+    //   }
+    // };
+  }
+
+  if (isType(action, meetingActions.VoteMeetingProposal) ||
+      isType(action, meetingActions.ExecuteMeetingProposal)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        proposals: [...state.user.proposals, action.payload.proposal]
+      }
+    };
+  }
+  
   return state;
 }

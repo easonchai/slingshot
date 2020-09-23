@@ -473,8 +473,19 @@ router.put('/pause', async (req: Request, res: Response, next: NextFunction) => 
  */
 router.put('/proposal/add', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
-        .updateOne(
-            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+        .updateMany(
+            {
+                $or: [
+                    {
+                        _id: req.body['meetingAddress'],
+                        type: ModelType.MEETING,
+
+                    }, {
+                        _id: req.body['userAddress'],
+                        type: ModelType.USER,
+                    }
+                ],
+            },
             {
                 $push: { 'proposals': req.body['proposal'] },
             },
@@ -497,14 +508,27 @@ router.put('/proposal/add', async (req: Request, res: Response, next: NextFuncti
  */
 router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
-        .updateOne(
+        .updateMany(
             {
-                _id: req.body['meetingAddress'],
-                type: ModelType.MEETING,
-                proposals: { $elemMatch: { id: req.body['proposal'].id } }
+                $or: [{
+                    _id: req.body['meetingAddress'],
+                    type: ModelType.MEETING,
+
+                }, {
+                    _id: req.body['userAddress'],
+                    type: ModelType.USER,
+                }
+                ],
+                proposals: {
+                    $elemMatch: {
+                        'id.index': req.body['proposal'].id.index,
+                        'id.clubAddress': req.body['proposal'].id.clubAddress,
+                        'id.meetingAddress': req.body['proposal'].id.meetingAddress
+                    }
+                }
             },
             {
-                $set: { 'proposals': req.body['proposal'] },
+                $set: { 'proposals.$.votes': req.body['proposal'].votes },
             },
             { safe: true, upsert: true }
         )

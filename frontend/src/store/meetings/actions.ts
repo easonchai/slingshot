@@ -20,9 +20,9 @@ export const UpdateHandleAbsence = actionCreator<GroupMeetingAndUserAddress>(App
 export const UpdateUserWithdraw = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_USER_WITHDRAW);
 export const CreateNextMeeting = actionCreator<Meeting>(AppActions.CREATE_NEXT_MEETING);
 export const PauseMeeting = actionCreator<string>(AppActions.PAUSE_MEETING);
-export const AddProposal = actionCreator<GroupMeetingAndProposal>(AppActions.ADD_PROPOSAL);
-export const VoteProposal = actionCreator<GroupMeetingAndProposal>(AppActions.VOTE_PROPOSAL);
-export const ExecuteProposal = actionCreator<GroupMeetingAndProposal>(AppActions.EXECUTE_PROPOSAL);
+export const AddMeetingProposal = actionCreator<GroupMeetingAndProposal>(AppActions.ADD_MEETING_PROPOSAL);
+export const VoteMeetingProposal = actionCreator<GroupMeetingAndProposal>(AppActions.VOTE_MEETING_PROPOSAL);
+export const ExecuteMeetingProposal = actionCreator<GroupMeetingAndProposal>(AppActions.EXECUTE_MEETING_PROPOSAL);
 
 export const actions = {
   UpdateOrganiserEthereumAddress,
@@ -40,7 +40,7 @@ export const actions = {
   UpdateUserWithdraw,
   CreateNextMeeting,
   PauseMeeting,
-  AddProposal,
-  VoteProposal,
-  ExecuteProposal,
+  AddMeetingProposal,
+  VoteMeetingProposal,
+  ExecuteMeetingProposal,
 };

@@ -76,10 +76,12 @@ export interface IProps {
   dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
+
   dispatchPauseMeeting(meetingAddress: String): void;
-  dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
-  dispatchExecuteProposal(meetingAddress: string, proposal: Proposal): void;
-  dispatchVoteProposal(meetingAddress: string, proposal: Proposal): void;
+  dispatchAddMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchVoteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchExecuteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+
   dispatchAddErrorNotification(message: String): void;
 }
 
@@ -316,14 +318,18 @@ export class MeetingView extends React.Component<IProps, IState> {
 
         let proposal = {
           created: (new Date()).getTime(),
-          id: proposalId,
+          id: {
+            clubAddress: "",
+            meetingAddress: this.props.cachedMeeting._id,
+            index: proposalId
+          },
           newAdmin: tempNewArr,
           oldAdmin: tempOldArr,
-          voted: 0,
+          votes: [],
           state: "Active",
         }
         // TODO: add loading animation while we wait for callback / TX to be mined
-        this.props.dispatchAddProposal(this.props.cachedMeeting._id, proposal);
+        this.props.dispatchAddMeetingProposal(this.props.cachedMeeting._id, this.props.user._id, proposal);
         this.handleCreateProposalPane();
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
@@ -579,7 +585,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     return (
       <React.Fragment>
         <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress}
-          meetingAddress={this.props.cachedMeeting._id} dispatchExecuteProposal={this.props.dispatchExecuteProposal} dispatchVoteProposal={this.props.dispatchVoteProposal}
+          meetingAddress={this.props.cachedMeeting._id} userAddress={this.props.user._id} dispatchExecuteMeetingProposal={this.props.dispatchExecuteMeetingProposal} dispatchVoteMeetingProposal={this.props.dispatchVoteMeetingProposal}
         />
         <CssBaseline />
         <Dialog

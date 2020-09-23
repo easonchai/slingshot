@@ -7,12 +7,18 @@ export const ModelType = {
     CLUB: 'club',
 };
 
-export const Proposal = new mongoose.Schema({
+const ProposalIdSchema = new mongoose.Schema({
+    clubAddress: String,
+    meetingAddress: String,
+    index: Number
+});
+
+const ProposalSchema = new mongoose.Schema({
     created: Number,
-    id: Number,
+    id: ProposalIdSchema,
     newAdmin: [String],
     oldAdmin: [String],
-    voted: Number,
+    votes: [String],
     state: String
 });
 
@@ -25,7 +31,7 @@ export const Item = mongoose.model(
             enum: Object.values(ModelType)
         },
         admins: [String],
-        proposals: [Proposal],
+        proposals: [ProposalSchema],
         data: Object
     })
 );
