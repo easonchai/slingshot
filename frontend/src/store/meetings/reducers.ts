@@ -427,7 +427,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     let index = 0;
     const updatedMeetings = state.meetings.map(meeting => {
       if (meeting._id === action.payload.meetingAddress) {
-        index = meeting.proposals.findIndex(proposal => proposal.id === action.payload.proposal.id)
+        index = meeting.proposals.findIndex(proposal => proposal.id.index === action.payload.proposal.id.index)
         return {
           ...meeting,
           proposals: [
