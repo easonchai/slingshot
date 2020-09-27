@@ -1,95 +1,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
-import { User } from '../users/actions';
-
-// TODO refactor duplicate
-export const ModelType = {
-  USER: 'user',
-  MEETING: 'meeting',
-  PENDING: 'pending'
-};
-
-export interface Feedback {
-  meetingAddress: string;
-  userAddress: string;
-  ensAddress: string;
-  comment: string;
-  stars: number;
-  images: ReadonlyArray<string>;
-  videos: ReadonlyArray<string>;
-};
-
-export interface Proposal {
-  id: number;
-  newAdmin: string;
-  oldAdmin: string;
-}
-
-export interface Meeting {
-  _id: string;
-  type: string;
-
-  data: {
-    // BACKEND
-    //txHash: string;  // only used as primary key for pending TX's
-    //meetingAddress: string;  // id is replaced by contract address as primary key once TX is mined
-    name: string;
-    clubName: string;
-    clubAddress: string;
-    location: string;
-    description: string;
-
-    // SOLIDITY
-    startDateTime: number;
-    endDateTime: number;
-    stake: number;
-    maxParticipants: number;
-    //registered: number;  // redundant -> rsvp.length + attend.length + withdraw.length
-    prevStake: number;
-    payout: number;
-    //attendanceCount: number;  // redundant -> attend.length + withdraw.length
-    isCancelled: boolean;
-    isStarted: boolean;
-    isEnded: boolean;
-    isPaused: boolean;
-    deployerContractAddress: string;
-    organizerAddress: string;
-
-    parent: string;  // prev meeting
-    child: string;  // next meeting
-
-    // Media provided by owner once event is created
-    images: ReadonlyArray<string>;
-    videos: ReadonlyArray<string>;
-
-    feedback: ReadonlyArray<Feedback>;
-
-    //For proposals
-    proposals: ReadonlyArray<Proposal>;
-  },
-
-  // list of user wallets (ethereum address) linked to this meeting per status
-  cancel: ReadonlyArray<string>,
-  rsvp: ReadonlyArray<string>,
-  attend: ReadonlyArray<string>,
-  withdraw: ReadonlyArray<string>
-};
-
-export interface GroupHashAndAddress {
-  txHash: string;
-  meetingAddress: string;
-};
-
-export interface GroupMeetingAndUserAddress {
-  meetingAddress: string,
-  userAddress: string
-};
-
-export interface GroupMeetingAndProposal {
-  meetingAddress: string,
-  newAdmin: string[],
-  oldAdmin: string[],
-}
+import { User, Meeting, GroupHashAndAddress, GroupMeetingAndUserAddress, GroupMeetingAndProposal } from '../interfaces';
 
 const actionCreator = actionCreatorFactory();
 
@@ -104,6 +15,7 @@ export const UpdateStartMeeting = actionCreator<string>(AppActions.UPDATE_START_
 export const UpdateEndMeeting = actionCreator<string>(AppActions.UPDATE_END_MEETING);
 export const UpdateCancelMeeting = actionCreator<string>(AppActions.UPDATE_CANCEL_MEETING);
 export const UpdateHandleAttendance = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_HANDLE_ATTENDANCE);
+export const UpdateHandleAbsence = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_HANDLE_ABSENCE);
 export const UpdateUserWithdraw = actionCreator<GroupMeetingAndUserAddress>(AppActions.UPDATE_USER_WITHDRAW);
 export const CreateNextMeeting = actionCreator<Meeting>(AppActions.CREATE_NEXT_MEETING);
 export const PauseMeeting = actionCreator<string>(AppActions.PAUSE_MEETING);
@@ -121,6 +33,7 @@ export const actions = {
   UpdateEndMeeting,
   UpdateCancelMeeting,
   UpdateHandleAttendance,
+  UpdateHandleAbsence,
   UpdateUserWithdraw,
   CreateNextMeeting,
   PauseMeeting,

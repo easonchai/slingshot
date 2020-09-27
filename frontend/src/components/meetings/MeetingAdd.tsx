@@ -2,9 +2,8 @@ import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
-import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
+import { ModelType, User, Club, Meeting, GroupHashAndAddress } from '../../store/interfaces';
 import { initState } from '../../store/meetings/reducers';
-import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
 import {
 	Button,
@@ -38,6 +37,8 @@ export const Hero = styled(Container)({
 })
 
 export const Middle = styled(Grid)({
+	width: '95%',
+	margin: 'auto',
 	padding: '60px 20px'
 })
 
@@ -89,7 +90,7 @@ interface IProps {
 	dispatchUpdateCachedMeeting(meeting: Meeting): void;
 
 	dispatchIsClubNameUnique(name: string): Promise<boolean>;
-	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
+	dispatchCreateFirstClubAndMeeting(history: History, club: Club, meeting: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateOrganiserEthereumAddress(organizer: User): void;
 
@@ -193,11 +194,25 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
-	createFirstMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
-		this.props.dispatchCreateFirstMeeting(this.props.history,
+	createFirstClubAndMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
+		this.props.dispatchCreateFirstClubAndMeeting(this.props.history,
+			{
+				_id: clubAddress,
+				type: ModelType.CLUB,
+				admins: [this.props.user._id],
+				proposals: [],
+
+				data: {
+					name: event.target.clubName.value,
+					deployerContractAddress: '0x4F40574184bC0bed3eE6df209118bD0eE06EC067',  // TODO: pull dynamically once we will have more versions
+					organizerAddress: this.props.user._id,				}
+			},
 			{
 				_id: hash,
 				type: ModelType.PENDING,
+				admins: [this.props.user._id],
+				proposals: [],
+
 				data: {
 					name: event.target.meetingName.value,
 					clubName: event.target.clubName.value,
@@ -221,17 +236,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					images: this.state.form.images,
 					videos: this.state.form.videos,
 					feedback: [],
-					proposals: [],
+					cancel: [],
+					rsvp: [],
+					attend: [],
+					withdraw: []
 				},
-				cancel: [],
-				rsvp: [],
-				attend: [],
-				withdraw: []
 			});
-	}
-
-	isClubNameUnique = () => {
-
 	}
 
 	handleFirstMeeting = (event: any, startDateTime: number, endDateTime: number) => {
@@ -240,7 +250,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		 */
 		this.props.dispatchIsClubNameUnique(event.target.clubName.value)
 			.then((isUnique: boolean) => {
-				if(!isUnique) {
+				if (!isUnique) {
 					this.props.dispatchAddErrorNotification("The name of the club already exists, please choose another one.");
 				} else {
 					/**
@@ -255,7 +265,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						this.callbackDeployedMeeting
 					)
 						.then((ethersResponse: any) => {
-							this.createFirstMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
+							this.createFirstClubAndMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
 						}, (reason: any) => {
 							// Code 4001 reflects MetaMask's rejection by user.
 							// Hence we don't display it as an error.
@@ -292,6 +302,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				this.props.dispatchCreateNextMeeting(this.props.history, {
 					_id: res.hash,
 					type: ModelType.PENDING,
+					admins: [this.props.user._id],
+					proposals: [],
+
 					data: {
 						name: event.target.meetingName.value,
 						clubName: this.props.cachedMeeting.data.clubName,
@@ -316,12 +329,11 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						images: this.state.form.images,
 						videos: this.state.form.videos,
 						feedback: [],
-						proposals: [],
+						cancel: [],
+						rsvp: [],
+						attend: [],
+						withdraw: []
 					},
-					cancel: [],
-					rsvp: [],
-					attend: [],
-					withdraw: []
 				});
 			}, (reason: any) => {
 				// Code 4001 reflects MetaMask's rejection by user.

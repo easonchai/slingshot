@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 
 export const ModelType = {
     USER: 'user',
+    PENDING: 'pending',
     MEETING: 'meeting',
-    PENDING: 'pending'
+    CLUB: 'club',
 };
 
 export const Item = mongoose.model(
@@ -14,12 +15,8 @@ export const Item = mongoose.model(
             type: String,
             enum: Object.values(ModelType)
         },
-        data: Object,
-        parent: String,
-        child: String,
-        cancel: [String],
-        rsvp: [String],
-        attend: [String],
-        withdraw: [String]
+        admins: [String],
+        proposals: Object,
+        data: Object
     })
 );

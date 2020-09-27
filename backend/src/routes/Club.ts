@@ -16,13 +16,8 @@ const router = Router();
  */
 router.get('/names', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
-        .find({
-            $or: [
-                { type: ModelType.MEETING },
-                { type: ModelType.PENDING }
-            ]
-        })
-        .distinct('data.clubName')
+        .find({ type: ModelType.CLUB })
+        .distinct('data.name')
         .then(documents => {
             res
                 .status(OK)
@@ -31,5 +26,41 @@ router.get('/names', async (req: Request, res: Response, next: NextFunction) => 
         .catch(err => next(err));
 });
 
+/**
+ * Get all the clubs.
+ * 
+ * @returns Array<Club>
+ */
+router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .find({ type: ModelType.CLUB })
+        .select('-__v')
+        .sort({ 'data.name': 1 })
+        .then(documents => {
+            res
+                .status(OK)
+                .json(documents);
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Create new club with empty clubAddress.
+ * 
+ * @params  Club     Value of the club.
+ * 
+ * @returns Club
+ */
+router.post('/create', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .create(req.body)
+        .then((document: any) => {
+            res
+                .status(CREATED)
+                .json(document);
+
+        })
+        .catch(err => next(err));
+});
 
 export default router;

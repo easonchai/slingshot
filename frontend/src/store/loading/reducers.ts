@@ -1,6 +1,7 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, Loading } from './actions';
+import { actions } from './actions';
+import { Loading } from '../interfaces';
 
 const initState: IState = {
   loading: {
@@ -13,6 +14,7 @@ const initState: IState = {
     cancelMeetingConfirmation: false,
 
     markAttendanceConfirmation: false,
+    markAbsenceConfirmation: false,
   }
 };
 
@@ -97,6 +99,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       loading: {
         ...state.loading,
         markAttendanceConfirmation: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateMarkAbsenceConfirmationLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        markAbsenceConfirmation: action.payload
       }
     };
   }
