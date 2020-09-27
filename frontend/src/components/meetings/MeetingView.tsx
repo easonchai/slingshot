@@ -79,7 +79,6 @@ export interface IProps {
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
   dispatchPauseMeeting(meetingAddress: string): void;
   dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
-
   dispatchAddErrorNotification(message: String): void;
 }
 
@@ -88,8 +87,8 @@ interface IState {
   viewPanelOpen: boolean;
   createPanelOpen: boolean;
   proposalPanelOpen: boolean;
-  newAdmin: string;
-  oldAdmin: string;
+  newAdmin: string[];
+  oldAdmin: string[];
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -110,8 +109,8 @@ export class MeetingView extends React.Component<IProps, IState> {
       viewPanelOpen: false,
       createPanelOpen: false,
       proposalPanelOpen: false,
-      newAdmin: '',
-      oldAdmin: '',
+      newAdmin: [''],
+      oldAdmin: [''],
     };
   }
 
@@ -328,15 +327,18 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleProposalDataChange = (event: any) => {
+    let data = [];
+    data.push(event.target.value);
+
     if (event.target.id === "new_address") {
       this.setState({
         ...this.state,
-        newAdmin: event.target.value
+        newAdmin: data
       })
     } else {
       this.setState({
         ...this.state,
-        oldAdmin: event.target.value
+        oldAdmin: data
       })
     }
   }
