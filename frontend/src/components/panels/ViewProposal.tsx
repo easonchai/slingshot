@@ -120,7 +120,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
 
     allowedToExecute = () => {
         const totalAdmins = this.props.meeting.admins.length
-        const voted = this.props.meeting.proposals[value].votes.length;
+        const voted = this.props.meeting.proposals[this.state.value].votes.length;
         // Need 4/5 consensus
         return (voted * 5) >= (totalAdmins * 4);
     }
