@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Tabs, Tab, Grid, Typography, Box, makeStyles, Theme, DialogContentText } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { Proposal } from '../../store/meetings/actions';
+import { Proposal } from '../../store/interfaces';
 import EtherService from '../../services/EtherService';
 
 interface TabPanelProps {
@@ -53,10 +53,10 @@ interface IProps {
     open: boolean;
     proposals: ReadonlyArray<Proposal>;
     meetingAddress: string;
+    userAddress: string;
     clubAddress: string;
-    view: boolean;
-    dispatchExecuteProposal(meetingAddress: string, proposal: Proposal): void;
-    dispatchVoteProposal(meetingAddress: string, proposal: Proposal): void;
+    dispatchExecuteMeetingProposal(meetingAddress: string, approverAddress: string, proposal: Proposal): void;
+    dispatchVoteMeetingProposal(meetingAddress: string, approverAddress: string, proposal: Proposal): void;
 }
 
 interface IState {
@@ -104,17 +104,26 @@ export default class ViewProposal extends React.Component<IProps, IState> {
     }
 
     retrieveProposal = (id: number) => {
-        return this.props.proposals.filter(proposal => proposal.id === id);
+        return this.props.proposals.filter(proposal => proposal.id.index === id)[0];
+    }
+
+    hasUserVotedOnProposalId = (id: number) => {
+        const proposal = this.retrieveProposal(id);
+
+        return proposal.votes.includes(this.props.userAddress);
+    }
+
+    allowedToVote = () => {
+        const id = this.state.value + 1;
+
+        return this.hasProposal() && !this.hasUserVotedOnProposalId(id);
     }
 
     handleVote = () => {
         let id = this.state.value + 1
-        let proposalArray = this.retrieveProposal(id);
-        let updatedProposal = proposalArray[0];
+        let proposal = this.retrieveProposal(id);
 
-        updatedProposal.voted = updatedProposal.voted + 1
-
-        console.log("New votes: " + updatedProposal.voted);
+        proposal.votes.push(this.props.userAddress);
 
         this.etherService.approveProposal(
             this.props.clubAddress,
@@ -123,7 +132,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
         )
             .then((res: any) => {
                 console.log("success vote ", res);
-                this.props.dispatchVoteProposal(this.props.meetingAddress, updatedProposal);
+                this.props.dispatchVoteMeetingProposal(this.props.meetingAddress, this.props.userAddress, proposal);
             }, (reason: any) => {
                 //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
                 console.log("vote: ", reason);
@@ -136,12 +145,11 @@ export default class ViewProposal extends React.Component<IProps, IState> {
 
     handleExecute = () => {
         let id = this.state.value + 1
-        let proposalArray = this.retrieveProposal(id);
-        let updatedProposal = proposalArray[0];
+        let proposal = this.retrieveProposal(id);
 
-        updatedProposal.state = "Executed"
+        proposal.state = "Executed"
 
-        console.log("New state: " + updatedProposal.state);
+        console.log("New state: " + proposal.state);
 
         this.etherService.executeProposal(
             this.props.clubAddress,
@@ -150,7 +158,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
         )
             .then((res: any) => {
                 console.log("success execute ", res);
-                this.props.dispatchExecuteProposal(this.props.meetingAddress, updatedProposal);
+                this.props.dispatchExecuteMeetingProposal(this.props.meetingAddress, this.props.userAddress, proposal);
             }, (reason: any) => {
                 //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
                 console.log("execute: ", reason);
@@ -186,9 +194,9 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                         // className={this.classes.tabs}
                                         >
                                             {
-                                                this.props.proposals.map(data => {
-                                                    let title = "Proposal " + data.id;
-                                                    return (<Tab label={title} {...a11yProps(data.id - 1)} />);
+                                                this.props.proposals.map(proposal => {
+                                                    let title = "Proposal " + proposal.id.index;
+                                                    return (<Tab label={title} {...a11yProps(proposal.id.index - 1)} />);
                                                 })
                                             }
                                         </Tabs>
@@ -197,10 +205,10 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                         {
                                             this.props.proposals.map(data => {
                                                 return (
-                                                    <TabPanel value={this.state.value} index={data.id - 1}>
+                                                    <TabPanel value={this.state.value} index={data.id.index - 1}>
                                                         <Typography component="div" style={{ paddingLeft: '1rem', paddingRight: '1rem', display: 'inline-block' }}>
                                                             <Box fontWeight="700" fontSize="2rem">
-                                                                {`Proposal ${data.id}`}
+                                                                {`Proposal ${data.id.index}`}
                                                             </Box>
                                                             <Box fontWeight="300" fontSize="1rem">
                                                                 Created {(new Date(data.created)).toLocaleDateString()}
@@ -229,7 +237,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                                                                 })}
                                                                 <br /><br />
                                                                 Votes: <br />
-                                                                {`${data.voted}`}
+                                                                {`${data.votes.length}`}
                                                             </Box>
                                                             <br /><br />
                                                             <Box display="flex" flexDirection="row" fontWeight="500" fontSize="1.2rem" alignItems="center">
@@ -249,16 +257,9 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                         }
                     </DialogContent>
                     <DialogActions>
-                        {
-                            this.props.view ?
-                                <Button disabled={!this.hasProposal()} onClick={this.handleVote} color="primary">
-                                    Vote
-                                </Button>
-                                :
-                                <Button disabled={!this.hasProposal()} onClick={this.handleExecute} color="primary">
-                                    Execute
-                                </Button>
-                        }
+                        <Button disabled={!this.allowedToVote()} onClick={this.handleVote} color="primary">
+                            Vote
+                        </Button>
                         <Button onClick={() => {
                             console.log("false")
                             this.setState({

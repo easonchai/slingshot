@@ -1,18 +1,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
 
-export interface Loading {
-  cachedMeeting: boolean;
-  clubDeployment: boolean;
-  meetingDeployment: boolean;
-  rsvpConfirmation: boolean;
-  rsvpCancellationConfirmation: boolean;
-  startMeetingConfirmation: boolean;
-  endMeetingConfirmation: boolean;
-  cancelMeetingConfirmation: boolean;
-
-  markAttendanceConfirmation: boolean;
-}
 
 const actionCreator = actionCreatorFactory();
 
@@ -25,7 +13,7 @@ export const UpdateStartMeetingConfirmationLoading = actionCreator<boolean>(AppA
 export const UpdateEndMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_END_MEETING_CONFIRMATION_LOADING);
 export const UpdateCancelMeetingConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_CANCEL_MEETING_CONFIRMATION_LOADING);
 export const UpdateMarkAttendanceConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_MARK_ATTENDANCE_CONFIRMATION_LOADING);
-
+export const UpdateMarkAbsenceConfirmationLoading = actionCreator<boolean>(AppActions.UPDATE_MARK_ABSENCE_CONFIRMATION_LOADING);
 
 export const actions = {
   UpdateCachedMeetingLoading,
@@ -36,5 +24,6 @@ export const actions = {
   UpdateStartMeetingConfirmationLoading,
   UpdateEndMeetingConfirmationLoading,
   UpdateCancelMeetingConfirmationLoading,
-  UpdateMarkAttendanceConfirmationLoading
+  UpdateMarkAttendanceConfirmationLoading,
+  UpdateMarkAbsenceConfirmationLoading
 };

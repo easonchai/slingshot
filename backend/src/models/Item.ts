@@ -2,9 +2,25 @@ import mongoose from 'mongoose';
 
 export const ModelType = {
     USER: 'user',
+    PENDING: 'pending',
     MEETING: 'meeting',
-    PENDING: 'pending'
+    CLUB: 'club',
 };
+
+const ProposalIdSchema = new mongoose.Schema({
+    clubAddress: String,
+    meetingAddress: String,
+    index: Number
+});
+
+const ProposalSchema = new mongoose.Schema({
+    created: Number,
+    id: ProposalIdSchema,
+    newAdmin: [String],
+    oldAdmin: [String],
+    votes: [String],
+    state: String
+});
 
 export const Item = mongoose.model(
     "Item",
@@ -14,12 +30,8 @@ export const Item = mongoose.model(
             type: String,
             enum: Object.values(ModelType)
         },
-        data: Object,
-        parent: String,
-        child: String,
-        cancel: [String],
-        rsvp: [String],
-        attend: [String],
-        withdraw: [String]
+        admins: [String],
+        proposals: [ProposalSchema],
+        data: Object
     })
 );

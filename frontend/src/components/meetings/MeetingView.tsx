@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting, Proposal } from '../../store/meetings/actions';
-import { User } from '../../store/users/actions';
-import { Loading } from '../../store/loading/actions';
+import { Proposal, User, Meeting, Loading } from '../../store/interfaces';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
 import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@material-ui/core';
@@ -79,9 +77,9 @@ export interface IProps {
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
   dispatchPauseMeeting(meetingAddress: String): void;
-  dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
-  dispatchExecuteProposal(meetingAddress: string, proposal: Proposal): void;
-  dispatchVoteProposal(meetingAddress: string, proposal: Proposal): void;
+  dispatchAddMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchVoteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchExecuteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
   dispatchAddErrorNotification(message: String): void;
 }
 
@@ -90,9 +88,14 @@ interface IState {
   viewPanelOpen: boolean;
   createPanelOpen: boolean;
   proposalPanelOpen: boolean;
+<<<<<<< HEAD
   newAdmin: string;
   oldAdmin: string;
   isViewing: boolean;
+=======
+  newAdmin: string[];
+  oldAdmin: string[];
+>>>>>>> 686093c1973827923ed875a45263bf30d96f4bfe
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -113,9 +116,14 @@ export class MeetingView extends React.Component<IProps, IState> {
       viewPanelOpen: false,
       createPanelOpen: false,
       proposalPanelOpen: false,
+<<<<<<< HEAD
       newAdmin: '',
       oldAdmin: '',
       isViewing: true,
+=======
+      newAdmin: [''],
+      oldAdmin: [''],
+>>>>>>> 686093c1973827923ed875a45263bf30d96f4bfe
     };
   }
 
@@ -251,7 +259,7 @@ export class MeetingView extends React.Component<IProps, IState> {
   handleEnd = (event: any) => {
     this.etherService.endEvent(
       this.props.cachedMeeting._id,
-      this.props.cachedMeeting.attend.slice(),
+      this.props.cachedMeeting.data.attend.slice(),
       confirmation => { console.log(confirmation); this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false) }
     )
       .then((res: any) => {
@@ -314,20 +322,24 @@ export class MeetingView extends React.Component<IProps, IState> {
       .then((res: any) => {
         let proposalId = 1;
 
-        if (this.props.cachedMeeting.data.proposals) {
-          proposalId = this.props.cachedMeeting.data.proposals.length + 1;
+        if (this.props.cachedMeeting.proposals) {
+          proposalId = this.props.cachedMeeting.proposals.length + 1;
         }
 
         let proposal = {
           created: (new Date()).getTime(),
-          id: proposalId,
+          id: {
+            clubAddress: "",
+            meetingAddress: this.props.cachedMeeting._id,
+            index: proposalId
+          },
           newAdmin: tempNewArr,
           oldAdmin: tempOldArr,
-          voted: 0,
+          votes: [],
           state: "Active",
         }
         // TODO: add loading animation while we wait for callback / TX to be mined
-        this.props.dispatchAddProposal(this.props.cachedMeeting._id, proposal);
+        this.props.dispatchAddMeetingProposal(this.props.cachedMeeting._id, this.props.user._id, proposal);
         this.handleCreateProposalPane();
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
@@ -340,15 +352,18 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleProposalDataChange = (event: any) => {
+    let data = [];
+    data.push(event.target.value);
+
     if (event.target.id === "new_address") {
       this.setState({
         ...this.state,
-        newAdmin: event.target.value
+        newAdmin: data
       })
     } else {
       this.setState({
         ...this.state,
-        oldAdmin: event.target.value
+        oldAdmin: data
       })
     }
   }
@@ -358,7 +373,7 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   getStateTooltipText = () => {
-    if (!this.props.user.rsvp.includes(this.props.cachedMeeting._id))
+    if (!this.props.user.data.rsvp.includes(this.props.cachedMeeting._id))
       return `Stake required: ${this.props.cachedMeeting.data.stake} ETH`;
 
     if (this.isUserLoggedOut())
@@ -385,7 +400,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (new Date() > new Date(this.props.cachedMeeting.data.endDateTime * 1000))
       return `You can't start an event after its official End time.`;
 
-    if (this.props.cachedMeeting.rsvp.length >= 1)
+    if (this.props.cachedMeeting.data.rsvp.length >= 1)
       return 'Ready to start?';
 
     return `You can't start an event with no participants!`;
@@ -401,13 +416,13 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (this.props.cachedMeeting.data.isCancelled)
       return `You can't end a cancelled event.`;
 
-    if (this.props.cachedMeeting.attend.length === 0)
+    if (this.props.cachedMeeting.data.attend.length === 0)
       return `You can't end an event without attendees.`;
 
     if (new Date() < new Date(this.props.cachedMeeting.data.endDateTime * 1000))
       return `You can't end an event before its official End time.`;
 
-    if (this.props.cachedMeeting.rsvp.length > 0)
+    if (this.props.cachedMeeting.data.rsvp.length > 0)
       return `Ready to end? Don't forget to mark all attendees first!`;
 
     return `Ready to end?`;
@@ -436,14 +451,14 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (this.props.cachedMeeting.data.isStarted)
       return `Cannot cancel RSVP of the started event.`;
 
-    if (this.props.user.cancel.includes(this.props.cachedMeeting._id))
+    if (this.props.user.data.cancel.includes(this.props.cachedMeeting._id))
       return `You've already cancelled your RSVP.`;
 
     return `Sorry to see you go!`;
   }
 
   getWithdrawButtonTooltipText = () => {
-    if (this.props.user.withdraw.includes(this.props.cachedMeeting._id))
+    if (this.props.user.data.withdraw.includes(this.props.cachedMeeting._id))
       return `You have already withdrawn.`;
 
     if (!this.props.cachedMeeting.data.isCancelled && !this.props.cachedMeeting.data.isEnded)
@@ -519,14 +534,14 @@ export class MeetingView extends React.Component<IProps, IState> {
     let totalStaked = 0.0;
     let individualPayout = 0.0;
 
-    const totalRegisteredNow = cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length;
-    const eligibleRegisteredNow = cachedMeeting.attend.length + cachedMeeting.withdraw.length;
+    const totalRegisteredNow = cachedMeeting.data.rsvp.length + cachedMeeting.data.attend.length + cachedMeeting.data.withdraw.length;
+    const eligibleRegisteredNow = cachedMeeting.data.attend.length + cachedMeeting.data.withdraw.length;
     // ended events
     totalStaked = cachedMeeting.data.stake * totalRegisteredNow;
     individualPayout = eligibleRegisteredNow ? totalStaked / eligibleRegisteredNow : 0.0;
 
     if (prevMeeting) {
-      const totalRegisteredPrev = prevMeeting.rsvp.length + prevMeeting.attend.length + prevMeeting.withdraw.length;
+      const totalRegisteredPrev = prevMeeting.data.rsvp.length + prevMeeting.data.attend.length + prevMeeting.data.withdraw.length;
 
       // active events
       payoutPool = prevMeeting.data.stake * totalRegisteredPrev;
@@ -536,20 +551,20 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id)
-        || cachedMeeting.rsvp.length === cachedMeeting.data.maxParticipants;
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.data.rsvp.includes(cachedMeeting._id) || this.props.user.data.attend.includes(cachedMeeting._id) || this.props.user.data.withdraw.includes(cachedMeeting._id)
+        || cachedMeeting.data.rsvp.length === cachedMeeting.data.maxParticipants;
     }
 
     const isCancelRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.cancel.includes(cachedMeeting._id);
+      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.data.cancel.includes(cachedMeeting._id);
     }
 
     const isUserPartOfMeeting = () => {
-      return this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
+      return this.props.user.data.rsvp.includes(cachedMeeting._id) || this.props.user.data.attend.includes(cachedMeeting._id) || this.props.user.data.withdraw.includes(cachedMeeting._id);
     }
 
     const isWithdrawButtonDisabled = () => {
-      if (this.props.user.withdraw.includes(cachedMeeting._id))
+      if (this.props.user.data.withdraw.includes(cachedMeeting._id))
         return true;
 
       if (this.props.cachedMeeting.data.isCancelled)
@@ -570,11 +585,11 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isStartButtonDisabled = () => {
-      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime * 1000) || (new Date()) > new Date(cachedMeeting.data.endDateTime * 1000);
+      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.data.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime * 1000) || (new Date()) > new Date(cachedMeeting.data.endDateTime * 1000);
     }
 
     const isEndButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted || this.props.cachedMeeting.attend.length === 0 || (new Date()) < new Date(cachedMeeting.data.endDateTime * 1000);
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted || this.props.cachedMeeting.data.attend.length === 0 || (new Date()) < new Date(cachedMeeting.data.endDateTime * 1000);
     }
 
     const isCancelButtonDisabled = () => {
@@ -583,8 +598,13 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
+<<<<<<< HEAD
         <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress} view={this.state.isViewing}
           meetingAddress={this.props.cachedMeeting._id} dispatchExecuteProposal={this.props.dispatchExecuteProposal} dispatchVoteProposal={this.props.dispatchVoteProposal}
+=======
+        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress}
+          meetingAddress={this.props.cachedMeeting._id} userAddress={this.props.user._id} dispatchExecuteMeetingProposal={this.props.dispatchExecuteMeetingProposal} dispatchVoteMeetingProposal={this.props.dispatchVoteMeetingProposal}
+>>>>>>> 686093c1973827923ed875a45263bf30d96f4bfe
         />
         <CssBaseline />
         <Dialog
@@ -699,9 +719,9 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <span>
                                   <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
                                     {
-                                      this.props.user.rsvp.includes(cachedMeeting._id) ||
-                                        this.props.user.attend.includes(cachedMeeting._id) ||
-                                        this.props.user.withdraw.includes(cachedMeeting._id)
+                                      this.props.user.data.rsvp.includes(cachedMeeting._id) ||
+                                        this.props.user.data.attend.includes(cachedMeeting._id) ||
+                                        this.props.user.data.withdraw.includes(cachedMeeting._id)
                                         ? "RSVP'd"
                                         : "RSVP"
                                     }
@@ -894,7 +914,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                               </Paper><br />
                             </React.Fragment>}
                           <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
-                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length}/{cachedMeeting.data.maxParticipants}
+                            Participants Registered: {cachedMeeting.data.rsvp.length + cachedMeeting.data.attend.length + cachedMeeting.data.withdraw.length}/{cachedMeeting.data.maxParticipants}
                           </Box><br />
                         </React.Fragment>}
                     </Typography>
@@ -913,21 +933,6 @@ export class MeetingView extends React.Component<IProps, IState> {
               </Grid>
             )
         }
-
-        {/* 
-                  <div>Name: {cachedMeeting.data.name}</div>
-                  <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
-                  <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
-                  <div>Is ended: {String(cachedMeeting.data.isEnded)}</div>
-                  <div>Stake: {cachedMeeting.data.stake}</div>
-                  <div>Max participants: {cachedMeeting.data.maxParticipants}</div>
-                  <div>Start time: {new Date(cachedMeeting.data.startDateTime * 1000).toUTCString()}</div>
-                  <div>End time: {new Date(cachedMeeting.data.endDateTime * 1000).toUTCString()}</div>
-                  <div>Location: {cachedMeeting.data.location}</div>
-                  <div>Description: {cachedMeeting.data.description}</div>
-                  <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
-                  <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
-                  */}
 
       </React.Fragment>
     );

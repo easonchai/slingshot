@@ -1,20 +1,26 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions as userActions, ModelType, User } from './actions';
+import { actions as userActions } from './actions';
 import { actions as meetingActions } from '../meetings/actions';
+import { ModelType, User } from '../interfaces';
+
 
 export const initState: IState = {
   user: {
     _id: '',
     type: ModelType.USER,
+    admins: [],
+    proposals: [],
+
     data: {
       ensDomain: '',
       feedback: [],
-    },
-    cancel: [],
-    rsvp: [],
-    attend: [],
-    withdraw: []
+      
+      cancel: [],
+      rsvp: [],
+      attend: [],
+      withdraw: []
+    }
   }
 };
 
@@ -36,9 +42,12 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        cancel: state.user.cancel.filter(meeting => meeting !== action.payload.meetingAddress),
-        rsvp: [...state.user.rsvp, action.payload.meetingAddress]
-      }
+        data: {
+          ...state.user.data,
+          cancel: state.user.data.cancel.filter(meeting => meeting !== action.payload.meetingAddress),
+          rsvp: [...state.user.data.rsvp, action.payload.meetingAddress]
+        }
+      },
     };
   }
 
@@ -47,8 +56,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter((address) => address !== action.payload.meetingAddress),
-        cancel: [...state.user.cancel, action.payload.meetingAddress]
+        data: {
+          ...state.user.data,
+          rsvp: state.user.data.rsvp.filter((address) => address !== action.payload.meetingAddress),
+          cancel: [...state.user.data.cancel, action.payload.meetingAddress]
+        }
       }
     };
   }
@@ -58,8 +70,25 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
-        attend: [...state.user.attend, action.payload.meetingAddress]
+        data: {
+          ...state.user.data,
+          rsvp: state.user.data.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+          attend: [...state.user.data.attend, action.payload.meetingAddress]
+        }
+      }
+    };
+  }
+
+  if (isType(action, meetingActions.UpdateHandleAbsence)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        data: {
+          ...state.user.data,
+          rsvp: [...state.user.data.rsvp, action.payload.meetingAddress],
+          attend: state.user.data.attend.filter(meeting => meeting !== action.payload.meetingAddress)
+        }
       }
     };
   }
@@ -98,12 +127,39 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       ...state,
       user: {
         ...state.user,
-        rsvp: state.user.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
-        attend: state.user.attend.filter(meeting => meeting !== action.payload.meetingAddress),
-        withdraw: [...state.user.withdraw, action.payload.meetingAddress]
+        data: {
+          ...state.user.data,
+          rsvp: state.user.data.rsvp.filter(meeting => meeting !== action.payload.meetingAddress),
+          attend: state.user.data.attend.filter(meeting => meeting !== action.payload.meetingAddress),
+          withdraw: [...state.user.data.withdraw, action.payload.meetingAddress]
+        }
       }
     };
   }
 
+  if (isType(action, meetingActions.AddMeetingProposal)) {
+    return state;
+
+    // TODO: next version of smart contract (creator of the proposal should automatically vote on it)
+    // return {
+    //   ...state,
+    //   user: {
+    //     ...state.user,
+    //     proposals: [...state.user.proposals, action.payload.proposal]
+    //   }
+    // };
+  }
+
+  if (isType(action, meetingActions.VoteMeetingProposal) ||
+      isType(action, meetingActions.ExecuteMeetingProposal)) {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        proposals: [...state.user.proposals, action.payload.proposal]
+      }
+    };
+  }
+  
   return state;
 }
