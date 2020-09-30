@@ -48,7 +48,7 @@ export default class EtherService {
       'function getBalance() external view returns (uint)',
       'function approveProposal(uint _proposal) external onlyAdmin',
       'function executeProposal(uint _proposal) external onlyAdmin',
-      'function proposeAdminChange(address _target, address calldata _addAdmins, address calldata _removeAdmins) external',
+      'function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external',
       'function pause(address payable _meeting, uint _pauseUntil) external onlyAdmin',
     ];
 

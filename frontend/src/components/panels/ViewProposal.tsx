@@ -54,6 +54,7 @@ interface IProps {
     proposals: ReadonlyArray<Proposal>;
     meetingAddress: string;
     clubAddress: string;
+    view: boolean;
     dispatchExecuteProposal(meetingAddress: string, proposal: Proposal): void;
     dispatchVoteProposal(meetingAddress: string, proposal: Proposal): void;
 }
@@ -142,7 +143,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
 
         console.log("New state: " + updatedProposal.state);
 
-        this.etherService.approveProposal(
+        this.etherService.executeProposal(
             this.props.clubAddress,
             id,
             this.callbackFn
@@ -248,9 +249,16 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                         }
                     </DialogContent>
                     <DialogActions>
-                        <Button disabled={!this.hasProposal()} onClick={this.handleVote} color="primary">
-                            Vote
-                        </Button>
+                        {
+                            this.props.view ?
+                                <Button disabled={!this.hasProposal()} onClick={this.handleVote} color="primary">
+                                    Vote
+                                </Button>
+                                :
+                                <Button disabled={!this.hasProposal()} onClick={this.handleExecute} color="primary">
+                                    Execute
+                                </Button>
+                        }
                         <Button onClick={() => {
                             console.log("false")
                             this.setState({

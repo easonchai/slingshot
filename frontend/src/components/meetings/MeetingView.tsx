@@ -92,6 +92,7 @@ interface IState {
   proposalPanelOpen: boolean;
   newAdmin: string;
   oldAdmin: string;
+  isViewing: boolean;
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -114,6 +115,7 @@ export class MeetingView extends React.Component<IProps, IState> {
       proposalPanelOpen: false,
       newAdmin: '',
       oldAdmin: '',
+      isViewing: true,
     };
   }
 
@@ -453,9 +455,10 @@ export class MeetingView extends React.Component<IProps, IState> {
     return `You've earned it!`;
   }
 
-  handleViewProposalPane = () => {
+  handleViewProposalPane = (state: boolean) => {
     this.setState(prevState => ({
       ...this.state,
+      isViewing: state,
       viewPanelOpen: !prevState.viewPanelOpen,
     }))
   }
@@ -580,7 +583,7 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress}
+        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress} view={this.state.isViewing}
           meetingAddress={this.props.cachedMeeting._id} dispatchExecuteProposal={this.props.dispatchExecuteProposal} dispatchVoteProposal={this.props.dispatchVoteProposal}
         />
         <CssBaseline />
@@ -858,7 +861,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                               <span>
                                                 <CustButton
                                                   disabled={!this.props.cachedMeeting.data.isPaused}
-                                                  onClick={() => { console.log("unpause Event") }}>
+                                                  onClick={() => this.handleViewProposalPane(false)}>
                                                   Unpause Event
                                                 </CustButton>
                                               </span>
@@ -877,7 +880,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                             <Tooltip title="View proposals">
                                               <span>
-                                                <CustButton onClick={() => this.handleViewProposalPane()}>View Proposals</CustButton>
+                                                <CustButton onClick={() => this.handleViewProposalPane(true)}>View Proposals</CustButton>
                                               </span>
                                             </Tooltip>
                                           </Grid>
