@@ -391,7 +391,7 @@ export default class EtherService {
       const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
 
       meetingContract
-        .once("Pause", (_pauseUntil, event) => eventCallback(event))
+        .once("Pause", (pauseUntil, event) => eventCallback(event))
         .once("error", console.error);
 
       clubContract

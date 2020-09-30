@@ -2,7 +2,6 @@ import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
 import { User, Meeting, GroupHashAndAddress, GroupMeetingAndUserAddress, GroupMeetingAndProposal } from '../interfaces';
 
-
 const actionCreator = actionCreatorFactory();
 
 export const UpdateOrganiserEthereumAddress = actionCreator<User>(AppActions.UPDATE_ORGANIZER_ETHEREUM_ADDRESS);
