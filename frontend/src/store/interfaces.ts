@@ -15,10 +15,24 @@ export interface Feedback {
   videos: ReadonlyArray<string>;
 };
 
+export interface Proposal {
+  created: number;
+  id: {
+    clubAddress: string;
+    meetingAddress: string;
+    index: number;
+  };
+  newAdmin: string[];
+  oldAdmin: string[];
+  votes: string[];
+  state: string;
+};
+
 export interface User {
   _id: string;
   type: string;
   admins: ReadonlyArray<string>;
+  proposals: ReadonlyArray<Proposal>;
 
   data: {
     ensDomain: string,
@@ -30,15 +44,6 @@ export interface User {
     attend: ReadonlyArray<string>;
     withdraw: ReadonlyArray<string>;
   };
-};
-
-export interface Proposal {
-  created: number;
-  id: number;
-  newAdmin: string[];
-  oldAdmin: string[];
-  voted: number;
-  state: string;
 };
 
 export interface Club {
@@ -116,11 +121,13 @@ export interface GroupMeetingAndUserAddress {
 
 export interface GroupMeetingAndProposal {
   meetingAddress: string,
+  userAddress: string,
   proposal: Proposal,
 };
 
 export interface Loading {
   cachedMeeting: boolean;
+  clubDeployment: boolean;
   meetingDeployment: boolean;
   rsvpConfirmation: boolean;
   rsvpCancellationConfirmation: boolean;

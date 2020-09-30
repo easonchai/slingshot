@@ -5,6 +5,7 @@ import { History } from 'history';
 import { ModelType, User, Club, Meeting, GroupHashAndAddress } from '../../store/interfaces';
 import { initState } from '../../store/meetings/reducers';
 import EtherService from '../../services/EtherService';
+import ClubDeployBackdrop from '../loading/ClubDeployBackdrop';
 import {
 	Button,
 	Container,
@@ -117,6 +118,7 @@ interface IState {
 	loadingVideo: boolean;
 	loadingImagePct: number;
 	loadingVideoPct: number;
+	loadingClub: boolean;
 }
 
 export class MeetingAdd extends React.Component<IProps, IState> {
@@ -150,6 +152,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			loadingVideo: false,
 			loadingImagePct: 0,
 			loadingVideoPct: 0,
+			loadingClub: false,
 		};
 
 		if (this.props.parent === 'first') {
@@ -266,6 +269,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					)
 						.then((ethersResponse: any) => {
 							this.createFirstClubAndMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
+							this.setState({
+								...this.state,
+								loadingClub: false,
+							});
 						}, (reason: any) => {
 							// Code 4001 reflects MetaMask's rejection by user.
 							// Hence we don't display it as an error.
@@ -364,6 +371,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		const endDateTime = (new Date(endDate)).getTime() / 1000 + (endHour * 60 + endMinute) * 60;
 
 		if (this.props.parent === 'first') {
+			this.setState({
+				...this.state,
+				loadingClub: true,
+			})
 			this.handleFirstMeeting(event, startDateTime, endDateTime);
 		} else {
 			this.handleNextMeeting(event, startDateTime, endDateTime);
@@ -564,6 +575,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		return (
 			<React.Fragment>
 				<CssBaseline />
+				<ClubDeployBackdrop open={this.state.loadingClub} />
 				<Header />
 				<Grid container>
 					{/* Top Section */}
@@ -883,8 +895,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 														style={this.isFormButtonDisabled() ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
 															{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}
 													>
-														CREATE MEETING
-												</MyButton>
+														{this.props.parent === 'first' ? "DEPLOY CLUB" : "DEPLOY MEETING"}
+													</MyButton>
 												</span>
 											</Tooltip>
 										</Grid>

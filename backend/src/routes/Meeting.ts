@@ -464,4 +464,105 @@ router.put('/pause', async (req: Request, res: Response, next: NextFunction) => 
         .catch(err => next(err));
 });
 
+/**
+ * Add proposal to database
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/proposal/add', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateMany(
+            {
+                $or: [
+                    {
+                        _id: req.body['meetingAddress'],
+                        type: ModelType.MEETING,
+
+                    }, {
+                        _id: req.body['userAddress'],
+                        type: ModelType.USER,
+                    }
+                ],
+            },
+            {
+                $push: { 'proposals': req.body['proposal'] },
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Vote on proposal (increase vote count)
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+ */
+router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateMany(
+            {
+                $or: [{
+                    _id: req.body['meetingAddress'],
+                    type: ModelType.MEETING,
+
+                }, {
+                    _id: req.body['userAddress'],
+                    type: ModelType.USER,
+                }
+                ],
+                proposals: {
+                    $elemMatch: {
+                        'id.index': req.body['proposal'].id.index,
+                        'id.clubAddress': req.body['proposal'].id.clubAddress,
+                        'id.meetingAddress': req.body['proposal'].id.meetingAddress
+                    }
+                }
+            },
+            {
+                $set: { 'proposals.$.votes': req.body['proposal'].votes },
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+
+/**
+ * Execute proposal
+ * 
+ * @params  meetingAddress  The _id to look for.
+ * 
+ * @returns Meeting
+
+router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunction) => {
+    Models.Item
+        .updateOne(
+            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+            {
+                $push: { 'data.proposals': req.body['proposal'] },
+            },
+            { safe: true, upsert: true }
+        )
+        .then(meeting => {
+            res
+                .status(OK)
+                .json(meeting);
+        })
+        .catch(err => next(err));
+});
+ */
+
 export default router;

@@ -4,7 +4,8 @@ import { actions } from './actions';
 import { Club } from '../interfaces';
 
 export interface IState {
-  clubs: ReadonlyArray<Club>;}
+  clubs: ReadonlyArray<Club>;
+}
 
 export const initState: IState = {
   clubs: []

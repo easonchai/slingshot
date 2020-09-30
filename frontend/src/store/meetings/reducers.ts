@@ -372,5 +372,88 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
+  if (isType(action, actions.PauseMeeting)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload) {
+        return {
+          ...meeting,
+          data: {
+            ...meeting.data,
+            isPaused: true
+          }
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          isPaused: true
+        }
+      }
+    };
+  }
+
+  if (isType(action, actions.AddMeetingProposal)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          proposals: [...meeting.proposals, action.payload.proposal]
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        proposals: [...state.cachedMeeting.proposals, action.payload.proposal]
+      }
+    };
+  }
+
+  if (isType(action, actions.VoteMeetingProposal) ||
+      isType(action, actions.ExecuteMeetingProposal)) {
+    let index = 0;
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        index = meeting.proposals.findIndex(proposal => proposal.id.index === action.payload.proposal.id.index)
+        return {
+          ...meeting,
+          proposals: [
+            ...meeting.proposals.slice(0, index),
+            action.payload.proposal,
+            ...meeting.proposals.slice(index + 1),
+          ]
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        proposals: [
+          ...state.cachedMeeting.proposals.slice(0, index),
+          action.payload.proposal,
+          ...state.cachedMeeting.proposals.slice(index + 1)
+        ]
+      }
+    };
+  }
+
   return state;
 }

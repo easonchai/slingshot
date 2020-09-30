@@ -14,7 +14,6 @@ import { MediaDisplay } from '../MediaDisplay';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { History } from 'history';
 import ViewProposal from '../panels/ViewProposal';
-import CreateProposal from '../panels/CreateProposal';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -77,8 +76,10 @@ export interface IProps {
   dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
-  dispatchPauseMeeting(meetingAddress: string): void;
-  dispatchAddProposal(meetingAddress: string, proposal: Proposal): void;
+  dispatchPauseMeeting(meetingAddress: String): void;
+  dispatchAddMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchVoteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchExecuteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
   dispatchAddErrorNotification(message: String): void;
 }
 
@@ -286,8 +287,18 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleCreateProposal = (event: any) => {
-    let tempNewArr = [this.state.newAdmin];
-    let tempOldArr = [this.state.oldAdmin];
+    let tempNewArr: string[] = [];
+    let tempOldArr: string[] = [];
+
+    let splitNew = this.state.newAdmin.split(",");
+    if (!this.state.oldAdmin) {
+      tempOldArr = ["0x0000000000000000000000000000000000000000"]
+    } else {
+      let splitOld = this.state.oldAdmin.split(",");
+      splitOld.map((unprocessedData) => tempOldArr.push(unprocessedData.trim()));
+    }
+
+    splitNew.map((unprocessedData) => tempNewArr.push(unprocessedData.trim()));
 
     this.etherService.proposeAdminChange(
       this.props.cachedMeeting.data.clubAddress,
@@ -297,8 +308,6 @@ export class MeetingView extends React.Component<IProps, IState> {
       this.callbackFn
     )
       .then((res: any) => {
-        console.log("proposal created ", res);
-
         let proposalId = 1;
 
         if (this.props.cachedMeeting.proposals) {
@@ -307,15 +316,19 @@ export class MeetingView extends React.Component<IProps, IState> {
 
         let proposal = {
           created: (new Date()).getTime(),
-          id: proposalId,
+          id: {
+            clubAddress: "",
+            meetingAddress: this.props.cachedMeeting._id,
+            index: proposalId
+          },
           newAdmin: tempNewArr,
           oldAdmin: tempOldArr,
-          voted: 0,
+          votes: [],
           state: "Active",
         }
         // TODO: add loading animation while we wait for callback / TX to be mined
-        this.props.dispatchAddProposal(this.props.cachedMeeting._id, proposal);
-        this.props.history.go(0);
+        this.props.dispatchAddMeetingProposal(this.props.cachedMeeting._id, this.props.user._id, proposal);
+        this.handleCreateProposalPane();
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
         console.log("proposal: ", reason);
@@ -470,10 +483,10 @@ export class MeetingView extends React.Component<IProps, IState> {
       this.callbackFn
     )
       .then((res: any) => {
-        console.log("success withdraw ", res);
+        console.log("success pause ", res);
         // TODO: add loading animation while we wait for callback / TX to be mined
         this.props.dispatchPauseMeeting(this.props.cachedMeeting._id);
-        this.props.history.go(0);
+        // this.props.history.go(0);
       }, (reason: any) => {
         this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
         console.log("pause: ", reason);
@@ -493,7 +506,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     const started = cachedMeeting.data.isStarted
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
-    const status = this.props.loading.meetingDeployment ? "Deploying" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
+    const status = this.props.loading.meetingDeployment ? "Deploying" : this.props.cachedMeeting.data.isPaused ? "Paused" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
 
     const prevMeetingAddress = cachedMeeting.data.parent;
     const prevMeeting = this.props.meetings.find(m => {
@@ -572,7 +585,9 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-        <ViewProposal open={this.state.viewPanelOpen} />
+        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress}
+          meetingAddress={this.props.cachedMeeting._id} userAddress={this.props.user._id} dispatchExecuteMeetingProposal={this.props.dispatchExecuteMeetingProposal} dispatchVoteMeetingProposal={this.props.dispatchVoteMeetingProposal}
+        />
         <CssBaseline />
         <Dialog
           open={this.state.proposalPanelOpen}
@@ -583,13 +598,13 @@ export class MeetingView extends React.Component<IProps, IState> {
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               Enter the address of the new admin to be proposed and old admin to be removed.
-                </DialogContentText>
+            </DialogContentText>
             <TextField
-              autoFocus margin="dense" id="new_address" label="New Admin" type="text" fullWidth value={this.state.newAdmin}
+              autoFocus margin="dense" id="new_address" label="New Admin (separated by comma)" type="text" fullWidth value={this.state.newAdmin}
               onChange={(e) => this.handleProposalDataChange(e)}
             />
             <TextField
-              autoFocus margin="dense" id="old_address" label="Remove Admin" type="text"
+              autoFocus margin="dense" id="old_address" label="Remove Admin (separated by comma)" type="text"
               fullWidth value={this.state.oldAdmin} onChange={(e) => this.handleProposalDataChange(e)}
             />
           </DialogContent>
@@ -672,7 +687,9 @@ export class MeetingView extends React.Component<IProps, IState> {
                           style={status === "Deploying" ? { background: "#2094f3" } :
                             status === "Active" ? { opacity: 20 } :
                               status === "Started" ? { background: "#4cae4f" } :
-                                status === "Ended" ? { background: "#ff9900" } : { background: "#f44034" }}
+                                status === "Ended" ? { background: "#ff9900" } :
+                                  status === "Paused" ? { background: "#e66e07" } :
+                                    { background: "#f44034" }}
                         />}
                       </Box><br />
                       {/* User actions */}
@@ -842,10 +859,10 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             </Tooltip>
                                           </Grid>
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                            <Tooltip title={"Event is not paused!"}>
+                                            <Tooltip title={this.props.cachedMeeting.data.isPaused ? "Execute proposal to unpause event" : "Event is not paused!"}>
                                               <span>
                                                 <CustButton
-                                                  disabled={true}
+                                                  disabled={!this.props.cachedMeeting.data.isPaused}
                                                   onClick={() => { console.log("unpause Event") }}>
                                                   Unpause Event
                                                 </CustButton>

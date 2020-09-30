@@ -39,16 +39,16 @@ export default class EtherService {
 
     this.clubABI = [
       'event NewMeetingEvent(address ownerAddr, address contractAddr)',
-      // 'event ProposalExecuted(address payable target, address payable[] addAdmins, address payable[] removeAdmins)',
-      'event ProposeAdminChange(uint counter, address payable target, address[] addAdmins, address[] removeAdmins)',
-      // 'event ApproveProposal(uint proposal)',
+      'event ProposalExecuted(address payable target, address payable addAdmins, address payable removeAdmins)',
+      'event ProposeAdminChange(uint counter, address payable target, address addAdmins, address removeAdmins)',
+      'event ApproveProposal(uint proposal)',
       // 'event PoolPayout(uint amount)',
       'function deployMeeting(uint _startDate, uint _endDate, uint _minStake, uint _registrationLimit) external onlyAdmin returns(address)',
       'function poolPayout(uint _amount) external',
       'function getBalance() external view returns (uint)',
       'function approveProposal(uint _proposal) external onlyAdmin',
       'function executeProposal(uint _proposal) external onlyAdmin',
-      'function proposeAdminChange(address _target, address[] calldata _addAdmins, address[] calldata _removeAdmins) external',
+      'function proposeAdminChange(address _target, address calldata _addAdmins, address calldata _removeAdmins) external',
       'function pause(address payable _meeting, uint _pauseUntil) external onlyAdmin',
     ];
 
@@ -437,11 +437,33 @@ export default class EtherService {
       const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
 
       clubContract
-        .once("ApproveProposal", (_proposal, event) => eventCallback(event))
+        .once("ApproveProposal", (proposalId, event) => eventCallback(event))
         .once("error", console.error);
 
       clubContract
         .approveProposal(_id)
+        .then(
+          (success: any) => resolve(success),
+          (reason: any) => reject(reason)
+        )
+        .catch((error: any) => reject(error.message));
+    });
+  }
+
+  public async executeProposal(
+    _clubAddress: string,
+    _id: number,
+    eventCallback: (event: any) => void
+  ): Promise<string> {
+    return new Promise<string>(async (resolve, reject) => {
+      const clubContract = new ethers.Contract(_clubAddress, this.clubABI, this.signer);
+
+      clubContract
+        .once("ProposalExecuted", (target, addAdmins, removeAdmins, event) => eventCallback(event))
+        .once("error", console.error);
+
+      clubContract
+        .executeProposal(_id)
         .then(
           (success: any) => resolve(success),
           (reason: any) => reject(reason)

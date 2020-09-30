@@ -6,6 +6,7 @@ import { Loading } from '../interfaces';
 const initState: IState = {
   loading: {
     cachedMeeting: false,
+    clubDeployment: false,
     meetingDeployment: false,
     rsvpConfirmation: false,
     rsvpCancellationConfirmation: false,
@@ -29,6 +30,16 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       loading: {
         ...state.loading,
         cachedMeeting: action.payload
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateClubDeploymentLoading)) {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        clubDeployment: action.payload
       }
     };
   }
