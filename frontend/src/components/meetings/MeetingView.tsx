@@ -88,14 +88,9 @@ interface IState {
   viewPanelOpen: boolean;
   createPanelOpen: boolean;
   proposalPanelOpen: boolean;
-<<<<<<< HEAD
+  isViewing: boolean;
   newAdmin: string;
   oldAdmin: string;
-  isViewing: boolean;
-=======
-  newAdmin: string[];
-  oldAdmin: string[];
->>>>>>> 686093c1973827923ed875a45263bf30d96f4bfe
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -116,14 +111,9 @@ export class MeetingView extends React.Component<IProps, IState> {
       viewPanelOpen: false,
       createPanelOpen: false,
       proposalPanelOpen: false,
-<<<<<<< HEAD
+      isViewing: true,
       newAdmin: '',
       oldAdmin: '',
-      isViewing: true,
-=======
-      newAdmin: [''],
-      oldAdmin: [''],
->>>>>>> 686093c1973827923ed875a45263bf30d96f4bfe
     };
   }
 
@@ -307,10 +297,10 @@ export class MeetingView extends React.Component<IProps, IState> {
       tempOldArr = ["0x0000000000000000000000000000000000000000"]
     } else {
       let splitOld = this.state.oldAdmin.split(",");
-      splitOld.map((unprocessedData) => tempOldArr.push(unprocessedData.trim()));
+      splitOld.map((unprocessedData: string) => tempOldArr.push(unprocessedData.trim()));
     }
 
-    splitNew.map((unprocessedData) => tempNewArr.push(unprocessedData.trim()));
+    splitNew.map((unprocessedData: string) => tempNewArr.push(unprocessedData.trim()));
 
     this.etherService.proposeAdminChange(
       this.props.cachedMeeting.data.clubAddress,
@@ -352,18 +342,15 @@ export class MeetingView extends React.Component<IProps, IState> {
   }
 
   handleProposalDataChange = (event: any) => {
-    let data = [];
-    data.push(event.target.value);
-
     if (event.target.id === "new_address") {
       this.setState({
         ...this.state,
-        newAdmin: data
+        newAdmin: event.target.value
       })
     } else {
       this.setState({
         ...this.state,
-        oldAdmin: data
+        oldAdmin: event.target.value
       })
     }
   }
@@ -598,13 +585,8 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
-<<<<<<< HEAD
-        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.data.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress} view={this.state.isViewing}
-          meetingAddress={this.props.cachedMeeting._id} dispatchExecuteProposal={this.props.dispatchExecuteProposal} dispatchVoteProposal={this.props.dispatchVoteProposal}
-=======
-        <ViewProposal open={this.state.viewPanelOpen} proposals={this.props.cachedMeeting.proposals} clubAddress={this.props.cachedMeeting.data.clubAddress}
-          meetingAddress={this.props.cachedMeeting._id} userAddress={this.props.user._id} dispatchExecuteMeetingProposal={this.props.dispatchExecuteMeetingProposal} dispatchVoteMeetingProposal={this.props.dispatchVoteMeetingProposal}
->>>>>>> 686093c1973827923ed875a45263bf30d96f4bfe
+        <ViewProposal isViewing={this.state.isViewing} open={this.state.viewPanelOpen} meeting={this.props.cachedMeeting}
+          userAddress={this.props.user._id} dispatchExecuteMeetingProposal={this.props.dispatchExecuteMeetingProposal} dispatchVoteMeetingProposal={this.props.dispatchVoteMeetingProposal}
         />
         <CssBaseline />
         <Dialog
