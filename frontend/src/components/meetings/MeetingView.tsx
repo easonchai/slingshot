@@ -859,7 +859,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             </Tooltip>
                                           </Grid>
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                            <Tooltip title={this.props.cachedMeeting.data.isPaused ? "Execute proposal to unpause event" : "Event is not paused!"}>
+                                            <Tooltip title={this.props.cachedMeeting.data.isPaused ? this.props.cachedMeeting.proposals.length === 0 ? "No proposals have been created!" : "Execute proposal to unpause event" : "Event is not paused!"}>
                                               <span>
                                                 <CustButton
                                                   disabled={!this.props.cachedMeeting.data.isPaused || this.props.cachedMeeting.proposals.length === 0}
