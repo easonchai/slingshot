@@ -862,7 +862,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             <Tooltip title={this.props.cachedMeeting.data.isPaused ? "Execute proposal to unpause event" : "Event is not paused!"}>
                                               <span>
                                                 <CustButton
-                                                  disabled={!this.props.cachedMeeting.data.isPaused}
+                                                  disabled={!this.props.cachedMeeting.data.isPaused || this.props.cachedMeeting.proposals.length === 0}
                                                   onClick={() => this.handleViewProposalPane(false)}>
                                                   Unpause Event
                                                 </CustButton>

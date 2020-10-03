@@ -422,8 +422,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
     };
   }
 
-  if (isType(action, actions.VoteMeetingProposal) ||
-      isType(action, actions.ExecuteMeetingProposal)) {
+  if (isType(action, actions.VoteMeetingProposal)) {
     let index = 0;
     const updatedMeetings = state.meetings.map(meeting => {
       if (meeting._id === action.payload.meetingAddress) {
@@ -434,7 +433,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
             ...meeting.proposals.slice(0, index),
             action.payload.proposal,
             ...meeting.proposals.slice(index + 1),
-          ]
+          ],
         };
       }
 
@@ -451,6 +450,46 @@ export const reducer = (state: IState = initState, action: Action): IState => {
           action.payload.proposal,
           ...state.cachedMeeting.proposals.slice(index + 1)
         ]
+      }
+    };
+  }
+
+  if (isType(action, actions.ExecuteMeetingProposal)) {
+    let index = 0;
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        index = meeting.proposals.findIndex(proposal => proposal.id.index === action.payload.proposal.id.index)
+        return {
+          ...meeting,
+          proposals: [
+            ...meeting.proposals.slice(0, index),
+            action.payload.proposal,
+            ...meeting.proposals.slice(index + 1),
+          ],
+          data: {
+            ...meeting.data,
+            isPaused: true
+          }
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        proposals: [
+          ...state.cachedMeeting.proposals.slice(0, index),
+          action.payload.proposal,
+          ...state.cachedMeeting.proposals.slice(index + 1)
+        ],
+        data: {
+          ...state.cachedMeeting.data,
+          isPaused: true
+        }
       }
     };
   }
