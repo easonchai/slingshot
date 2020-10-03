@@ -546,8 +546,9 @@ router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunct
  * @params  meetingAddress  The _id to look for.
  * 
  * @returns Meeting
+ * */
 
-router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/proposal/execute', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
         .updateOne(
             { _id: req.body['meetingAddress'], type: ModelType.MEETING },
@@ -563,6 +564,6 @@ router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunct
         })
         .catch(err => next(err));
 });
- */
+
 
 export default router;

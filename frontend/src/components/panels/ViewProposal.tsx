@@ -140,11 +140,9 @@ export default class ViewProposal extends React.Component<IProps, IState> {
                 console.log("success vote ", res);
                 this.props.dispatchVoteMeetingProposal(this.props.meeting._id, this.props.userAddress, proposal);
             }, (reason: any) => {
-                //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
                 console.log("vote: ", reason);
             })
             .catch((err: any) => {
-                //   this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
                 console.log("vote: ", err);
             });
     }
@@ -154,6 +152,7 @@ export default class ViewProposal extends React.Component<IProps, IState> {
         let proposal = this.retrieveProposal(id);
 
         proposal.state = "Executed"
+        this.props.meeting.data.isPaused = false;
 
         console.log("New state: " + proposal.state);
 
