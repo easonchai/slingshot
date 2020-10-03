@@ -488,7 +488,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
         ],
         data: {
           ...state.cachedMeeting.data,
-          isPaused: true
+          isPaused: false
         }
       }
     };
