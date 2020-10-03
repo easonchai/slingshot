@@ -468,7 +468,7 @@ export const reducer = (state: IState = initState, action: Action): IState => {
           ],
           data: {
             ...meeting.data,
-            isPaused: true
+            isPaused: false
           }
         };
       }

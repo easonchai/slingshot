@@ -550,10 +550,27 @@ router.put('/proposal/vote', async (req: Request, res: Response, next: NextFunct
 
 router.put('/proposal/execute', async (req: Request, res: Response, next: NextFunction) => {
     Models.Item
-        .updateOne(
-            { _id: req.body['meetingAddress'], type: ModelType.MEETING },
+        .updateMany(
             {
-                $push: { 'data.proposals': req.body['proposal'] },
+                $or: [{
+                    _id: req.body['meetingAddress'],
+                    type: ModelType.MEETING,
+
+                }, {
+                    _id: req.body['userAddress'],
+                    type: ModelType.USER,
+                }
+                ],
+                proposals: {
+                    $elemMatch: {
+                        'id.index': req.body['proposal'].id.index,
+                        'id.clubAddress': req.body['proposal'].id.clubAddress,
+                        'id.meetingAddress': req.body['proposal'].id.meetingAddress
+                    }
+                }
+            },
+            {
+                $set: { 'proposals.$.state': req.body['proposal'].state, 'data.isPaused': false },
             },
             { safe: true, upsert: true }
         )
