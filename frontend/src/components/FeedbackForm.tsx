@@ -19,7 +19,7 @@ import { IAppState } from '../store/index';
 import { Hero, CardImage, Middle, MyButton, SponsorMessage } from './meetings/MeetingAdd';
 import { actions as notificationActions, Notification } from '../store/notifications/actions';
 import { actions as userActions } from '../store/users/actions';
-import { Feedback, Meeting } from '../store/meetings/actions';
+import { Feedback, Meeting } from '../store/interfaces';
 import { styled } from '@material-ui/core/styles';
 
 const UploadButton = styled(Input)({

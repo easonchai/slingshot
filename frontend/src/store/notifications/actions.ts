@@ -2,6 +2,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { AppActions } from '../constants';
 import { AlertProps } from '@material-ui/lab';
 
+
 export interface Notification {
   message: string;
   variant: AlertProps['variant'];

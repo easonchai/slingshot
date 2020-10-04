@@ -1,11 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Meeting } from '../../store/meetings/actions';
-import { User } from '../../store/users/actions';
-import { Loading } from '../../store/loading/actions';
+import { Proposal, User, Meeting, Loading } from '../../store/interfaces';
 import { UsersList } from '../../containers/users/UsersList';
 import EtherService from '../../services/EtherService';
-import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, CircularProgress, Grid, CssBaseline, Typography, Box, Chip, CardMedia, Tooltip, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@material-ui/core';
 import Header from '../Header';
 import { styled } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -15,6 +13,7 @@ import Footer from '../Footer';
 import { MediaDisplay } from '../MediaDisplay';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { History } from 'history';
+import ViewProposal from '../panels/ViewProposal';
 
 const Center = styled(Box)({
   display: 'flex',
@@ -77,12 +76,21 @@ export interface IProps {
   dispatchUpdateHandleCancelMeeting(meetingAddress: string): void;
   dispatchUpdateHandleCancelMeetingConfirmationLoading(status: boolean): void;
   dispatchUpdateWithdraw(meetingAddress: string, userAddress: string): void;
-
+  dispatchPauseMeeting(meetingAddress: String): void;
+  dispatchAddMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchVoteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
+  dispatchExecuteMeetingProposal(meetingAddress: string, userAddress: string, proposal: Proposal): void;
   dispatchAddErrorNotification(message: String): void;
 }
 
 interface IState {
   id: String;
+  viewPanelOpen: boolean;
+  createPanelOpen: boolean;
+  proposalPanelOpen: boolean;
+  isViewing: boolean;
+  newAdmin: string;
+  oldAdmin: string;
 }
 
 export class MeetingView extends React.Component<IProps, IState> {
@@ -99,7 +107,13 @@ export class MeetingView extends React.Component<IProps, IState> {
       */
 
     this.state = {
-      id: this.props.id
+      id: this.props.id,
+      viewPanelOpen: false,
+      createPanelOpen: false,
+      proposalPanelOpen: false,
+      isViewing: true,
+      newAdmin: '',
+      oldAdmin: '',
     };
   }
 
@@ -235,7 +249,7 @@ export class MeetingView extends React.Component<IProps, IState> {
   handleEnd = (event: any) => {
     this.etherService.endEvent(
       this.props.cachedMeeting._id,
-      this.props.cachedMeeting.attend.slice(),
+      this.props.cachedMeeting.data.attend.slice(),
       confirmation => { console.log(confirmation); this.props.dispatchUpdateHandleEndMeetingConfirmationLoading(false) }
     )
       .then((res: any) => {
@@ -274,12 +288,79 @@ export class MeetingView extends React.Component<IProps, IState> {
       });
   }
 
+  handleCreateProposal = (event: any) => {
+    let tempNewArr: string[] = [];
+    let tempOldArr: string[] = [];
+
+    let splitNew = this.state.newAdmin.split(",");
+    if (!this.state.oldAdmin) {
+      tempOldArr = ["0x0000000000000000000000000000000000000000"]
+    } else {
+      let splitOld = this.state.oldAdmin.split(",");
+      splitOld.map((unprocessedData: string) => tempOldArr.push(unprocessedData.trim()));
+    }
+
+    splitNew.map((unprocessedData: string) => tempNewArr.push(unprocessedData.trim()));
+
+    this.etherService.proposeAdminChange(
+      this.props.cachedMeeting.data.clubAddress,
+      this.props.cachedMeeting._id,
+      tempNewArr,
+      tempOldArr,
+      this.callbackFn
+    )
+      .then((res: any) => {
+        let proposalId = 1;
+
+        if (this.props.cachedMeeting.proposals) {
+          proposalId = this.props.cachedMeeting.proposals.length + 1;
+        }
+
+        let proposal = {
+          created: (new Date()).getTime(),
+          id: {
+            clubAddress: "",
+            meetingAddress: this.props.cachedMeeting._id,
+            index: proposalId
+          },
+          newAdmin: tempNewArr,
+          oldAdmin: tempOldArr,
+          votes: [],
+          state: "Active",
+        }
+        // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchAddMeetingProposal(this.props.cachedMeeting._id, this.props.user._id, proposal);
+        this.handleCreateProposalPane();
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handleCreateProposal: ' + reason);
+        console.log("proposal: ", reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handleCreateProposal: ' + err);
+        console.log("proposal: ", err);
+      });
+  }
+
+  handleProposalDataChange = (event: any) => {
+    if (event.target.id === "new_address") {
+      this.setState({
+        ...this.state,
+        newAdmin: event.target.value
+      })
+    } else {
+      this.setState({
+        ...this.state,
+        oldAdmin: event.target.value
+      })
+    }
+  }
+
   isUserLoggedOut = () => {
     return this.props.user._id === '';
   }
 
   getStateTooltipText = () => {
-    if (!this.props.user.rsvp.includes(this.props.cachedMeeting._id))
+    if (!this.props.user.data.rsvp.includes(this.props.cachedMeeting._id))
       return `Stake required: ${this.props.cachedMeeting.data.stake} ETH`;
 
     if (this.isUserLoggedOut())
@@ -306,7 +387,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (new Date() > new Date(this.props.cachedMeeting.data.endDateTime * 1000))
       return `You can't start an event after its official End time.`;
 
-    if (this.props.cachedMeeting.rsvp.length >= 1)
+    if (this.props.cachedMeeting.data.rsvp.length >= 1)
       return 'Ready to start?';
 
     return `You can't start an event with no participants!`;
@@ -322,13 +403,13 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (this.props.cachedMeeting.data.isCancelled)
       return `You can't end a cancelled event.`;
 
-    if (this.props.cachedMeeting.attend.length === 0)
+    if (this.props.cachedMeeting.data.attend.length === 0)
       return `You can't end an event without attendees.`;
 
     if (new Date() < new Date(this.props.cachedMeeting.data.endDateTime * 1000))
       return `You can't end an event before its official End time.`;
 
-    if (this.props.cachedMeeting.rsvp.length > 0)
+    if (this.props.cachedMeeting.data.rsvp.length > 0)
       return `Ready to end? Don't forget to mark all attendees first!`;
 
     return `Ready to end?`;
@@ -357,14 +438,14 @@ export class MeetingView extends React.Component<IProps, IState> {
     if (this.props.cachedMeeting.data.isStarted)
       return `Cannot cancel RSVP of the started event.`;
 
-    if (this.props.user.cancel.includes(this.props.cachedMeeting._id))
+    if (this.props.user.data.cancel.includes(this.props.cachedMeeting._id))
       return `You've already cancelled your RSVP.`;
 
     return `Sorry to see you go!`;
   }
 
   getWithdrawButtonTooltipText = () => {
-    if (this.props.user.withdraw.includes(this.props.cachedMeeting._id))
+    if (this.props.user.data.withdraw.includes(this.props.cachedMeeting._id))
       return `You have already withdrawn.`;
 
     if (!this.props.cachedMeeting.data.isCancelled && !this.props.cachedMeeting.data.isEnded)
@@ -376,6 +457,46 @@ export class MeetingView extends React.Component<IProps, IState> {
     return `You've earned it!`;
   }
 
+  handleViewProposalPane = (state: boolean) => {
+    this.setState(prevState => ({
+      ...this.state,
+      isViewing: state,
+      viewPanelOpen: !prevState.viewPanelOpen,
+    }))
+  }
+
+  handleCreateProposalPane = () => {
+    this.setState(prevState => ({
+      ...this.state,
+      proposalPanelOpen: !prevState.proposalPanelOpen,
+    }))
+  }
+
+  handlePauseMeeting = () => {
+    const today = new Date();
+    const pauseUntil = Math.floor((today.getTime() / 1000) + 601200);
+
+    this.etherService.pause(
+      this.props.cachedMeeting.data.clubAddress,
+      this.props.cachedMeeting._id,
+      pauseUntil,
+      this.callbackFn
+    )
+      .then((res: any) => {
+        console.log("success pause ", res);
+        // TODO: add loading animation while we wait for callback / TX to be mined
+        this.props.dispatchPauseMeeting(this.props.cachedMeeting._id);
+        // this.props.history.go(0);
+      }, (reason: any) => {
+        this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + reason);
+        console.log("pause: ", reason);
+      })
+      .catch((err: any) => {
+        this.props.dispatchAddErrorNotification('handlePauseMeeting: ' + err);
+        console.log("pause: ", err);
+      });
+  }
+
 
   render() {
     const { cachedMeeting } = this.props;
@@ -385,7 +506,7 @@ export class MeetingView extends React.Component<IProps, IState> {
     const started = cachedMeeting.data.isStarted
     const cancelled = cachedMeeting.data.isCancelled
     const ended = cachedMeeting.data.isEnded
-    const status = this.props.loading.meetingDeployment ? "Deploying" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
+    const status = this.props.loading.meetingDeployment ? "Deploying" : this.props.cachedMeeting.data.isPaused ? "Paused" : started ? (ended ? "Ended" : "Started") : (cancelled ? "Cancelled" : "Active")
 
     const prevMeetingAddress = cachedMeeting.data.parent;
     const prevMeeting = this.props.meetings.find(m => {
@@ -400,14 +521,14 @@ export class MeetingView extends React.Component<IProps, IState> {
     let totalStaked = 0.0;
     let individualPayout = 0.0;
 
-    const totalRegisteredNow = cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length;
-    const eligibleRegisteredNow = cachedMeeting.attend.length + cachedMeeting.withdraw.length;
+    const totalRegisteredNow = cachedMeeting.data.rsvp.length + cachedMeeting.data.attend.length + cachedMeeting.data.withdraw.length;
+    const eligibleRegisteredNow = cachedMeeting.data.attend.length + cachedMeeting.data.withdraw.length;
     // ended events
     totalStaked = cachedMeeting.data.stake * totalRegisteredNow;
     individualPayout = eligibleRegisteredNow ? totalStaked / eligibleRegisteredNow : 0.0;
 
     if (prevMeeting) {
-      const totalRegisteredPrev = prevMeeting.rsvp.length + prevMeeting.attend.length + prevMeeting.withdraw.length;
+      const totalRegisteredPrev = prevMeeting.data.rsvp.length + prevMeeting.data.attend.length + prevMeeting.data.withdraw.length;
 
       // active events
       payoutPool = prevMeeting.data.stake * totalRegisteredPrev;
@@ -417,20 +538,20 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id)
-        || cachedMeeting.rsvp.length === cachedMeeting.data.maxParticipants;
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.data.rsvp.includes(cachedMeeting._id) || this.props.user.data.attend.includes(cachedMeeting._id) || this.props.user.data.withdraw.includes(cachedMeeting._id)
+        || cachedMeeting.data.rsvp.length === cachedMeeting.data.maxParticipants;
     }
 
     const isCancelRSVPButtonDisabled = () => {
-      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.cancel.includes(cachedMeeting._id);
+      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || this.props.user.data.cancel.includes(cachedMeeting._id);
     }
 
     const isUserPartOfMeeting = () => {
-      return this.props.user.rsvp.includes(cachedMeeting._id) || this.props.user.attend.includes(cachedMeeting._id) || this.props.user.withdraw.includes(cachedMeeting._id);
+      return this.props.user.data.rsvp.includes(cachedMeeting._id) || this.props.user.data.attend.includes(cachedMeeting._id) || this.props.user.data.withdraw.includes(cachedMeeting._id);
     }
 
     const isWithdrawButtonDisabled = () => {
-      if (this.props.user.withdraw.includes(cachedMeeting._id))
+      if (this.props.user.data.withdraw.includes(cachedMeeting._id))
         return true;
 
       if (this.props.cachedMeeting.data.isCancelled)
@@ -451,11 +572,11 @@ export class MeetingView extends React.Component<IProps, IState> {
     }
 
     const isStartButtonDisabled = () => {
-      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime * 1000) || (new Date()) > new Date(cachedMeeting.data.endDateTime * 1000);
+      return cachedMeeting.data.isStarted || cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || cachedMeeting.data.rsvp.length === 0 || (new Date()) < new Date(cachedMeeting.data.startDateTime * 1000) || (new Date()) > new Date(cachedMeeting.data.endDateTime * 1000);
     }
 
     const isEndButtonDisabled = () => {
-      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted || this.props.cachedMeeting.attend.length === 0 || (new Date()) < new Date(cachedMeeting.data.endDateTime * 1000);
+      return cachedMeeting.data.isEnded || cachedMeeting.data.isCancelled || !cachedMeeting.data.isStarted || this.props.cachedMeeting.data.attend.length === 0 || (new Date()) < new Date(cachedMeeting.data.endDateTime * 1000);
     }
 
     const isCancelButtonDisabled = () => {
@@ -464,7 +585,38 @@ export class MeetingView extends React.Component<IProps, IState> {
 
     return (
       <React.Fragment>
+        <ViewProposal isViewing={this.state.isViewing} open={this.state.viewPanelOpen} meeting={this.props.cachedMeeting}
+          userAddress={this.props.user._id} dispatchExecuteMeetingProposal={this.props.dispatchExecuteMeetingProposal} dispatchVoteMeetingProposal={this.props.dispatchVoteMeetingProposal}
+        />
         <CssBaseline />
+        <Dialog
+          open={this.state.proposalPanelOpen}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Create Proposals"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Enter the address of the new admin to be proposed and old admin to be removed.
+            </DialogContentText>
+            <TextField
+              autoFocus margin="dense" id="new_address" label="New Admin (separated by comma)" type="text" fullWidth value={this.state.newAdmin}
+              onChange={(e) => this.handleProposalDataChange(e)}
+            />
+            <TextField
+              autoFocus margin="dense" id="old_address" label="Remove Admin (separated by comma)" type="text"
+              fullWidth value={this.state.oldAdmin} onChange={(e) => this.handleProposalDataChange(e)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleCreateProposal} color="primary">
+              Propose
+            </Button>
+            <Button onClick={this.handleCreateProposalPane} color="primary" autoFocus>
+              Exit
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Header />
         {
           this.props.loading.cachedMeeting && cachedMeeting
@@ -535,7 +687,9 @@ export class MeetingView extends React.Component<IProps, IState> {
                           style={status === "Deploying" ? { background: "#2094f3" } :
                             status === "Active" ? { opacity: 20 } :
                               status === "Started" ? { background: "#4cae4f" } :
-                                status === "Ended" ? { background: "#ff9900" } : { background: "#f44034" }}
+                                status === "Ended" ? { background: "#ff9900" } :
+                                  status === "Paused" ? { background: "#e66e07" } :
+                                    { background: "#f44034" }}
                         />}
                       </Box><br />
                       {/* User actions */}
@@ -547,9 +701,9 @@ export class MeetingView extends React.Component<IProps, IState> {
                                 <span>
                                   <CustButton size="small" onClick={this.handleRSVP} disabled={isRSVPButtonDisabled()}                                >
                                     {
-                                      this.props.user.rsvp.includes(cachedMeeting._id) ||
-                                        this.props.user.attend.includes(cachedMeeting._id) ||
-                                        this.props.user.withdraw.includes(cachedMeeting._id)
+                                      this.props.user.data.rsvp.includes(cachedMeeting._id) ||
+                                        this.props.user.data.attend.includes(cachedMeeting._id) ||
+                                        this.props.user.data.withdraw.includes(cachedMeeting._id)
                                         ? "RSVP'd"
                                         : "RSVP"
                                     }
@@ -646,7 +800,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         <CustButton
                                           disabled={isStartButtonDisabled()}
                                           onClick={this.handleStart}>
-                                            Start Event
+                                          Start Event
                                         </CustButton>
                                       </span>
                                     </Tooltip>
@@ -657,7 +811,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         <CustButton
                                           disabled={isEndButtonDisabled()}
                                           onClick={this.handleEnd}>
-                                            End Event
+                                          End Event
                                         </CustButton>
                                       </span>
                                     </Tooltip>
@@ -668,7 +822,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                         <CustButton
                                           disabled={isCancelButtonDisabled()}
                                           onClick={this.handleCancelEvent}>
-                                            Cancel Event
+                                          Cancel Event
                                         </CustButton>
                                       </span>
                                     </Tooltip>
@@ -697,19 +851,20 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             <Tooltip title="Pause Event">
                                               <span>
                                                 <CustButton
-                                                  onClick={() => { console.log("Pause Event") }}>
-                                                    Pause Event
+                                                  disabled={this.props.cachedMeeting.data.isPaused}
+                                                  onClick={this.handlePauseMeeting}>
+                                                  Pause Event
                                                 </CustButton>
                                               </span>
                                             </Tooltip>
                                           </Grid>
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
-                                            <Tooltip title={"Event is not paused!"}>
+                                            <Tooltip title={this.props.cachedMeeting.data.isPaused ? this.props.cachedMeeting.proposals.length === 0 ? "No proposals have been created!" : "Execute proposal to unpause event" : "Event is not paused!"}>
                                               <span>
                                                 <CustButton
-                                                  disabled={true}
-                                                  onClick={() => { console.log("unpause Event") }}>
-                                                    Unpause Event
+                                                  disabled={!this.props.cachedMeeting.data.isPaused || this.props.cachedMeeting.proposals.length === 0}
+                                                  onClick={() => this.handleViewProposalPane(false)}>
+                                                  Unpause Event
                                                 </CustButton>
                                               </span>
                                             </Tooltip>
@@ -718,8 +873,8 @@ export class MeetingView extends React.Component<IProps, IState> {
                                             <Tooltip title="Create a proposal">
                                               <span>
                                                 <CustButton
-                                                  onClick={() => { console.log("Create proposal") }}>
-                                                    Create Proposal
+                                                  onClick={() => { this.handleCreateProposalPane() }}>
+                                                  Create Proposal
                                                 </CustButton>
                                               </span>
                                             </Tooltip>
@@ -727,7 +882,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                                           <Grid item md={6} lg={3} style={{ padding: 10 }}>
                                             <Tooltip title="View proposals">
                                               <span>
-                                                <CustButton>View Proposals</CustButton>
+                                                <CustButton onClick={() => this.handleViewProposalPane(true)}>View Proposals</CustButton>
                                               </span>
                                             </Tooltip>
                                           </Grid>
@@ -741,7 +896,7 @@ export class MeetingView extends React.Component<IProps, IState> {
                               </Paper><br />
                             </React.Fragment>}
                           <Box fontSize="subtitle1.fontSize" fontWeight="fontWeightLight">
-                            Participants Registered: {cachedMeeting.rsvp.length + cachedMeeting.attend.length + cachedMeeting.withdraw.length}/{cachedMeeting.data.maxParticipants}
+                            Participants Registered: {cachedMeeting.data.rsvp.length + cachedMeeting.data.attend.length + cachedMeeting.data.withdraw.length}/{cachedMeeting.data.maxParticipants}
                           </Box><br />
                         </React.Fragment>}
                     </Typography>
@@ -760,21 +915,6 @@ export class MeetingView extends React.Component<IProps, IState> {
               </Grid>
             )
         }
-
-        {/* 
-                  <div>Name: {cachedMeeting.data.name}</div>
-                  <div>Is cancelled: {String(cachedMeeting.data.isCancelled)}</div>
-                  <div>Is started: {String(cachedMeeting.data.isStarted)}</div>
-                  <div>Is ended: {String(cachedMeeting.data.isEnded)}</div>
-                  <div>Stake: {cachedMeeting.data.stake}</div>
-                  <div>Max participants: {cachedMeeting.data.maxParticipants}</div>
-                  <div>Start time: {new Date(cachedMeeting.data.startDateTime * 1000).toUTCString()}</div>
-                  <div>End time: {new Date(cachedMeeting.data.endDateTime * 1000).toUTCString()}</div>
-                  <div>Location: {cachedMeeting.data.location}</div>
-                  <div>Description: {cachedMeeting.data.description}</div>
-                  <div>Organizer address: {cachedMeeting.data.organizerAddress}</div>
-                  <div>Deployer contract: {cachedMeeting.data.deployerContractAddress}</div>
-                  */}
 
       </React.Fragment>
     );

@@ -31,7 +31,7 @@ router.get('/id/:id', async (req: Request, res: Response, next: NextFunction) =>
     Models.Item
         .findOne({ _id: req.params.id, type: ModelType.USER })
         .select('-__v')
-        .then(document => document || Models.Item.create({ _id: req.params.id, type: ModelType.USER }))
+        .then(document => document || Models.Item.create({ _id: req.params.id, data: { feedback:[], cancel:[], rsvp:[], attend:[], withdraw:[] }, type: ModelType.USER }))
         .then(user => {
             res
                 .status(OK)

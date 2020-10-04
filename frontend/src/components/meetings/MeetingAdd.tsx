@@ -2,10 +2,10 @@ import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { History } from 'history';
-import { Meeting, GroupHashAndAddress, ModelType } from '../../store/meetings/actions';
+import { ModelType, User, Club, Meeting, GroupHashAndAddress } from '../../store/interfaces';
 import { initState } from '../../store/meetings/reducers';
-import { User } from '../../store/users/actions';
 import EtherService from '../../services/EtherService';
+import ClubDeployBackdrop from '../loading/ClubDeployBackdrop';
 import {
 	Button,
 	Container,
@@ -38,6 +38,8 @@ export const Hero = styled(Container)({
 })
 
 export const Middle = styled(Grid)({
+	width: '95%',
+	margin: 'auto',
 	padding: '60px 20px'
 })
 
@@ -88,7 +90,8 @@ interface IProps {
 
 	dispatchUpdateCachedMeeting(meeting: Meeting): void;
 
-	dispatchCreateFirstMeeting(history: History, payload: Meeting): void;
+	dispatchIsClubNameUnique(name: string): Promise<boolean>;
+	dispatchCreateFirstClubAndMeeting(history: History, club: Club, meeting: Meeting): void;
 	dispatchUpdateMeetingContractAddress(history: History, payload: GroupHashAndAddress): void;
 	dispatchUpdateOrganiserEthereumAddress(organizer: User): void;
 
@@ -115,6 +118,7 @@ interface IState {
 	loadingVideo: boolean;
 	loadingImagePct: number;
 	loadingVideoPct: number;
+	loadingClub: boolean;
 }
 
 export class MeetingAdd extends React.Component<IProps, IState> {
@@ -148,6 +152,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 			loadingVideo: false,
 			loadingImagePct: 0,
 			loadingVideoPct: 0,
+			loadingClub: false,
 		};
 
 		if (this.props.parent === 'first') {
@@ -192,11 +197,25 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		this.props.dispatchUpdateMeetingContractAddress(this.props.history, payload);
 	}
 
-	createFirstMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
-		this.props.dispatchCreateFirstMeeting(this.props.history,
+	createFirstClubAndMeeting = (hash: string, clubAddress: string, event: any, startDateTime: number, endDateTime: number) => {
+		this.props.dispatchCreateFirstClubAndMeeting(this.props.history,
+			{
+				_id: clubAddress,
+				type: ModelType.CLUB,
+				admins: [this.props.user._id],
+				proposals: [],
+
+				data: {
+					name: event.target.clubName.value,
+					deployerContractAddress: '0x4F40574184bC0bed3eE6df209118bD0eE06EC067',  // TODO: pull dynamically once we will have more versions
+					organizerAddress: this.props.user._id,				}
+			},
 			{
 				_id: hash,
 				type: ModelType.PENDING,
+				admins: [this.props.user._id],
+				proposals: [],
+
 				data: {
 					name: event.target.meetingName.value,
 					clubName: event.target.clubName.value,
@@ -212,45 +231,67 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 					isCancelled: false,
 					isStarted: false,
 					isEnded: false,
+					isPaused: false,
 					deployerContractAddress: '0x4F40574184bC0bed3eE6df209118bD0eE06EC067',  // TODO: pull dynamically once we will have more versions
 					organizerAddress: this.props.user._id,
 					parent: '',
 					child: '',
 					images: this.state.form.images,
 					videos: this.state.form.videos,
-					feedback: []
+					feedback: [],
+					cancel: [],
+					rsvp: [],
+					attend: [],
+					withdraw: []
 				},
-				cancel: [],
-				rsvp: [],
-				attend: [],
-				withdraw: []
 			});
 	}
 
 	handleFirstMeeting = (event: any, startDateTime: number, endDateTime: number) => {
 		/**
-		 * TODO: verify that the user is still connected to MetaMask.
-		 * Preferably listen to events (network change, account change, logout).
+		 * Verify that the club name is unique.
 		 */
-		this.etherService.deployFirstMeeting(
-			startDateTime,
-			endDateTime,
-			parseFloat(event.target.stake.value),
-			parseInt(event.target.maxParticipants.value),
-			this.callbackDeployedMeeting
-		)
-			.then((ethersResponse: any) => {
-				this.createFirstMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
-			}, (reason: any) => {
-				// Code 4001 reflects MetaMask's rejection by user.
-				// Hence we don't display it as an error.
-				if (reason?.code !== 4001) {
-					this.props.dispatchAddErrorNotification("There was an error creating this event: " + reason);
-					console.error(reason);
+		this.props.dispatchIsClubNameUnique(event.target.clubName.value)
+			.then((isUnique: boolean) => {
+				if (!isUnique) {
+					this.props.dispatchAddErrorNotification("The name of the club already exists, please choose another one.");
+				} else {
+					/**
+					 * TODO: verify that the user is still connected to MetaMask.
+					 * Preferably listen to events (network change, account change, logout).
+					 */
+					this.etherService.deployFirstMeeting(
+						startDateTime,
+						endDateTime,
+						parseFloat(event.target.stake.value),
+						parseInt(event.target.maxParticipants.value),
+						this.callbackDeployedMeeting
+					)
+						.then((ethersResponse: any) => {
+							this.createFirstClubAndMeeting(ethersResponse.hash, ethersResponse.clubAddress, event, startDateTime, endDateTime);
+							this.setState({
+								...this.state,
+								loadingClub: false,
+							});
+						}, (reason: any) => {
+							// Code 4001 reflects MetaMask's rejection by user.
+							// Hence we don't display it as an error.
+							if (reason?.code !== 4001) {
+								this.props.dispatchAddErrorNotification("There was an error creating this event: " + reason);
+								console.error(reason);
+							}
+						})
+						.catch((err: any) => {
+							this.props.dispatchAddErrorNotification("There was an error creating this event: " + err);
+							console.error(err);
+						});
 				}
+			}, (reason: any) => {
+				this.props.dispatchAddErrorNotification("Please try again later. A rejection occured while checking for club name uniqueness: " + reason);
+				console.error(reason);
 			})
 			.catch((err: any) => {
-				this.props.dispatchAddErrorNotification("There was an error creating this event: " + err);
+				this.props.dispatchAddErrorNotification("Please try again later. An error occured while checking for club name uniqueness: " + err);
 				console.error(err);
 			});
 	}
@@ -268,6 +309,9 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 				this.props.dispatchCreateNextMeeting(this.props.history, {
 					_id: res.hash,
 					type: ModelType.PENDING,
+					admins: [this.props.user._id],
+					proposals: [],
+
 					data: {
 						name: event.target.meetingName.value,
 						clubName: this.props.cachedMeeting.data.clubName,
@@ -283,6 +327,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						isCancelled: false,
 						isStarted: false,
 						isEnded: false,
+						isPaused: false,
 						deployerContractAddress: '0x4F40574184bC0bed3eE6df209118bD0eE06EC067',  // TODO: pull dynamically once we will have more versions
 						organizerAddress: this.props.user._id,
 						parent: this.props.parent,
@@ -290,12 +335,12 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 						// TODO replace files if needed
 						images: this.state.form.images,
 						videos: this.state.form.videos,
-						feedback: []
+						feedback: [],
+						cancel: [],
+						rsvp: [],
+						attend: [],
+						withdraw: []
 					},
-					cancel: [],
-					rsvp: [],
-					attend: [],
-					withdraw: []
 				});
 			}, (reason: any) => {
 				// Code 4001 reflects MetaMask's rejection by user.
@@ -326,6 +371,10 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		const endDateTime = (new Date(endDate)).getTime() / 1000 + (endHour * 60 + endMinute) * 60;
 
 		if (this.props.parent === 'first') {
+			this.setState({
+				...this.state,
+				loadingClub: true,
+			})
 			this.handleFirstMeeting(event, startDateTime, endDateTime);
 		} else {
 			this.handleNextMeeting(event, startDateTime, endDateTime);
@@ -526,6 +575,7 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 		return (
 			<React.Fragment>
 				<CssBaseline />
+				<ClubDeployBackdrop open={this.state.loadingClub} />
 				<Header />
 				<Grid container>
 					{/* Top Section */}
@@ -845,8 +895,8 @@ export class MeetingAdd extends React.Component<IProps, IState> {
 														style={this.isFormButtonDisabled() ? { background: 'linear-gradient(45deg, #ff9eb4 30%, #ffb994 90%)' } :
 															{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}
 													>
-														CREATE MEETING
-												</MyButton>
+														{this.props.parent === 'first' ? "DEPLOY CLUB" : "DEPLOY MEETING"}
+													</MyButton>
 												</span>
 											</Tooltip>
 										</Grid>

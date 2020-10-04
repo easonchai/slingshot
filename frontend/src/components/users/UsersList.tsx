@@ -1,6 +1,5 @@
 import React from 'react';
-import { Meeting } from '../../store/meetings/actions';
-import { Loading } from '../../store/loading/actions';
+import { Meeting, Loading } from '../../store/interfaces';
 import EtherService from '../../services/EtherService';
 import { TabPanel } from '../panels/TabPanel';
 import { AppBar, Button, Grid, Tab, Tabs, Tooltip, Typography, CircularProgress, Chip, Box } from '@material-ui/core';
@@ -10,6 +9,7 @@ import BeenhereIcon from '@material-ui/icons/Beenhere';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EventSeatIcon from '@material-ui/icons/EventSeat';
 import { History } from 'history';
+
 
 const AttendanceButton = styled(Button)({
   backgroundColor: '#FE6B8B',
@@ -35,6 +35,7 @@ interface IProps {
 
   dispatchHandleMarkAttendanceConfirmationLoading(status: boolean): void;
   dispatchHandleMarkAttendance(meetingAddress: string, userAddress: string): void;
+  dispatchHandleMarkAbsence(meetingAddress: string, userAddress: string): void;
 
   dispatchAddErrorNotification(message: String): void;
 }
@@ -61,22 +62,22 @@ export class UsersList extends React.Component<IProps, IState> {
   }
 
   componentDidMount() {
-    this.props.cachedMeeting.withdraw.map(p => {
+    this.props.cachedMeeting.data.withdraw.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'WITHDRAWN' }] }))
       return null;
     });
 
-    this.props.cachedMeeting.attend.map(p => {
+    this.props.cachedMeeting.data.attend.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => { this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'ATTENDED' }] }) })
       return null;
     });
 
-    this.props.cachedMeeting.rsvp.map(p => {
+    this.props.cachedMeeting.data.rsvp.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: `RSVP'D` }] }))
       return null;
     });
 
-    this.props.cachedMeeting.cancel.map(p => {
+    this.props.cachedMeeting.data.cancel.map(p => {
       this.etherService.findENSDomain(p, (domain: string) => this.setState({ participants: [...this.state.participants, { address: p, ens: domain, status: 'CANCELLED' }] }))
       return null;
     });
@@ -85,7 +86,31 @@ export class UsersList extends React.Component<IProps, IState> {
   handleAttendance = (event: any) => {
     const participantWallet = event.currentTarget.value;
     this.props.dispatchHandleMarkAttendance(this.props.cachedMeeting._id, participantWallet);
-    this.props.history.go(0);
+
+    // Update local state without reloading the page.
+    const updatedParticipants = this.state.participants.map(p => {
+      if (p.address === participantWallet) {
+        p.status = 'ATTENDED';
+      }
+
+      return p;
+    });
+    this.setState({ participants: updatedParticipants});
+  };
+
+  handleAbsence = (event: any) => {
+    const participantWallet = event.currentTarget.value;
+    this.props.dispatchHandleMarkAbsence(this.props.cachedMeeting._id, participantWallet);
+
+    // Update local state without reloading the page.
+    const updatedParticipants = this.state.participants.map(p => {
+      if (p.address === participantWallet) {
+        p.status = `RSVP'D`;
+      }
+
+      return p;
+    });
+    this.setState({ participants: updatedParticipants});
   };
 
   handleTabSwitch = (event: React.ChangeEvent<{}>, newValue: string) => {
@@ -96,7 +121,7 @@ export class UsersList extends React.Component<IProps, IState> {
     if (this.props.loading.rsvpConfirmation)
       return `Please hold on until the RSVP transaction confirms.`;
 
-    if (this.props.cachedMeeting.attend.includes(participantWallet))
+    if (this.props.cachedMeeting.data.attend.includes(participantWallet))
       return `Already marked as attendee.`;
 
     if (!this.props.cachedMeeting.data.isStarted)
@@ -108,9 +133,28 @@ export class UsersList extends React.Component<IProps, IState> {
     return '';
   }
 
+  getMarkAbsenceButtonTooltipText = (participantWallet: string) => {
+    if (!this.props.cachedMeeting.data.attend.includes(participantWallet))
+      return `The participant is not marked as attendee.`;
+
+    if (!this.props.cachedMeeting.data.isStarted)
+      return `You can't mark absences before the start of the event.`;
+
+    if (this.props.cachedMeeting.data.isEnded)
+      return `You can't mark absences after the end of the event.`;
+
+    return '';
+  }
+
   isMarkAttendanceButtonDisabled = (participantWallet: string) => {
     return this.props.loading.rsvpConfirmation
-      || this.props.cachedMeeting.attend.includes(participantWallet)
+      || this.props.cachedMeeting.data.attend.includes(participantWallet)
+      || !this.props.cachedMeeting.data.isStarted
+      || this.props.cachedMeeting.data.isEnded
+  }
+
+  isMarkAbsenceButtonDisabled = (participantWallet: string) => {
+    return !this.props.cachedMeeting.data.attend.includes(participantWallet)
       || !this.props.cachedMeeting.data.isStarted
       || this.props.cachedMeeting.data.isEnded
   }
@@ -154,17 +198,35 @@ export class UsersList extends React.Component<IProps, IState> {
                           {
                             this.isUserOrganizer() &&
                             <Grid item>
-                              <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
-                                <span>
-                                  <AttendanceButton
-                                    disabled={this.isMarkAttendanceButtonDisabled(p.address)}
-                                    onClick={this.handleAttendance}
-                                    value={p.address}
-                                    type="submit">
-                                    MARK ATTENDANCE
-                                  </AttendanceButton>
-                                </span>
-                              </Tooltip>
+
+                              { p.status !== 'ATTENDED' &&
+                                <Tooltip title={this.getMarkAttendanceButtonTooltipText(p.address)}>
+                                  <span>
+                                    <AttendanceButton
+                                      disabled={this.isMarkAttendanceButtonDisabled(p.address)}
+                                      onClick={this.handleAttendance}
+                                      value={p.address}
+                                      type="submit">
+                                      MARK ATTENDANCE
+                                    </AttendanceButton>
+                                  </span>
+                                </Tooltip>
+                              }
+
+                              { p.status === 'ATTENDED' &&
+                                <Tooltip title={this.getMarkAbsenceButtonTooltipText(p.address)}>
+                                  <span>
+                                    <AttendanceButton
+                                      disabled={this.isMarkAbsenceButtonDisabled(p.address)}
+                                      onClick={this.handleAbsence}
+                                      value={p.address}
+                                      type="submit">
+                                      MARK ABSENCE
+                                    </AttendanceButton>
+                                  </span>
+                                </Tooltip>
+                              }
+
                             </Grid>
                           }
                           <Grid item style={{ paddingLeft: 15, marginTop: 5 }}>
@@ -201,121 +263,6 @@ export class UsersList extends React.Component<IProps, IState> {
                   })
             }
           </TabPanel>
-
-
-          <TabPanel value={this.state.tabIndex} index={'rsvp'}>
-            {
-              // Simulate awaiting confirmation of RSVP cancellation (gray out + spinner)
-              // TODO: switch tabindex to 'cancel' upon confirmation
-              this.props.loading.rsvpCancellationConfirmation &&
-              <span key={this.props.userWallet}>
-                <Grid container>
-                  <Grid item>
-                    <LoadingSpinner size={16} style={{ marginTop: 5, marginRight: 5 }} />
-                  </Grid>
-                  <Grid item>
-                    <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                      {this.props.userWallet}
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <br />
-              </span>
-            }
-
-            {
-              this.props.cachedMeeting.rsvp
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Grid container>
-                        <Grid item>
-                          {
-                            this.props.loading.rsvpConfirmation &&
-                            participantWallet === this.props.userWallet &&
-                            <LoadingSpinner size={16} style={{ marginTop: 10, marginRight: 5 }} />
-                          }
-                        </Grid>
-                        <Grid item>
-                          <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', marginTop: 10, marginRight: 5 }}>
-                            {participantWallet}
-                          </Typography>
-                        </Grid>
-                        {
-                          this.props.userWallet === this.props.cachedMeeting.data.organizerAddress &&
-                          <Grid item>
-                            <Tooltip title={this.getMarkAttendanceButtonTooltipText(participantWallet)}>
-                              <span>
-                                <AttendanceButton
-                                  disabled={this.isMarkAttendanceButtonDisabled(participantWallet)}
-                                  onClick={this.handleAttendance}
-                                  value={participantWallet}
-                                  type="submit">
-                                  MARK ATTENDANCE
-                                  </AttendanceButton>
-                              </span>
-                            </Tooltip>
-                          </Grid>
-                        }
-                      </Grid>
-                      <br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
-
-          <TabPanel value={this.state.tabIndex} index={'cancel'}>
-            {
-              this.props.cachedMeeting.cancel
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography><br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
-
-
-          <TabPanel value={this.state.tabIndex} index={'attend'}>
-            {
-              this.props.cachedMeeting.attend
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography><br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
-
-
-          <TabPanel value={this.state.tabIndex} index={'withdraw'}>
-            {
-              this.props.cachedMeeting.withdraw
-                .map((participantWallet) => {
-                  return (
-                    <span key={participantWallet}>
-                      <Typography style={{ fontWeight: "normal", fontSize: 14, alignItems: 'center', justifyContent: 'center', }}>
-                        {participantWallet}
-                      </Typography>
-                      <br />
-                    </span>
-                  );
-                })
-            }
-          </TabPanel>
-
         </Grid>
       </Grid>
     );

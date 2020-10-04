@@ -38,6 +38,22 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         });
     },
 
+    dispatchHandleMarkAbsence: (meetingAddress: string, participantAddress: string) => {
+      dispatch(loadingActions.UpdateMarkAbsenceConfirmationLoading(true));
+
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: participantAddress
+      };
+
+      axios
+        .put('/api/meeting/absence', payload)
+        .then(res => {
+          dispatch(meetingActions.UpdateHandleAbsence(payload));
+          dispatch(loadingActions.UpdateMarkAbsenceConfirmationLoading(false));
+        });
+    },
+
     dispatchHandleWithdraw: (meetingAddress: string, participantAddress: string) => {
       const payload = {
         meetingAddress: meetingAddress,

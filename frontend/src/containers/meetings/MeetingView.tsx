@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 import { IAppState } from '../../store/index';
 import { MeetingView as Component } from '../../components/meetings/MeetingView';
 import { actions as notificationActions, Notification } from '../../store/notifications/actions';
-import { actions as meetingActions, Meeting } from '../../store/meetings/actions';
+import { actions as meetingActions } from '../../store/meetings/actions';
 import { actions as loadingActions } from '../../store/loading/actions';
+import { Meeting, Proposal } from '../../store/interfaces';
+
 
 const mapStateToProps = (state: IAppState, props: any) => {
   return {
@@ -157,7 +159,61 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
         .then(res => {
           dispatch(meetingActions.UpdateUserWithdraw(payload));
         });
-    }
+    },
+
+    dispatchPauseMeeting: (meetingAddress: string) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+      };
+
+      axios
+        .put('/api/meeting/pause', payload)
+        .then(res => {
+          dispatch(meetingActions.PauseMeeting(meetingAddress));
+        });
+    },
+
+    dispatchAddMeetingProposal: (meetingAddress: string, userAddress: string, proposal: Proposal) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: userAddress,
+        proposal: proposal,
+      };
+
+      axios
+        .put('/api/meeting/proposal/add', payload)
+        .then(res => {
+          dispatch(meetingActions.AddMeetingProposal(payload));
+        });
+    },
+
+    dispatchVoteMeetingProposal: (meetingAddress: string, userAddress: string, proposal: Proposal) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: userAddress,
+        proposal: proposal,
+      };
+
+      axios
+        .put('/api/meeting/proposal/vote', payload)
+        .then(res => {
+          dispatch(meetingActions.VoteMeetingProposal(payload));
+        });
+    },
+
+    dispatchExecuteMeetingProposal: (meetingAddress: string, userAddress: string, proposal: Proposal) => {
+      const payload = {
+        meetingAddress: meetingAddress,
+        userAddress: userAddress,
+        proposal: proposal,
+      };
+
+      axios
+        .put('/api/meeting/proposal/execute', payload)
+        .then(res => {
+          dispatch(meetingActions.ExecuteMeetingProposal(payload));
+        });
+    },
   };
 };
 

@@ -1,7 +1,9 @@
 import { Action } from 'redux';
 import { isType } from 'typescript-fsa';
-import { actions, Meeting, ModelType } from './actions';
+import { actions } from './actions';
 import { actions as userActions } from '../users/actions';
+import { Meeting, ModelType } from '../interfaces';
+
 
 export interface IState {
   meetings: ReadonlyArray<Meeting>;
@@ -13,6 +15,8 @@ export const initState: IState = {
   cachedMeeting: {
     _id: '',
     type: ModelType.PENDING,
+    admins: [],
+    proposals: [],
 
     data: {
       // BACKEND
@@ -36,6 +40,7 @@ export const initState: IState = {
       isCancelled: false,
       isStarted: false,
       isEnded: false,
+      isPaused: false,
       deployerContractAddress: '0x8dF42792C58e7F966cDE976a780B376129632468',
       organizerAddress: '',
 
@@ -46,13 +51,13 @@ export const initState: IState = {
       videos: [],
 
       feedback: [],
-    },
 
-    // list of user wallets (ethereum address) linked to this meeting per status
-    cancel: [],
-    rsvp: [],
-    attend: [],
-    withdraw: []
+      // list of user wallets (ethereum address) linked to this meeting per status
+      cancel: [],
+      rsvp: [],
+      attend: [],
+      withdraw: []
+    },
   }
 };
 
@@ -117,8 +122,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       if (meeting._id === action.payload.meetingAddress) {
         return {
           ...meeting,
-          cancel: meeting.cancel.filter(user => user !== action.payload.userAddress),
-          rsvp: [...meeting.rsvp, action.payload.userAddress]
+          data: {
+            ...meeting.data,
+            cancel: meeting.data.cancel.filter(user => user !== action.payload.userAddress),
+            rsvp: [...meeting.data.rsvp, action.payload.userAddress]
+          }
         }
       }
 
@@ -130,8 +138,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        cancel: state.cachedMeeting.cancel.filter(user => user !== action.payload.userAddress),
-        rsvp: [...state.cachedMeeting.rsvp, action.payload.userAddress]
+        data: {
+          ...state.cachedMeeting.data,
+          cancel: state.cachedMeeting.data.cancel.filter(user => user !== action.payload.userAddress),
+          rsvp: [...state.cachedMeeting.data.rsvp, action.payload.userAddress]
+        }
       },
     };
   }
@@ -141,8 +152,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       if (meeting._id === action.payload.meetingAddress) {
         return {
           ...meeting,
-          rsvp: meeting.rsvp.filter(user => user !== action.payload.userAddress),
-          cancel: [...meeting.cancel, action.payload.userAddress]
+          data: {
+            ...meeting.data,
+            rsvp: meeting.data.rsvp.filter(user => user !== action.payload.userAddress),
+            cancel: [...meeting.data.cancel, action.payload.userAddress]
+          }
         }
       }
 
@@ -154,8 +168,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        rsvp: state.cachedMeeting.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
-        cancel: [...state.cachedMeeting.cancel, action.payload.userAddress]
+        data: {
+          ...state.cachedMeeting.data,
+          rsvp: state.cachedMeeting.data.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
+          cancel: [...state.cachedMeeting.data.cancel, action.payload.userAddress]
+        }
       }
     };
   }
@@ -230,8 +247,11 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       if (meeting._id === action.payload.meetingAddress) {
         return {
           ...meeting,
-          rsvp: meeting.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
-          attend: [...meeting.attend, action.payload.userAddress]
+          data: {
+            ...meeting.data,
+            rsvp: meeting.data.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
+            attend: [...meeting.data.attend, action.payload.userAddress]
+          }
         };
       }
 
@@ -243,8 +263,41 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        rsvp: state.cachedMeeting.rsvp.filter(user => user !== action.payload.userAddress),
-        attend: [...state.cachedMeeting.attend, action.payload.userAddress]
+        data: {
+          ...state.cachedMeeting.data,
+          rsvp: state.cachedMeeting.data.rsvp.filter(user => user !== action.payload.userAddress),
+          attend: [...state.cachedMeeting.data.attend, action.payload.userAddress]
+        }
+      }
+    };
+  }
+
+  if (isType(action, actions.UpdateHandleAbsence)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          data: {
+            ...meeting.data,
+            rsvp: [...meeting.data.rsvp, action.payload.userAddress],
+            attend: meeting.data.attend.filter(userAddress => userAddress !== action.payload.userAddress)
+          }
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          rsvp: [...state.cachedMeeting.data.rsvp, action.payload.userAddress],
+          attend: state.cachedMeeting.data.attend.filter(user => user !== action.payload.userAddress)
+        }
       }
     };
   }
@@ -292,9 +345,12 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       if (meeting._id === action.payload.meetingAddress) {
         return {
           ...meeting,
-          rsvp: meeting.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
-          attend: meeting.attend.filter(userAddress => userAddress !== action.payload.userAddress),
-          withdraw: [...meeting.withdraw, action.payload.userAddress]
+          data: {
+            ...meeting.data,
+            rsvp: meeting.data.rsvp.filter(userAddress => userAddress !== action.payload.userAddress),
+            attend: meeting.data.attend.filter(userAddress => userAddress !== action.payload.userAddress),
+            withdraw: [...meeting.data.withdraw, action.payload.userAddress]
+          }
         };
       }
 
@@ -306,9 +362,134 @@ export const reducer = (state: IState = initState, action: Action): IState => {
       meetings: updatedMeetings,
       cachedMeeting: {
         ...state.cachedMeeting,
-        rsvp: state.cachedMeeting.rsvp.filter(user => user !== action.payload.userAddress),
-        attend: state.cachedMeeting.attend.filter(user => user !== action.payload.userAddress),
-        withdraw: [...state.cachedMeeting.withdraw, action.payload.userAddress]
+        data: {
+          ...state.cachedMeeting.data,
+          rsvp: state.cachedMeeting.data.rsvp.filter(user => user !== action.payload.userAddress),
+          attend: state.cachedMeeting.data.attend.filter(user => user !== action.payload.userAddress),
+          withdraw: [...state.cachedMeeting.data.withdraw, action.payload.userAddress]
+        }
+      }
+    };
+  }
+
+  if (isType(action, actions.PauseMeeting)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload) {
+        return {
+          ...meeting,
+          data: {
+            ...meeting.data,
+            isPaused: true
+          }
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        data: {
+          ...state.cachedMeeting.data,
+          isPaused: true
+        }
+      }
+    };
+  }
+
+  if (isType(action, actions.AddMeetingProposal)) {
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        return {
+          ...meeting,
+          proposals: [...meeting.proposals, action.payload.proposal]
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        proposals: [...state.cachedMeeting.proposals, action.payload.proposal]
+      }
+    };
+  }
+
+  if (isType(action, actions.VoteMeetingProposal)) {
+    let index = 0;
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        index = meeting.proposals.findIndex(proposal => proposal.id.index === action.payload.proposal.id.index)
+        return {
+          ...meeting,
+          proposals: [
+            ...meeting.proposals.slice(0, index),
+            action.payload.proposal,
+            ...meeting.proposals.slice(index + 1),
+          ],
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        proposals: [
+          ...state.cachedMeeting.proposals.slice(0, index),
+          action.payload.proposal,
+          ...state.cachedMeeting.proposals.slice(index + 1)
+        ]
+      }
+    };
+  }
+
+  if (isType(action, actions.ExecuteMeetingProposal)) {
+    let index = 0;
+    const updatedMeetings = state.meetings.map(meeting => {
+      if (meeting._id === action.payload.meetingAddress) {
+        index = meeting.proposals.findIndex(proposal => proposal.id.index === action.payload.proposal.id.index)
+        return {
+          ...meeting,
+          proposals: [
+            ...meeting.proposals.slice(0, index),
+            action.payload.proposal,
+            ...meeting.proposals.slice(index + 1),
+          ],
+          data: {
+            ...meeting.data,
+            isPaused: false
+          }
+        };
+      }
+
+      return meeting;
+    });
+
+    return {
+      ...state,
+      meetings: updatedMeetings,
+      cachedMeeting: {
+        ...state.cachedMeeting,
+        proposals: [
+          ...state.cachedMeeting.proposals.slice(0, index),
+          action.payload.proposal,
+          ...state.cachedMeeting.proposals.slice(index + 1)
+        ],
+        data: {
+          ...state.cachedMeeting.data,
+          isPaused: false
+        }
       }
     };
   }
