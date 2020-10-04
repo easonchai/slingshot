@@ -2,8 +2,6 @@ pragma solidity >= 0.6.2 < 0.7.0;
 
 import "./openzeppelin/Ownable.sol";
 import "./openzeppelin/SafeMath.sol";
-//import "./Ownable.sol";
-//import "./SafeMath.sol";
 import "./ClubInterface.sol";
 
 contract Meeting is Ownable {
@@ -100,6 +98,10 @@ contract Meeting is Ownable {
         emit RSVPEvent(msg.sender);
     }
 
+    function testingCheckStake(address _guy) external view returns (uint stake) {
+        stake = addressToParticipant[_guy].stakedAmount;
+    }
+
     function getChange() external notPaused{
         uint amnt = addressToParticipant[msg.sender].stakedAmount;
         require(amnt > 0);
@@ -130,7 +132,7 @@ contract Meeting is Ownable {
     }
 
     function startEvent() external onlyOwner notActive notCancelled notPaused{
-        require(startDate < now && now < endDate, "Can't start out of scope");
+        require(startDate < now, "Can't start out of scope");
         //Means organiser cannot start event at arbitrary times.
         isActive = true;
         emit StartEvent(msg.sender); //Maybe not necessary to msg.sender
